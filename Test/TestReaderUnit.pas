@@ -25,6 +25,7 @@ type
     procedure TearDown; override;
   published
     procedure TestNextChar;
+    procedure TestPeekChar;
   end;
 
 implementation
@@ -50,6 +51,26 @@ begin
   ExpectedValue := '2';
   ReturnValue := FReader.NextChar;
   CheckEquals(ExpectedValue, ReturnValue);
+end;
+
+procedure TestTReader.TestPeekChar;
+var
+  ReturnValue, ExpectedValue: Char;
+begin
+  ExpectedValue := '1';
+
+  ReturnValue := FReader.PeekChar;
+  CheckEquals(ExpectedValue, ReturnValue);
+
+  ReturnValue := FReader.NextChar;
+  CheckEquals(ExpectedValue, ReturnValue);
+
+  ExpectedValue := '2';
+  ReturnValue := FReader.PeekChar;
+  CheckEquals(ExpectedValue, ReturnValue);
+
+
+
 end;
 
 initialization
