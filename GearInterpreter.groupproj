@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{38301353-42D9-4DCF-AF07-2A5889EF661E}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="Gear.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="Test\GearTests.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="Gear">
+        <MSBuild Projects="Gear.dproj"/>
+    </Target>
+    <Target Name="Gear:Clean">
+        <MSBuild Projects="Gear.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="Gear:Make">
+        <MSBuild Projects="Gear.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="GearTests">
+        <MSBuild Projects="Test\GearTests.dproj"/>
+    </Target>
+    <Target Name="GearTests:Clean">
+        <MSBuild Projects="Test\GearTests.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="GearTests:Make">
+        <MSBuild Projects="Test\GearTests.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="Gear;GearTests"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="Gear:Clean;GearTests:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="Gear:Make;GearTests:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
