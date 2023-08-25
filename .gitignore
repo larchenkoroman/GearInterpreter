@@ -5,3 +5,4 @@
 *.identcache
 Gear.dproj.local
 /Test/Win32
+/Win32
