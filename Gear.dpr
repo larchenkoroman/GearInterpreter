@@ -11,6 +11,7 @@ uses
 
 var
   FReader: TReader;
+  TokenTypes: TTokenTypeSet;
 begin
   FReader := TReader.Create('123', itPrompt);
   try

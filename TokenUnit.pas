@@ -2,7 +2,7 @@ unit TokenUnit;
 
 interface
 uses
-  System.Classes, System.SysUtils, System.Generics.Collections, System.Variants;
+  System.Classes, System.SysUtils, System.Generics.Collections, System.Variants, RTTI;
 
 type
   TTokenType = (
@@ -60,18 +60,11 @@ type
 
 implementation
 
-{ TTokenTypeHelper }
-
-function TTokenTypeHelper.ToString: string;
-begin
-
-end;
-
 { TToken }
 
 function TToken.Copy: TToken;
 begin
-
+  Result := TToken.Create(FTokenType, FLexeme, FValue, FLine, FCol);
 end;
 
 constructor TToken.Create(ATokenType: TTokenType; ALexeme: string; AValue: Variant; ALine, ACol: LongInt);
@@ -85,7 +78,56 @@ end;
 
 function TToken.ToString: string;
 begin
-
+  Result := FTokenType.ToString + ' (' + FLexeme + ') = ' + VarToStr(FValue);
 end;
+
+
+{ TTokenTypeHelper }
+
+function TTokenTypeHelper.ToString: string;
+begin
+  case Self of
+    ttPlus: Result := '';
+    ttMin  : Result := '-';
+    ttMul  : Result := '*';
+    ttDiv  : Result := '/';
+    ttRem  : Result := '%';
+    ttPlusIs : Result := '+=';
+    ttMinIs  : Result := '-=';
+    ttMulIs  : Result := '*=';
+    ttDivIs  : Result := '/=';
+    ttRemIs  : Result := '%=';
+    ttOr : Result := '|';
+    ttAnd : Result := '&';
+    ttNot : Result := '!';
+    ttXor : Result := '~';
+    ttShl : Result := '<<';
+    ttShr : Result := '>>';
+    ttPow : Result := '^';
+    ttEQ : Result := '=';
+    ttNEQ : Result := '<>';
+    ttGT : Result := '>';
+    ttGE : Result := '>=';
+    ttLT : Result := '<';
+    ttLE : Result := '<=';
+    ttComma: Result := ',';
+    ttDot: Result := '.';
+    ttDotDot: Result := '..';
+    ttAssign: Result := ':=';
+    ttQuestion: Result := '?';
+    ttArrow: Result := '=>';
+    ttColon: Result := ':';
+    ttOpenParen: Result := '(';
+    ttCloseParen: Result := ')';
+    ttOpenBrace: Result := '{';
+    ttCloseBrace: Result := '}';
+    ttOpenBrack: Result := '[';
+    ttCloseBrack: Result := ']';
+    ttEOF: Result := 'End of file';
+  else
+    Result := TRttiEnumerationType.GetName(Self).Substring(2);
+  end;
+end;
+
 
 end.
