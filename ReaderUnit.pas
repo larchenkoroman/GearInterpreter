@@ -5,7 +5,7 @@ uses
   System.Classes, System.SysUtils, System.IOUtils;
 
 const
-  FileEnding = #26;
+  EOF_CHAR = #26;
 
 type
   TInputType = (itPrompt, itFile);
@@ -14,7 +14,7 @@ type
     private
       FFileName: string;
       FText: string;
-      Index: LongInt;
+      FIndex: LongInt;
     public
       property FileName: string read FFileName;
       constructor Create(Source: string; InputType: TInputType);
@@ -30,38 +30,39 @@ constructor TReader.Create(Source: string; InputType: TInputType);
 begin
   inherited Create;
   FFileName := '';
-  Index := 1;
+  FText := '';
+  FIndex := 1;
 
   case InputType of
-    itPrompt: FText := Source;
+    itPrompt:
+      FText := Source;
+
     itFile:
       if FileExists(Source) then
       begin
         FFileName := Source;
         FText := TFile.ReadAllText(FFileName);
       end;
-    else
-      FText := '';
   end;
 end;
 
 function TReader.PeekChar: Char;
 begin
-  if Index <= FText.Length then
-    Result := FText[Index]
+  if FIndex <= FText.Length then
+    Result := FText[FIndex]
   else
-    Result := FileEnding;
+    Result := EOF_CHAR;
 end;
 
 function TReader.NextChar: Char;
 begin
-  if Index <= FText.Length then
+  if FIndex <= FText.Length then
   begin
-    Result := FText[Index];
-    Inc(Index);
+    Result := FText[FIndex];
+    Inc(FIndex);
   end
   else
-    Result := FileEnding;
+    Result := EOF_CHAR;
 end;
 
 end.

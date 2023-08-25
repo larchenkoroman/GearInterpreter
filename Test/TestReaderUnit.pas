@@ -56,7 +56,7 @@ begin
   ReturnValue := FReader.NextChar;
   CheckEquals(ExpectedValue, ReturnValue);
 
-  ExpectedValue := FileEnding;
+  ExpectedValue := EOF_CHAR;
   ReturnValue := FReader.NextChar;
   CheckEquals(ExpectedValue, ReturnValue);
 end;
@@ -65,7 +65,7 @@ procedure TestTReader.TestPeekChar;
 var
   ReturnValue, ExpectedValue: Char;
 begin
-  ExpectedValue := FileEnding;
+  ExpectedValue := EOF_CHAR;
   FReader.NextChar;
   FReader.NextChar;
   FReader.NextChar;

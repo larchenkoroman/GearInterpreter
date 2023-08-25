@@ -10,7 +10,7 @@ uses
 var
   FReader: TReader;
 begin
-  FReader := TReader.Create('C:\Projects\test.txt', itFile);
+  FReader := TReader.Create('123', itPrompt);
   try
     Writeln(FReader.PeekChar);
     Writeln(Ord(FReader.PeekChar));
