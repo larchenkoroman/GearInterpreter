@@ -51,27 +51,28 @@ begin
   ExpectedValue := '2';
   ReturnValue := FReader.NextChar;
   CheckEquals(ExpectedValue, ReturnValue);
+
+  ExpectedValue := '3';
+  ReturnValue := FReader.NextChar;
+  CheckEquals(ExpectedValue, ReturnValue);
+
+  ExpectedValue := FileEnding;
+  ReturnValue := FReader.NextChar;
+  CheckEquals(ExpectedValue, ReturnValue);
 end;
 
 procedure TestTReader.TestPeekChar;
 var
   ReturnValue, ExpectedValue: Char;
 begin
-  ExpectedValue := '1';
-
+  ExpectedValue := FileEnding;
+  FReader.NextChar;
+  FReader.NextChar;
+  FReader.NextChar;
   ReturnValue := FReader.PeekChar;
   CheckEquals(ExpectedValue, ReturnValue);
-
-  ReturnValue := FReader.NextChar;
-  CheckEquals(ExpectedValue, ReturnValue);
-
-  ExpectedValue := '2';
-  ReturnValue := FReader.PeekChar;
-  CheckEquals(ExpectedValue, ReturnValue);
-
-
-
 end;
+
 
 initialization
   // Register any test cases with the test runner

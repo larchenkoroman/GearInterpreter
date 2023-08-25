@@ -2,7 +2,7 @@ unit ReaderUnit;
 
 interface
 uses
-  System.Classes, System.SysUtils;
+  System.Classes, System.SysUtils, System.IOUtils;
 
 const
   FileEnding = #26;
@@ -10,16 +10,16 @@ const
 type
   TInputType = (itPrompt, itFile);
 
-  TReader = class(TStringList)
+  TReader = class
     private
       FFileName: string;
+      FText: string;
       Index: LongInt;
-      function getPeekChar: Char;
     public
       property FileName: string read FFileName;
-      property PeekChar: Char read getPeekChar;
       constructor Create(Source: string; InputType: TInputType);
       function NextChar: Char;
+      function PeekChar: Char;
   end;
 
 implementation
@@ -31,29 +31,33 @@ begin
   inherited Create;
   FFileName := '';
   Index := 1;
+
   case InputType of
-    itPrompt: Add(Source);
+    itPrompt: FText := Source;
     itFile:
+      if FileExists(Source) then
       begin
         FFileName := Source;
-        LoadFromFile(FFileName);
+        FText := TFile.ReadAllText(FFileName);
       end;
+    else
+      FText := '';
   end;
 end;
 
-function TReader.getPeekChar: Char;
+function TReader.PeekChar: Char;
 begin
-  if Index <= Length(Text) then
-    Result := Text[Index]
+  if Index <= FText.Length then
+    Result := FText[Index]
   else
     Result := FileEnding;
 end;
 
 function TReader.NextChar: Char;
 begin
-  if Index <= Length(Text) then
+  if Index <= FText.Length then
   begin
-    Result := Text[Index];
+    Result := FText[Index];
     Inc(Index);
   end
   else

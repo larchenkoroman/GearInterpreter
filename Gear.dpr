@@ -7,12 +7,32 @@ program Gear;
 uses
   System.SysUtils,
   ReaderUnit in 'ReaderUnit.pas';
-
+var
+  FReader: TReader;
 begin
+  FReader := TReader.Create('C:\Projects\test.txt', itFile);
   try
-    { TODO -oUser -cConsole Main : Insert code here }
-  except
-    on E: Exception do
-      Writeln(E.ClassName, ': ', E.Message);
+    Writeln(FReader.PeekChar);
+    Writeln(Ord(FReader.PeekChar));
+    Writeln(FReader.NextChar);
+    Writeln;
+
+    Writeln(FReader.PeekChar);
+    Writeln(Ord(FReader.PeekChar));
+    Writeln(FReader.NextChar);
+    Writeln;
+
+    Writeln(FReader.PeekChar);
+    Writeln(Ord(FReader.PeekChar));
+    Writeln(FReader.NextChar);
+    Writeln;
+
+    Writeln(FReader.PeekChar);
+    Writeln(Ord(FReader.PeekChar));
+    Writeln(FReader.NextChar);
+
+    Readln;
+  finally
+    FreeAndNil(FReader)
   end;
 end.
