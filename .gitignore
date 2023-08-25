@@ -1,5 +1,7 @@
 # Specify filepatterns you want git to ignore.
+.gitignore
 *.dcu
 *.res
 *.identcache
+Gear.dproj.local
 /Test/Win32
