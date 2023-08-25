@@ -41,14 +41,23 @@ begin
   end;
 end;
 
-function TReader.GetPeekChar: Char;
+function TReader.getPeekChar: Char;
 begin
-
+  if Index <= Length(Text) then
+    Result := Text[Index]
+  else
+    Result := FileEnding;
 end;
 
 function TReader.NextChar: Char;
 begin
-
+  if Index <= Length(Text) then
+  begin
+    Result := Text[Index];
+    Inc(Index);
+  end
+  else
+    Result := FileEnding;
 end;
 
 end.
