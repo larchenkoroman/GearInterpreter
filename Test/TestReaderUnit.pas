@@ -32,7 +32,7 @@ implementation
 
 procedure TestTReader.SetUp;
 begin
-  FReader := TReader.Create('123', itPrompt);
+  FReader := TReader.Create('153', itPrompt);
 end;
 
 procedure TestTReader.TearDown;
@@ -41,36 +41,17 @@ begin
 end;
 
 procedure TestTReader.TestNextChar;
-var
-  ReturnValue, ExpectedValue: Char;
 begin
-  ExpectedValue := '1';
-  ReturnValue := FReader.NextChar;
-  CheckEquals(ExpectedValue, ReturnValue);
-
-  ExpectedValue := '2';
-  ReturnValue := FReader.NextChar;
-  CheckEquals(ExpectedValue, ReturnValue);
-
-  ExpectedValue := '3';
-  ReturnValue := FReader.NextChar;
-  CheckEquals(ExpectedValue, ReturnValue);
-
-  ExpectedValue := EOF_CHAR;
-  ReturnValue := FReader.NextChar;
-  CheckEquals(ExpectedValue, ReturnValue);
+  CheckEquals('1', FReader.NextChar);
+  CheckEquals('5', FReader.NextChar);
+  CheckEquals('3', FReader.NextChar);
+  CheckEquals(EOF_CHAR, FReader.NextChar);
 end;
 
 procedure TestTReader.TestPeekChar;
-var
-  ReturnValue, ExpectedValue: Char;
 begin
-  ExpectedValue := EOF_CHAR;
   FReader.NextChar;
-  FReader.NextChar;
-  FReader.NextChar;
-  ReturnValue := FReader.PeekChar;
-  CheckEquals(ExpectedValue, ReturnValue);
+  CheckEquals('5', FReader.PeekChar);
 end;
 
 

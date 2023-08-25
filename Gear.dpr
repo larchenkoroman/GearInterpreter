@@ -6,30 +6,25 @@ program Gear;
 
 uses
   System.SysUtils,
-  ReaderUnit in 'ReaderUnit.pas';
+  ReaderUnit in 'ReaderUnit.pas',
+  TokenUnit in 'TokenUnit.pas';
+
 var
   FReader: TReader;
 begin
   FReader := TReader.Create('123', itPrompt);
   try
-    Writeln(FReader.PeekChar);
-    Writeln(Ord(FReader.PeekChar));
     Writeln(FReader.NextChar);
+    Writeln('Peek ', FReader.PeekChar);
     Writeln;
 
-    Writeln(FReader.PeekChar);
-    Writeln(Ord(FReader.PeekChar));
     Writeln(FReader.NextChar);
+    Writeln('Peek ', FReader.PeekChar);
     Writeln;
 
-    Writeln(FReader.PeekChar);
-    Writeln(Ord(FReader.PeekChar));
     Writeln(FReader.NextChar);
+    Writeln('Peek ', FReader.PeekChar);
     Writeln;
-
-    Writeln(FReader.PeekChar);
-    Writeln(Ord(FReader.PeekChar));
-    Writeln(FReader.NextChar);
 
     Readln;
   finally
