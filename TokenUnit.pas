@@ -37,7 +37,6 @@ type
   end;
 
   TTokenTypeSet = set of TTokenType;
-
   TKeywords = TDictionary<string, TTokenType>;
 
   TToken = class
@@ -57,6 +56,13 @@ type
       function Copy: TToken;
   end;
 
+  TTokens = TList<TToken>;
+  TTokensHelper = class helper for TTokens
+    function ToText: string;
+  end;
+
+var
+  Keywords: TKeywords;
 
 implementation
 
@@ -129,5 +135,65 @@ begin
   end;
 end;
 
+
+{ TTokensHelper }
+
+function TTokensHelper.ToText: string;
+var
+ Token: TToken;
+begin
+  Result := '';
+  for Token in Self do
+    Result := Result + Token.ToString + sLineBreak;
+
+end;
+
+initialization
+  Keywords := TKeywords.Create;
+
+ // the constant values
+  Keywords.Add('False', ttFalse);
+  Keywords.Add('Null', ttNull);
+  Keywords.Add('True', ttTrue);
+
+  // the keywords
+  Keywords.Add('array', ttArray);
+  Keywords.Add('break', ttBreak);
+  Keywords.Add('case', ttCase);
+  Keywords.Add('class', ttClass);
+  Keywords.Add('dictionary', ttDictionary);
+  Keywords.Add('do', ttDo);
+  Keywords.Add('each', ttEach);
+  Keywords.Add('else', ttElse);
+  Keywords.Add('end', ttEnd);
+  Keywords.Add('ensure', ttEnsure);
+  Keywords.Add('enum', ttEnum);
+  Keywords.Add('extension', ttExtension);
+  Keywords.Add('for', ttFor);
+  Keywords.Add('func', ttFunc);
+  Keywords.Add('if', ttIf);
+  Keywords.Add('in', ttIn);
+  Keywords.Add('is', ttIs);
+  Keywords.Add('inherited', ttInherited);
+  Keywords.Add('init', ttInit);
+  Keywords.Add('let', ttLet);
+  Keywords.Add('match', ttMatch);
+  Keywords.Add('on', ttOn);
+  Keywords.Add('print', ttPrint);
+  Keywords.Add('repeat', ttRepeat);
+  Keywords.Add('return', ttReturn);
+  Keywords.Add('self', ttSelf);
+  Keywords.Add('switch', ttSwitch);
+  Keywords.Add('then', ttThen);
+  Keywords.Add('trait', ttTrait);
+  Keywords.Add('until', ttUntil);
+  Keywords.Add('use', ttUse);
+  Keywords.Add('val', ttVal);
+  Keywords.Add('var', ttVar);
+  Keywords.Add('where', ttWhere);
+  Keywords.Add('while', ttWhile);
+
+finalization
+  FreeAndNil(Keywords);
 
 end.
