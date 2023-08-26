@@ -7,7 +7,8 @@ program Gear;
 uses
   System.SysUtils,
   ReaderUnit in 'ReaderUnit.pas',
-  TokenUnit in 'TokenUnit.pas';
+  TokenUnit in 'TokenUnit.pas',
+  LexerUnit in 'LexerUnit.pas';
 
 var
   FReader: TReader;
@@ -25,7 +26,6 @@ begin
 
     Writeln(FReader.NextChar);
     Writeln('Peek ', FReader.PeekChar);
-    Writeln;
 
     Readln;
   finally

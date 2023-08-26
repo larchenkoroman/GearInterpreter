@@ -91,6 +91,7 @@
         </DelphiCompile>
         <DCCReference Include="ReaderUnit.pas"/>
         <DCCReference Include="TokenUnit.pas"/>
+        <DCCReference Include="LexerUnit.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
