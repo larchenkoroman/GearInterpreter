@@ -103,8 +103,75 @@ begin
 end;
 
 procedure TLexer.ScanToken(const Line, Col: Integer);
-begin
+  procedure AddToken(const ATokenType: TTokenType);
+  var
+    Token: TToken;
+  begin
+    Token := TToken.Create(ATokenType, Null, Line, Col);
+    Tokens.Add(Token);
+    FLook := getChar;
+  end;
 
+begin
+  case Flook of
+    '+':
+      if FReader.PeekChar = '=' then
+      begin
+        FLook := getChar;
+        AddToken(ttPlusIs); //+=
+      end
+      else
+        AddToken(ttPlus);
+
+    '-':
+      if FReader.PeekChar = '=' then
+      begin
+        Flook := getChar;
+        AddToken(ttMinusIs); //-=
+      end
+      else
+        AddToken(ttMinus);
+
+    '/':
+      case FReader.PeekChar of
+        '/':
+          begin
+            FLook := getChar;
+            SingleLineComment;
+          end;
+        '*':
+          begin
+            FLook := getChar;
+            MultiLineComment;
+          end;
+        '=':
+          begin
+            FLook := getChar;
+            AddToken(ttDivIs); {/=}
+          end;
+        else
+          AddToken(ttDiv);
+      end;
+
+    '*':
+      if FReader.PeekChar = '=' then
+      begin
+        FLook := getChar;
+        AddToken(ttMulIs); // *=
+      end
+      else
+        AddToken(ttMul);
+
+    '%':
+      if FReader.PeekChar = '=' then
+      begin
+        FLook := getChar;
+        AddToken(ttRemainderIs); // %=
+      end
+      else
+        AddToken(ttRemainder);
+
+  end;
 end;
 
 procedure TLexer.ScanTokens;
@@ -115,7 +182,7 @@ begin
       FLook := getChar;  // skip white space
     ScanToken(FLine, FCol);
   end;
-  Tokens.Add(TToken.Create(ttEOF, ttEOF.ToString, Null, FLine, FCol));
+  Tokens.Add(TToken.Create(ttEOF, Null, FLine, FCol));
 end;
 
 procedure TLexer.SingleLineComment;

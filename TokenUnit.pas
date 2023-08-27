@@ -7,8 +7,8 @@ uses
 type
   TTokenType = (
     //Expressions - operators
-    ttPlus, ttMin, ttMul, ttDiv, ttRem,
-    ttPlusIs, ttMinIs, ttMulIs, ttDivIs, ttRemIs,
+    ttPlus, ttMinus, ttMul, ttDiv, ttRemainder,
+    ttPlusIs, ttMinusIs, ttMulIs, ttDivIs, ttRemainderIs,
     ttOr, ttAnd, ttNot, ttXor,
     ttShl, ttShr, ttPow,
     ttEQ, ttNEQ, ttGT, ttGE, ttLT, ttLE,
@@ -51,7 +51,7 @@ type
       property Value: Variant read FValue;
       property Line: LongInt read FLine;
       property Col: LongInt read FCol;
-      constructor Create(ATokenType: TTokenType; ALexeme: string; AValue: Variant; ALine, ACol: LongInt);
+      constructor Create(ATokenType: TTokenType; AValue: Variant; ALine, ACol: LongInt);
       function ToString: string; override;
       function Copy: TToken;
   end;
@@ -70,13 +70,13 @@ implementation
 
 function TToken.Copy: TToken;
 begin
-  Result := TToken.Create(FTokenType, FLexeme, FValue, FLine, FCol);
+  Result := TToken.Create(FTokenType, FValue, FLine, FCol);
 end;
 
-constructor TToken.Create(ATokenType: TTokenType; ALexeme: string; AValue: Variant; ALine, ACol: LongInt);
+constructor TToken.Create(ATokenType: TTokenType; AValue: Variant; ALine, ACol: LongInt);
 begin
   FTokenType := ATokenType;
-  FLexeme := ALexeme;
+  FLexeme := ATokenType.ToString;
   FValue := AValue;
   FLine := ALine;
   FCol := ACol;
@@ -93,16 +93,16 @@ end;
 function TTokenTypeHelper.ToString: string;
 begin
   case Self of
-    ttPlus: Result := '';
-    ttMin  : Result := '-';
-    ttMul  : Result := '*';
-    ttDiv  : Result := '/';
-    ttRem  : Result := '%';
+    ttPlus:  Result := '';
+    ttMinus: Result := '-';
+    ttMul: Result := '*';
+    ttDiv: Result := '/';
+    ttRemainder: Result := '%';
     ttPlusIs : Result := '+=';
-    ttMinIs  : Result := '-=';
+    ttMinusIs : Result := '-=';
     ttMulIs  : Result := '*=';
     ttDivIs  : Result := '/=';
-    ttRemIs  : Result := '%=';
+    ttRemainderIs  : Result := '%=';
     ttOr : Result := '|';
     ttAnd : Result := '&';
     ttNot : Result := '!';
