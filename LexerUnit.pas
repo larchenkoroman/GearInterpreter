@@ -5,12 +5,12 @@ uses
   System.Classes, System.SysUtils, ReaderUnit, TokenUnit, Variants;
 
 const
-  Space      = #32;
-  Tab        = #9;
-  RetCaret   = #13;
-  NewLine    = #10;
-  Apostrophe = #39; // '
-  Quote      = #34; // "
+  Space    = #32;
+  Tab      = #9;
+  RetCaret = #13;
+  NewLine  = #10;
+  Quote1   = #39; // '
+  Quote2   = #34; // "
 
   WhiteSpace   = [Tab, RetCaret, NewLine, Space];
   Underscore   = ['_'];
@@ -170,6 +170,39 @@ begin
       end
       else
         AddToken(ttRemainder);
+
+    ':':
+      if FReader.PeekChar = '=' then
+      begin
+        FLook := getChar;
+        AddToken(ttAssign); // :=
+      end
+      else
+        AddToken(ttColon);
+
+    '&': AddToken(ttAnd);
+    '|': AddToken(ttOr);
+    '~': AddToken(ttXor);
+    '!': AddToken(ttNot);
+    '^': AddToken(ttPow);
+    '(': AddToken(ttOpenParen);
+    ')': AddToken(ttCloseParen);
+    '{': AddToken(ttOpenBrace);
+    '}': AddToken(ttCloseBrace);
+    '[': AddToken(ttOpenBrack);
+    ']': AddToken(ttCloseBrack);
+    ',': AddToken(ttComma);
+
+    '.' :
+      if FReader.PeekChar = '.' then
+      begin
+        FLook := getChar;
+        AddToken(ttDotDot);
+      end      else        AddToken(ttDot);    '=':      if FReader.PeekChar = '>' then      begin        FLook := getChar;
+        AddToken(ttArrow);
+      end      else        AddToken(ttEQ);
+
+
 
   end;
 end;
