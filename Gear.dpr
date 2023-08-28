@@ -11,24 +11,18 @@ uses
   LexerUnit in 'LexerUnit.pas';
 
 var
-  FReader: TReader;
-  TokenTypes: TTokenTypeSet;
+  Reader: TReader;
+  Lexer: TLexer;
 begin
-  FReader := TReader.Create('123', itPrompt);
+  Reader := TReader.Create('+-/*qwefwe*//', itPrompt);
+  Lexer := TLexer.Create(Reader);
   try
-    Writeln(FReader.NextChar);
-    Writeln('Peek ', FReader.PeekChar);
-    Writeln;
-
-    Writeln(FReader.NextChar);
-    Writeln('Peek ', FReader.PeekChar);
-    Writeln;
-
-    Writeln(FReader.NextChar);
-    Writeln('Peek ', FReader.PeekChar);
+    for var tok in Lexer.Tokens do
+      Writeln(tok.TokenType.ToString, ' ', Tok.Lexeme);
 
     Readln;
   finally
-    FreeAndNil(FReader)
+    FreeAndNil(Reader);
+    FreeAndNil(Lexer);
   end;
 end.

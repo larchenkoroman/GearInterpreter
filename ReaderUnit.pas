@@ -5,7 +5,7 @@ uses
   System.Classes, System.SysUtils, System.IOUtils;
 
 const
-  EOF_CHAR = #26;
+  CHAR_EOF = #26;
 
 type
   TInputType = (itPrompt, itFile);
@@ -51,7 +51,7 @@ begin
   if FIndex <= FText.Length then
     Result := FText[FIndex]
   else
-    Result := EOF_CHAR;
+    Result := CHAR_EOF;
 end;
 
 function TReader.NextChar: Char;
@@ -62,7 +62,7 @@ begin
     Inc(FIndex);
   end
   else
-    Result := EOF_CHAR;
+    Result := CHAR_EOF;
 end;
 
 end.

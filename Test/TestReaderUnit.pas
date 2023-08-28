@@ -45,7 +45,7 @@ begin
   CheckEquals('1', FReader.NextChar);
   CheckEquals('5', FReader.NextChar);
   CheckEquals('3', FReader.NextChar);
-  CheckEquals(EOF_CHAR, FReader.NextChar);
+  CheckEquals(CHAR_EOF, FReader.NextChar);
 end;
 
 procedure TestTReader.TestPeekChar;
