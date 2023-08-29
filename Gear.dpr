@@ -14,11 +14,11 @@ var
   Reader: TReader;
   Lexer: TLexer;
 begin
-  Reader := TReader.Create('+-/*qwefwe*//', itPrompt);
+  Reader := TReader.Create('+-<=/*qwe' + sLineBreak + '@#$fwe*//', itPrompt);
   Lexer := TLexer.Create(Reader);
   try
     for var tok in Lexer.Tokens do
-      Writeln(tok.TokenType.ToString, ' ', Tok.Lexeme);
+      Writeln(tok.ToString);
 
     Readln;
   finally

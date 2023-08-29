@@ -84,7 +84,9 @@ end;
 
 function TToken.ToString: string;
 begin
-  Result := FTokenType.ToString + ' (' + FLexeme + ') = ' + VarToStr(FValue);
+  Result := FTokenType.ToString;  // + ' (' + FLexeme + ')';
+  if not VarIsNull(FValue) then
+    Result := Result +  ' = ' + VarToStr(FValue);
 end;
 
 
@@ -149,7 +151,7 @@ begin
 end;
 
 initialization
-  Keywords := TKeywords.Create;
+  Keywords := TKeywords.Create(100);
 
  // the constant values
   Keywords.Add('False', ttFalse);

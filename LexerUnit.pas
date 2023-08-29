@@ -259,7 +259,8 @@ begin
     until FLook in ['*', CHAR_EOF];
     FLook := getChar;
   until FLook in ['/', CHAR_EOF];
-  FLook := getChar;end;
+  FLook := getChar;
+end;
 
 procedure TLexer.SingleLineComment;
 begin

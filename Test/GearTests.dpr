@@ -17,7 +17,10 @@ program GearTests;
 uses
   DUnitTestRunner,
   TestReaderUnit in 'TestReaderUnit.pas',
-  ReaderUnit in '..\ReaderUnit.pas';
+  ReaderUnit in '..\ReaderUnit.pas',
+  TokenUnit in '..\TokenUnit.pas',
+  LexerUnit in '..\LexerUnit.pas',
+  TestLexerUnit in 'TestLexerUnit.pas';
 
 {$R *.RES}
 
