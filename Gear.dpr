@@ -14,7 +14,7 @@ var
   Reader: TReader;
   Lexer: TLexer;
 begin
-  Reader := TReader.Create('+-<=/*qwe' + sLineBreak + '@#$fwe*//', itPrompt);
+  Reader := TReader.Create('+-<=MyVar for/*qwe' + sLineBreak + '@#$fwe*//', itPrompt);
   Lexer := TLexer.Create(Reader);
   try
     for var tok in Lexer.Tokens do

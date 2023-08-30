@@ -46,17 +46,18 @@ type
       FValue: Variant;
       FLine, FCol: LongInt;
     public
+      constructor Create(ATokenType: TTokenType; AValue: Variant; ALine, ACol: LongInt); overload;
+      constructor Create(ATokenType: TTokenType; ALexeme: string; AValue: Variant; ALine, ACol: LongInt); overload;
       property TokenType: TTokenType read FTokenType;
       property Lexeme: string read FLexeme;
       property Value: Variant read FValue;
       property Line: LongInt read FLine;
       property Col: LongInt read FCol;
-      constructor Create(ATokenType: TTokenType; AValue: Variant; ALine, ACol: LongInt);
       function ToString: string; override;
       function Copy: TToken;
   end;
 
-  TTokens = TList<TToken>;
+  TTokens = TObjectList<TToken>;
   TTokensHelper = class helper for TTokens
     function ToText: string;
   end;
@@ -82,9 +83,18 @@ begin
   FCol := ACol;
 end;
 
+constructor TToken.Create(ATokenType: TTokenType; ALexeme: string; AValue: Variant; ALine, ACol: LongInt);
+begin
+  FTokenType := ATokenType;
+  FLexeme := ALexeme;
+  FValue := AValue;
+  FLine := ALine;
+  FCol := ACol;
+end;
+
 function TToken.ToString: string;
 begin
-  Result := FTokenType.ToString;  // + ' (' + FLexeme + ')';
+  Result := FTokenType.ToString + ' (' + FLexeme + ')';
   if not VarIsNull(FValue) then
     Result := Result +  ' = ' + VarToStr(FValue);
 end;

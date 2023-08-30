@@ -30,11 +30,11 @@ type
       FReader: TReader;          // contains the text to scan
       FTokens: TTokens;          // list of mined tokens
       FEndOfFile: Boolean;
-      function getChar: Char;
-      procedure doKeywordOrIdentifier(const Line, Col: Integer);
-      procedure doNumber(const Line, Col: Integer);
-      procedure doString(const Line, Col: Integer);
-      procedure doChar(const Line, Col: Integer);
+      function GetChar: Char;
+      procedure DoKeywordOrIdentifier(const Line, Col: Integer);
+      procedure DoNumber(const Line, Col: Integer);
+      procedure DoString(const Line, Col: Integer);
+      procedure DoChar(const Line, Col: Integer);
       procedure ScanToken(const Line, Col: Integer);
       procedure ScanTokens;
       procedure SingleLineComment;
@@ -53,11 +53,11 @@ implementation
 constructor TLexer.Create(Reader: TReader);
 begin
   FReader := Reader;
-  FTokens := TTokens.Create;
+  FTokens := TTokens.Create(True); //AOwnsObjects
   FLine := 1;
   FCol := 0;
   FEndOfFile := False;
-  FLook := getChar;   // get first character
+  FLook := GetChar;   // get first character
   ScanTokens;  // scan all tokens
 end;
 
@@ -67,27 +67,44 @@ begin
   inherited;
 end;
 
-procedure TLexer.doChar(const Line, Col: Integer);
+procedure TLexer.DoChar(const Line, Col: Integer);
 begin
 
 end;
 
-procedure TLexer.doKeywordOrIdentifier(const Line, Col: Integer);
+procedure TLexer.DoKeywordOrIdentifier(const Line, Col: Integer);
+var
+  Lexeme: string;
+  TokenType: TTokenType;
+  Token: TToken;
+begin
+  Lexeme := FLook;
+  FLook := GetChar;
+  while FLook in IdentChars do
+  begin
+    Lexeme := Lexeme + Flook;
+    Flook := GetChar;
+  end;
+
+  //Match the keyword and return its type, otherwise it's an identifier
+  if not Keywords.TryGetValue(Lexeme, TokenType) then
+    TokenType := TTokenType.ttIdentifier;
+
+  Token := TToken.Create(TokenType, Lexeme, Null, Line, Col);
+  Tokens.Add(Token);
+end;
+
+procedure TLexer.DoNumber(const Line, Col: Integer);
 begin
 
 end;
 
-procedure TLexer.doNumber(const Line, Col: Integer);
+procedure TLexer.DoString(const Line, Col: Integer);
 begin
 
 end;
 
-procedure TLexer.doString(const Line, Col: Integer);
-begin
-
-end;
-
-function TLexer.getChar: Char;
+function TLexer.GetChar: Char;
 begin
   Result := FLook;
   if FLook <> CHAR_EOF then
@@ -109,14 +126,14 @@ procedure TLexer.ScanToken(const Line, Col: Integer);
   begin
     Token := TToken.Create(ATokenType, Null, Line, Col);
     Tokens.Add(Token);
-    FLook := getChar;
+    FLook := GetChar;
   end;
 
 begin
   case Flook of
     '+': if FReader.PeekChar = '=' then
          begin
-           FLook := getChar;
+           FLook := GetChar;
            AddToken(ttPlusIs); //+=
          end
          else
@@ -124,7 +141,7 @@ begin
 
     '-': if FReader.PeekChar = '=' then
          begin
-           Flook := getChar;
+           Flook := GetChar;
            AddToken(ttMinusIs); //-=
          end
          else
@@ -132,15 +149,15 @@ begin
 
     '/': case FReader.PeekChar of
            '/': begin
-                  FLook := getChar;
+                  FLook := GetChar;
                   SingleLineComment;
                 end;
            '*': begin
-                  FLook := getChar;
+                  FLook := GetChar;
                   MultiLineComment;
                 end;
            '=': begin
-                  FLook := getChar;
+                  FLook := GetChar;
                   AddToken(ttDivIs); {/=}
                 end;
            else
@@ -149,7 +166,7 @@ begin
 
     '*': if FReader.PeekChar = '=' then
          begin
-           FLook := getChar;
+           FLook := GetChar;
            AddToken(ttMulIs); // *=
          end
          else
@@ -157,7 +174,7 @@ begin
 
     '%': if FReader.PeekChar = '=' then
          begin
-           FLook := getChar;
+           FLook := GetChar;
            AddToken(ttRemainderIs); // %=
          end
          else
@@ -165,7 +182,7 @@ begin
 
     ':': if FReader.PeekChar = '=' then
          begin
-           FLook := getChar;
+           FLook := GetChar;
            AddToken(ttAssign); // :=
          end
          else
@@ -186,7 +203,7 @@ begin
 
     '.': if FReader.PeekChar = '.' then
          begin
-           FLook := getChar;
+           FLook := GetChar;
            AddToken(ttDotDot);
          end
          else
@@ -194,7 +211,7 @@ begin
 
     '=': if FReader.PeekChar = '>' then
          begin
-           FLook := getChar;
+           FLook := GetChar;
            AddToken(ttArrow);
          end
          else
@@ -202,15 +219,15 @@ begin
 
     '<': case FReader.PeekChar of
            '<': begin
-                  Flook := getChar;
+                  Flook := GetChar;
                   AddToken(ttShl);
                 end;
            '=': begin
-                  Flook := getChar;
+                  Flook := GetChar;
                   AddToken(ttLE);
                 end;
            '>': begin
-                  Flook := getChar;
+                  Flook := GetChar;
                   AddToken(ttNEQ);
                 end;
            else
@@ -219,11 +236,11 @@ begin
 
     '>': case FReader.PeekChar of
            '>': begin
-                  Flook := getChar;
+                  Flook := GetChar;
                   AddToken(ttShr);
                 end;
            '=': begin
-                  Flook := getChar;
+                  Flook := GetChar;
                   AddToken(ttGE);
                 end;
            else
@@ -231,10 +248,10 @@ begin
          end;
 
     '?': AddToken(ttQuestion);
-    '0'..'9': doNumber(Line, Col);
-    '_', 'A'..'Z', 'a'..'z': doKeywordOrIdentifier(Line, Col);
-    Quote1: doString(Line, Col);
-    Quote2: doChar(Line, Col);
+    '0'..'9': DoNumber(Line, Col);
+    '_', 'A'..'Z', 'a'..'z': DoKeywordOrIdentifier(Line, Col);
+    Quote1: DoString(Line, Col);
+    Quote2: DoChar(Line, Col);
     CHAR_EOF: FEndOfFile := True;
     else
       FEndOfFile := True;
@@ -255,26 +272,26 @@ procedure TLexer.MultiLineComment;
 begin
   repeat
     repeat
-      FLook := getChar;
+      FLook := GetChar;
     until FLook in ['*', CHAR_EOF];
-    FLook := getChar;
+    FLook := GetChar;
   until FLook in ['/', CHAR_EOF];
-  FLook := getChar;
+  FLook := GetChar;
 end;
 
 procedure TLexer.SingleLineComment;
 begin
   repeat
-    FLook := getChar;
+    FLook := GetChar;
   until FLook in [CHAR_13, CHAR_10, CHAR_EOF];
 
-  FLook := getChar;
+  FLook := GetChar;
 end;
 
 procedure TLexer.SkipWhiteSpace;
 begin
   while FLook in WhiteSpace do
-    FLook := getChar;
+    FLook := GetChar;
 end;
 
 end.
