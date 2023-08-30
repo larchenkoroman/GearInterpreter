@@ -25,6 +25,7 @@ const
 type
   TLexer = class
     private
+      FFormatSettings: TFormatSettings;
       FLook : char;              // next input character (still unprocessed)
       FLine, FCol : integer;     // line and column number of the input character
       FReader: TReader;          // contains the text to scan
@@ -52,6 +53,9 @@ implementation
 
 constructor TLexer.Create(Reader: TReader);
 begin
+  FFormatSettings := FormatSettings;
+  FFormatSettings.DecimalSeparator := '.';
+
   FReader := Reader;
   FTokens := TTokens.Create(True); //AOwnsObjects
   FLine := 1;
@@ -95,8 +99,54 @@ begin
 end;
 
 procedure TLexer.DoNumber(const Line, Col: Integer);
+var
+  Lexeme: string;
+  Value: Extended;
+  Token: TToken;
+  IsFoundDotDot: Boolean;
 begin
+  Lexeme := FLook;
+  Flook := GetChar;
+  //читаем целую часть
+  while Flook in NumberChars do
+  begin
+    Lexeme := Lexeme + Flook;
+    Flook := GetChar;
+  end;
 
+  IsFoundDotDot := (Flook = '.') and (FReader.PeekChar = '.');
+  //читаем дробную часть, если есть
+  if (Flook = '.') and not IsFoundDotDot then
+  begin
+    Lexeme := Lexeme + FLook;
+    Flook := GetChar;
+    while Flook in NumberChars do
+    begin
+      Lexeme := Lexeme + Flook;
+      Flook := GetChar;
+    end;
+  end;
+
+  //если в виде экспоненты
+  if (UpperCase(FLook) = 'E') and not IsFoundDotDot then
+  begin
+    Lexeme := Lexeme + FLook;
+    Flook := GetChar;
+    if FLook in ['+', '-'] then
+    begin
+      Lexeme := Lexeme + FLook;
+      Flook := GetChar;
+    end;
+    while Flook in NumberChars do
+    begin
+      Lexeme := Lexeme + Flook;
+      Flook := GetChar;
+    end;
+  end;
+
+  Value := StrToFloat(Lexeme, FFormatSettings);
+  Token := TToken.Create(ttNumber,Lexeme, Value, Line, Col);
+  Tokens.Add(Token);
 end;
 
 procedure TLexer.DoString(const Line, Col: Integer);

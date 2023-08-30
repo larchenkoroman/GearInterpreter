@@ -11,10 +11,14 @@ uses
   LexerUnit in 'LexerUnit.pas';
 
 var
+  Input: string;
   Reader: TReader;
   Lexer: TLexer;
 begin
-  Reader := TReader.Create('+-<=MyVar for/*qwe' + sLineBreak + '@#$fwe*//', itPrompt);
+  Input := '+-<=MyVar = 123.00089 for/*qwe'#13#10'@#$fwe*//';
+  Writeln(Input);
+  Writeln;
+  Reader := TReader.Create(Input, itPrompt);
   Lexer := TLexer.Create(Reader);
   try
     for var tok in Lexer.Tokens do
