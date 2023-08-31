@@ -8,14 +8,16 @@ uses
   System.SysUtils,
   ReaderUnit in 'ReaderUnit.pas',
   TokenUnit in 'TokenUnit.pas',
-  LexerUnit in 'LexerUnit.pas';
+  LexerUnit in 'LexerUnit.pas',
+  ErrorUnit in 'ErrorUnit.pas';
 
 var
   Input: string;
   Reader: TReader;
   Lexer: TLexer;
 begin
-  Input := '+-<=MyVar = 123.00089 for/*qwe'#13#10'@#$fwe*//';
+  Input := 'StrVar = "df for" RRR = 10.58';
+  Writeln('Input:');
   Writeln(Input);
   Writeln;
   Reader := TReader.Create(Input, itPrompt);
@@ -23,6 +25,9 @@ begin
   try
     for var tok in Lexer.Tokens do
       Writeln(tok.ToString);
+
+    if not Errors.IsEmpty then
+      Writeln(Errors.ToString);
 
     Readln;
   finally

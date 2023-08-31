@@ -92,6 +92,7 @@
         <DCCReference Include="ReaderUnit.pas"/>
         <DCCReference Include="TokenUnit.pas"/>
         <DCCReference Include="LexerUnit.pas"/>
+        <DCCReference Include="ErrorUnit.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

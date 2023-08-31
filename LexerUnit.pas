@@ -2,7 +2,7 @@ unit LexerUnit;
 
 interface
 uses
-  System.Classes, System.SysUtils, ReaderUnit, TokenUnit, Variants;
+  System.Classes, System.SysUtils, ReaderUnit, TokenUnit, ErrorUnit, Variants;
 
 const
   Space    = #32;
@@ -26,7 +26,7 @@ type
   TLexer = class
     private
       FFormatSettings: TFormatSettings;
-      FLook : char;              // next input character (still unprocessed)
+      FLook : Char;              // next input character (still unprocessed)
       FLine, FCol : integer;     // line and column number of the input character
       FReader: TReader;          // contains the text to scan
       FTokens: TTokens;          // list of mined tokens
@@ -34,8 +34,8 @@ type
       function GetChar: Char;
       procedure DoKeywordOrIdentifier(const Line, Col: Integer);
       procedure DoNumber(const Line, Col: Integer);
-      procedure DoString(const Line, Col: Integer);
-      procedure DoChar(const Line, Col: Integer);
+      procedure DoString(const QuoteChar: Char; const Line, Col: Integer);
+//      procedure DoChar(const Line, Col: Integer);
       procedure ScanToken(const Line, Col: Integer);
       procedure ScanTokens;
       procedure SingleLineComment;
@@ -58,7 +58,7 @@ begin
 
   FReader := Reader;
   FTokens := TTokens.Create(True); //AOwnsObjects
-  FLine := 1;
+  FLine := 0;
   FCol := 0;
   FEndOfFile := False;
   FLook := GetChar;   // get first character
@@ -71,10 +71,10 @@ begin
   inherited;
 end;
 
-procedure TLexer.DoChar(const Line, Col: Integer);
-begin
-
-end;
+//procedure TLexer.DoChar(const Line, Col: Integer);
+//begin
+//
+//end;
 
 procedure TLexer.DoKeywordOrIdentifier(const Line, Col: Integer);
 var
@@ -84,7 +84,7 @@ var
 begin
   Lexeme := FLook;
   FLook := GetChar;
-  while FLook in IdentChars do
+  while CharInSet(FLook, IdentChars) do
   begin
     Lexeme := Lexeme + Flook;
     Flook := GetChar;
@@ -108,7 +108,7 @@ begin
   Lexeme := FLook;
   Flook := GetChar;
   //читаем целую часть
-  while Flook in NumberChars do
+  while CharInSet(Flook, NumberChars) do
   begin
     Lexeme := Lexeme + Flook;
     Flook := GetChar;
@@ -120,7 +120,7 @@ begin
   begin
     Lexeme := Lexeme + FLook;
     Flook := GetChar;
-    while Flook in NumberChars do
+    while CharInSet(Flook, NumberChars) do
     begin
       Lexeme := Lexeme + Flook;
       Flook := GetChar;
@@ -132,12 +132,12 @@ begin
   begin
     Lexeme := Lexeme + FLook;
     Flook := GetChar;
-    if FLook in ['+', '-'] then
+    if CharInSet(FLook, ['+', '-']) then
     begin
       Lexeme := Lexeme + FLook;
       Flook := GetChar;
     end;
-    while Flook in NumberChars do
+    while CharInSet(Flook, NumberChars) do
     begin
       Lexeme := Lexeme + Flook;
       Flook := GetChar;
@@ -149,9 +149,27 @@ begin
   Tokens.Add(Token);
 end;
 
-procedure TLexer.DoString(const Line, Col: Integer);
+procedure TLexer.DoString(const QuoteChar: Char; const Line, Col: Integer);
+var
+  Lexeme, Value: string;
+  Token: TToken;
 begin
+  FLook := GetChar;
+  while    (FLook <> QuoteChar)
+       and not CharInSet(FLook, [CHAR_13, CHAR_10, CHAR_EOF]) do
+  begin
+    Lexeme := Lexeme + FLook;
+    FLook := GetChar;
+  end;
 
+  if CharInSet(FLook, [CHAR_13, CHAR_10, CHAR_EOF]) then
+    Errors.Append(FLine, FCol, 'Lexer error: String exceeds line.');
+
+  FLook := getChar;   // consume quote
+  Value := Lexeme;
+  Lexeme := QuoteChar + Lexeme + QuoteChar;  // including the quotes
+  Token := TToken.Create(ttString, Lexeme, Value, Line, Col);
+  Tokens.Add(Token);
 end;
 
 function TLexer.GetChar: Char;
@@ -160,8 +178,10 @@ begin
   if FLook <> CHAR_EOF then
   begin
     Result := FReader.NextChar;
-    Inc(FCol);
-    if Result = CHAR_13 then
+    if not CharInSet(FLook, [CHAR_13, CHAR_10]) then
+      Inc(FCol);
+
+    if Result = CHAR_10 then
     begin
       Inc(FLine);
       FCol := 0;
@@ -300,8 +320,8 @@ begin
     '?': AddToken(ttQuestion);
     '0'..'9': DoNumber(Line, Col);
     '_', 'A'..'Z', 'a'..'z': DoKeywordOrIdentifier(Line, Col);
-    Quote1: DoString(Line, Col);
-    Quote2: DoChar(Line, Col);
+    Quote1: DoString(Quote1, Line, Col);
+    Quote2: DoString(Quote2, Line, Col);
     CHAR_EOF: FEndOfFile := True;
     else
       FEndOfFile := True;
@@ -323,9 +343,9 @@ begin
   repeat
     repeat
       FLook := GetChar;
-    until FLook in ['*', CHAR_EOF];
+    until CharInSet(FLook, ['*', CHAR_EOF]);
     FLook := GetChar;
-  until FLook in ['/', CHAR_EOF];
+  until CharInSet(FLook, ['/', CHAR_EOF]);
   FLook := GetChar;
 end;
 
@@ -333,14 +353,14 @@ procedure TLexer.SingleLineComment;
 begin
   repeat
     FLook := GetChar;
-  until FLook in [CHAR_13, CHAR_10, CHAR_EOF];
+  until CharInSet(FLook, [CHAR_13, CHAR_10, CHAR_EOF]);
 
   FLook := GetChar;
 end;
 
 procedure TLexer.SkipWhiteSpace;
 begin
-  while FLook in WhiteSpace do
+  while CharInSet(FLook, WhiteSpace) do
     FLook := GetChar;
 end;
 
