@@ -288,10 +288,10 @@ begin
            AddToken(ttEQ);
 
     '<': case FReader.PeekChar of
-           '<': begin
-                  Flook := GetChar;
-                  AddToken(ttShl);
-                end;
+//           '<': begin
+//                  Flook := GetChar;
+//                  AddToken(ttShl);
+//                end;
            '=': begin
                   Flook := GetChar;
                   AddToken(ttLE);
@@ -305,10 +305,10 @@ begin
          end;
 
     '>': case FReader.PeekChar of
-           '>': begin
-                  Flook := GetChar;
-                  AddToken(ttShr);
-                end;
+//           '>': begin
+//                  Flook := GetChar;
+//                  AddToken(ttShr);
+//                end;
            '=': begin
                   Flook := GetChar;
                   AddToken(ttGE);

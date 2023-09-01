@@ -10,7 +10,7 @@ type
     ttPlus, ttMinus, ttMul, ttDiv, ttRemainder,
     ttPlusIs, ttMinusIs, ttMulIs, ttDivIs, ttRemainderIs,
     ttOr, ttAnd, ttNot, ttXor,
-    ttShl, ttShr, ttPow,
+    {ttShl, ttShr,} ttPow,
     ttEQ, ttNEQ, ttGT, ttGE, ttLT, ttLE,
 
     //Keywords declarations
@@ -119,8 +119,8 @@ begin
     ttAnd:         Result := '&';
     ttNot:         Result := '!';
     ttXor:         Result := '~';
-    ttShl:         Result := '<<';
-    ttShr:         Result := '>>';
+//    ttShl:         Result := '<<';
+//    ttShr:         Result := '>>';
     ttPow:         Result := '^';
     ttEQ:          Result := '=';
     ttNEQ:         Result := '<>';

@@ -10,7 +10,8 @@ uses
   TokenUnit in 'TokenUnit.pas',
   LexerUnit in 'LexerUnit.pas',
   ErrorUnit in 'ErrorUnit.pas',
-  AstUnit in 'AstUnit.pas';
+  AstUnit in 'AstUnit.pas',
+  ParserUnit in 'ParserUnit.pas';
 
 var
   Input: string;
