@@ -2,7 +2,7 @@ unit AstUnit;
 
 interface
 uses
-  System.Classes, System.SysUtils, TokenUnit;
+  System.Classes, System.SysUtils, TokenUnit, Variants;
 
 type
   TNode = class
@@ -68,7 +68,7 @@ implementation
 
 constructor TNode.Create(AToken: TToken);
 begin
-  FToken :=AToken;
+  FToken := AToken;
 end;
 
 { TBinaryExpr }
@@ -78,7 +78,8 @@ begin
   inherited Create(AOp);
   FLeft := ALeft;
   FOp := AOp;
-  ARight := ARight;
+  FRight := ARight;
+  Writeln('TBinaryExpr.Create ', AOp.ToString);
 end;
 
 destructor TBinaryExpr.Destroy;
@@ -99,6 +100,7 @@ begin
   inherited Create(AOp);
   FOp := AOp;
   FExpr := AExpr;
+  WriteLn('TUnaryExpression.Create ', AOp.ToString);
 end;
 
 destructor TUnaryExpression.Destroy;
@@ -115,6 +117,7 @@ constructor TConstExpr.Create(Constant: Variant; AToken: TToken);
 begin
   inherited Create(AToken);
   FValue := Constant;
+  Writeln('TConstExpr.Create ', VarToStr(Constant));
 end;
 
 { TProduct }

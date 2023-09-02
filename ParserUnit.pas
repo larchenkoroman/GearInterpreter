@@ -139,7 +139,38 @@ end;
 
 function TParser.ParseFactor: TExpr;
 begin
+  case CurrentToken.TokenType of
+    ttFalse, ttTrue:
+    begin
+      Result := TConstExpr.Create(CurrentToken.TokenType = ttTrue, CurrentToken);
+      Next;
+    end;
 
+    ttNull:
+    begin
+      Result := TConstExpr.Create(Null, CurrentToken);
+      Next;
+    end;
+
+    ttNumber, ttString:
+    begin
+      Result := TConstExpr.Create(CurrentToken.Value, CurrentToken);
+      Next;
+    end;
+
+    ttOpenParen:
+    begin
+      Next; //Skip '('
+      Result := ParseExpr;
+      Expect(ttCloseParen);
+    end;
+
+    else
+    begin
+      Result := TExpr.Create(CurrentToken);
+      Error(CurrentToken, 'Unexpected token: ' + CurrentToken.ToString + '.');
+    end;
+  end;
 end;
 
 function TParser.ParseMulExpr: TExpr;
@@ -157,7 +188,7 @@ end;
 
 function TParser.ParseProduct: TProduct;
 begin
-
+  Result := TProduct.Create(ParseExpr, CurrentToken);
 end;
 
 function TParser.ParseUnaryExpr: TExpr;

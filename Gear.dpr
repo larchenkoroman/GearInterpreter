@@ -17,23 +17,23 @@ var
   Input: string;
   Reader: TReader;
   Lexer: TLexer;
+  Parser: TParser;
 begin
-  Input := 'StrVar = "df for" or RRR = 10.58';
+  Input := '5 + (5 - 1) * 6';
   Writeln('Input:');
   Writeln(Input);
   Writeln;
   Reader := TReader.Create(Input, itPrompt);
   Lexer := TLexer.Create(Reader);
+  Parser := TParser.Create(Lexer);
   try
-    for var tok in Lexer.Tokens do
-      Writeln(tok.ToString);
+    Parser.Parse;
 
-    if not Errors.IsEmpty then
-      Writeln(Errors.ToString);
-
+    Writeln('done.');
     Readln;
   finally
     FreeAndNil(Reader);
     FreeAndNil(Lexer);
+    FreeAndNil(Parser);
   end;
 end.
