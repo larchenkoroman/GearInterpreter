@@ -199,7 +199,7 @@ begin
   begin
     Op := CurrentToken;
     Next;
-    Result := TUnaryExpression.Create(Op, ParseUnaryExpr);
+    Result := TUnaryExpr.Create(Op, ParseUnaryExpr);
   end
   else
     Result := ParseFactor;

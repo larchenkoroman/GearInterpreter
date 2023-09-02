@@ -33,7 +33,7 @@ type
       destructor Destroy; override;
   end;
 
-  TUnaryExpression = class(TFactorExpr)
+  TUnaryExpr = class(TFactorExpr)
     private
       FOp: TToken;
       FExpr: TExpr;
@@ -79,7 +79,7 @@ begin
   FLeft := ALeft;
   FOp := AOp;
   FRight := ARight;
-  Writeln('TBinaryExpr.Create ', AOp.ToString);
+//  Writeln('TBinaryExpr.Create ', AOp.ToString);
 end;
 
 destructor TBinaryExpr.Destroy;
@@ -95,15 +95,15 @@ end;
 
 { TUnaryExpression }
 
-constructor TUnaryExpression.Create(AOp: TToken; AExpr: TExpr);
+constructor TUnaryExpr.Create(AOp: TToken; AExpr: TExpr);
 begin
   inherited Create(AOp);
   FOp := AOp;
   FExpr := AExpr;
-  WriteLn('TUnaryExpression.Create ', AOp.ToString);
+//  WriteLn('TUnaryExpression.Create ', AOp.ToString);
 end;
 
-destructor TUnaryExpression.Destroy;
+destructor TUnaryExpr.Destroy;
 begin
   if Assigned(FExpr) then
     FreeAndNil(FExpr);
@@ -117,7 +117,7 @@ constructor TConstExpr.Create(Constant: Variant; AToken: TToken);
 begin
   inherited Create(AToken);
   FValue := Constant;
-  Writeln('TConstExpr.Create ', VarToStr(Constant));
+//  Writeln('TConstExpr.Create ', VarToStr(Constant));
 end;
 
 { TProduct }

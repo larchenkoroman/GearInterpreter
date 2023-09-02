@@ -2,7 +2,7 @@ unit TokenUnit;
 
 interface
 uses
-  System.Classes, System.SysUtils, System.Generics.Collections, System.Variants, RTTI;
+  System.Classes, System.SysUtils, System.Generics.Collections, System.Variants, System.Rtti;
 
 type
   TTokenType = (

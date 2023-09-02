@@ -11,15 +11,19 @@ uses
   LexerUnit in 'LexerUnit.pas',
   ErrorUnit in 'ErrorUnit.pas',
   AstUnit in 'AstUnit.pas',
-  ParserUnit in 'ParserUnit.pas';
+  ParserUnit in 'ParserUnit.pas',
+  VisitorUnit in 'VisitorUnit.pas',
+  PrinterUnit in 'PrinterUnit.pas';
 
 var
   Input: string;
   Reader: TReader;
   Lexer: TLexer;
   Parser: TParser;
+  Printer: TPrinter;
+  Product: TProduct;
 begin
-  Input := '5 + (5 - 1) * 6';
+  Input := '5 + (5-1) * 6';
   Writeln('Input:');
   Writeln(Input);
   Writeln;
@@ -27,7 +31,9 @@ begin
   Lexer := TLexer.Create(Reader);
   Parser := TParser.Create(Lexer);
   try
-    Parser.Parse;
+    Product := Parser.Parse;
+    Printer := TPrinter.Create(Product);
+    Printer.Print;
 
     Writeln('done.');
     Readln;
@@ -35,5 +41,6 @@ begin
     FreeAndNil(Reader);
     FreeAndNil(Lexer);
     FreeAndNil(Parser);
+    FreeAndNil(Printer);
   end;
 end.

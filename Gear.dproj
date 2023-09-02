@@ -95,6 +95,8 @@
         <DCCReference Include="ErrorUnit.pas"/>
         <DCCReference Include="AstUnit.pas"/>
         <DCCReference Include="ParserUnit.pas"/>
+        <DCCReference Include="VisitorUnit.pas"/>
+        <DCCReference Include="PrinterUnit.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
