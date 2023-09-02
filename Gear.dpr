@@ -18,7 +18,7 @@ var
   Reader: TReader;
   Lexer: TLexer;
 begin
-  Input := 'StrVar = "df for" RRR = 10.58';
+  Input := 'StrVar = "df for" or RRR = 10.58';
   Writeln('Input:');
   Writeln(Input);
   Writeln;

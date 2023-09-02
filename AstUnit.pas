@@ -29,7 +29,7 @@ type
       property Left: TExpr read FLeft;
       property Right: TExpr read FRight;
       property Op: TToken read FOp;
-      constructor Create(ALeft, ARight: TExpr; AOp: TToken);
+      constructor Create(ALeft: TExpr; AOp: TToken; ARight: TExpr);
       destructor Destroy; override;
   end;
 
@@ -73,7 +73,7 @@ end;
 
 { TBinaryExpr }
 
-constructor TBinaryExpr.Create(ALeft, ARight: TExpr; AOp: TToken);
+constructor TBinaryExpr.Create(ALeft: TExpr; AOp: TToken; ARight: TExpr);
 begin
   inherited Create(AOp);
   FLeft := ALeft;

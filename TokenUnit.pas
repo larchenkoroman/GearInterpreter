@@ -115,7 +115,7 @@ begin
     ttMulIs:       Result := '*=';
     ttDivIs:       Result := '/=';
     ttRemainderIs: Result := '%=';
-    ttOr:          Result := '|';
+//    ttOr:          Result := '|';
     ttAnd:         Result := '&';
     ttNot:         Result := '!';
     ttXor:         Result := '~';
@@ -204,6 +204,7 @@ initialization
   Keywords.Add('var', ttVar);
   Keywords.Add('where', ttWhere);
   Keywords.Add('while', ttWhile);
+  Keywords.Add('or', ttOr);
 
 finalization
   FreeAndNil(Keywords);
