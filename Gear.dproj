@@ -99,6 +99,7 @@
         <DCCReference Include="PrinterUnit.pas"/>
         <DCCReference Include="InterpreterUnit.pas"/>
         <DCCReference Include="EvalMathUnit.pas"/>
+        <DCCReference Include="LanguageUnit.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

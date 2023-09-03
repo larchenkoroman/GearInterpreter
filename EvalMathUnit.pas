@@ -29,9 +29,9 @@ type
 // boolean checks
     class function areBothNumber(const Value1, Value2: Variant): Boolean; static;
     class function areBothString(const Value1, Value2: Variant): Boolean; static;
-    class function areBothBoolean(const Value1, Value2: Variant): Boolean; static;
-    class function oneOfBothBoolean(const Value1, Value2: Variant): Boolean; static;
-    class function oneOfBothNull(const Value1, Value2: Variant): Boolean; static;
+//    class function areBothBoolean(const Value1, Value2: Variant): Boolean; static;
+//    class function oneOfBothBoolean(const Value1, Value2: Variant): Boolean; static;
+//    class function oneOfBothNull(const Value1, Value2: Variant): Boolean; static;
 
   End;
 
@@ -39,11 +39,11 @@ implementation
 
 { TMath }
 
-class function TMath.areBothBoolean(const Value1,
-  Value2: Variant): Boolean;
-begin
-
-end;
+//class function TMath.areBothBoolean(const Value1,
+//  Value2: Variant): Boolean;
+//begin
+//
+//end;
 
 class function TMath.areBothNumber(const Value1, Value2: Variant): Boolean;
 begin
@@ -55,16 +55,16 @@ begin
 
 end;
 
-class function TMath.oneOfBothBoolean(const Value1,
-  Value2: Variant): Boolean;
-begin
-
-end;
-
-class function TMath.oneOfBothNull(const Value1, Value2: Variant): Boolean;
-begin
-
-end;
+//class function TMath.oneOfBothBoolean(const Value1,
+//  Value2: Variant): Boolean;
+//begin
+//
+//end;
+//
+//class function TMath.oneOfBothNull(const Value1, Value2: Variant): Boolean;
+//begin
+//
+//end;
 
 class function TMath._Add(const Left, Right: Variant; Op: TToken): Variant;
 begin
@@ -102,7 +102,8 @@ end;
 class function TMath._Sub(const Left, Right: Variant; Op: TToken): Variant;
 begin
   if areBothNumber(Left, Right) then
-      Exit(Left - Right);  Raise ERuntimeError.Create(Op, Format(ErrMustBeBothNumber, ['-']));
+      Exit(Left - Right);
+  Raise ERuntimeError.Create(Op, Format(ErrMustBeBothNumber, ['-']));
 end;
 
 end.

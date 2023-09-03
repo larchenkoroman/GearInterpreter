@@ -15,8 +15,8 @@ uses
   VisitorUnit in 'VisitorUnit.pas',
   PrinterUnit in 'PrinterUnit.pas',
   InterpreterUnit in 'InterpreterUnit.pas',
-  EvalMathUnit in 'EvalMathUnit.pas';
-
+  EvalMathUnit in 'EvalMathUnit.pas',
+  LanguageUnit in 'LanguageUnit.pas';
 
 var
   Input: string;
