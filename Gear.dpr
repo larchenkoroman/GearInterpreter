@@ -27,7 +27,7 @@ var
   Product: TProduct;
   Interpreter: TInterpreter;
 begin
-  Input := '5 + (5-1) * 6';
+  Input := '2 * 2';
   Writeln('Input:');
   Writeln(Input);
   Writeln;
