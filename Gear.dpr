@@ -16,45 +16,11 @@ uses
   PrinterUnit in 'PrinterUnit.pas',
   InterpreterUnit in 'InterpreterUnit.pas',
   EvalMathUnit in 'EvalMathUnit.pas',
-  LanguageUnit in 'LanguageUnit.pas';
+  LanguageUnit in 'LanguageUnit.pas',
+  ProgrammUnit in 'ProgrammUnit.pas';
 
-var
-  Input: string;
-  Reader: TReader;
-  Lexer: TLexer;
-  Parser: TParser;
-  Printer: TPrinter;
-  Product: TProduct;
-  Interpreter: TInterpreter;
 begin
-  Input := '2 * 2';
-  Writeln('Input:');
-  Writeln(Input);
-  Writeln;
-  Reader := TReader.Create(Input, itPrompt);
-  Lexer := TLexer.Create(Reader);
-  Parser := TParser.Create(Lexer);
-  Interpreter := TInterpreter.Create;
-  try
-    Product := Parser.Parse;
-    Printer := TPrinter.Create(Product);
 
-    Writeln('AST:');
-    Printer.Print;
+  ProgrammUnit.DoRun;
 
-    Writeln('Result:');
-    Interpreter.Execute(Product);
-
-    if Errors.Count >= 0 then
-      for var e in Errors do
-        Writeln(e.ToString);
-
-    Readln;
-  finally
-    FreeAndNil(Reader);
-    FreeAndNil(Lexer);
-    FreeAndNil(Parser);
-    FreeAndNil(Printer);
-    FreeAndNil(Interpreter);
-  end;
 end.

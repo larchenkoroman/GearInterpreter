@@ -33,7 +33,6 @@ type
       function ParseProduct: TProduct;
     public
       constructor Create(ALexer: TLexer);
-      destructor Destroy; override;
       function Parse: TProduct;
   end;
 
@@ -50,14 +49,6 @@ end;
 function TParser.CurrentToken: TToken;
 begin
   Result := FTokens[FCurrent];
-end;
-
-destructor TParser.Destroy;
-begin
-  if Assigned(FTokens) then
-    FreeAndNil(FTokens);
-
-  inherited;
 end;
 
 procedure TParser.Error(AToken: TToken; AMsg: string);
