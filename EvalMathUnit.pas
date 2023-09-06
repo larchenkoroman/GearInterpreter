@@ -68,9 +68,21 @@ begin
 end;
 
 class function TMath._Mul(const Left, Right: Variant; Op: TToken): Variant;
+var
+  str: string;
+  N: Integer;
 begin
   Result := Null;
-  if AreBothNumber(Left, Right) then
+  if     VarIsStr(Left)
+     and VarIsNumeric(Right) then
+  begin
+    str := VarToStr(Left);
+    N := Right;
+    Result := '';
+    for var i := 1 to N do //умножение строк как в питоне
+      Result := Result + str;
+  end
+  else if AreBothNumber(Left, Right) then
     Result := Left * Right
   else
     Raise ERuntimeError.Create(Op, Format(ErrMustBeBothNumber, ['*']));
