@@ -73,7 +73,7 @@ end;
 
 function TParser.IsAddOp: Boolean;
 begin
-  Result := CurrentToken.TokenType in [ttPlus, ttMinus];
+  Result := CurrentToken.TokenType in [ttPlus, ttMinus, ttOr];
 end;
 
 //function TParser.IsLastToken: Boolean;
@@ -207,7 +207,7 @@ function TParser.ParseUnaryExpr: TExpr;
 var
   Op: TToken;
 begin
-  if CurrentToken.TokenType in [ttPlus, ttMinus] then
+  if CurrentToken.TokenType in [ttPlus, ttMinus, ttNot] then
   begin
     Op := CurrentToken;
     Next;

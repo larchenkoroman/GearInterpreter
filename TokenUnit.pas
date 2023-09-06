@@ -116,8 +116,8 @@ begin
     ttDivIs:       Result := '/=';
     ttRemainderIs: Result := '%=';
 //    ttOr:          Result := '|';
-    ttAnd:         Result := '&';
-    ttNot:         Result := '!';
+//    ttAnd:         Result := '&';
+//    ttNot:         Result := '!';
     ttXor:         Result := '~';
 //    ttShl:         Result := '<<';
 //    ttShr:         Result := '>>';
@@ -164,9 +164,9 @@ initialization
   Keywords := TKeywords.Create(100);
 
  // the constant values
-  Keywords.Add('False', ttFalse);
-  Keywords.Add('Null', ttNull);
-  Keywords.Add('True', ttTrue);
+  Keywords.Add('false', ttFalse);
+  Keywords.Add('null', ttNull);
+  Keywords.Add('true', ttTrue);
 
   // the keywords
   Keywords.Add('array', ttArray);
@@ -205,6 +205,8 @@ initialization
   Keywords.Add('where', ttWhere);
   Keywords.Add('while', ttWhile);
   Keywords.Add('or', ttOr);
+  Keywords.Add('and', ttAnd);
+  Keywords.Add('not', ttNot);
 
 finalization
   FreeAndNil(Keywords);

@@ -91,7 +91,7 @@ begin
   end;
 
   //Match the keyword and return its type, otherwise it's an identifier
-  if not Keywords.TryGetValue(Lexeme, TokenType) then
+  if not Keywords.TryGetValue(Lexeme.ToLower, TokenType) then
     TokenType := TTokenType.ttIdentifier;
 
   Token := TToken.Create(TokenType, Lexeme, Null, Line, Col);

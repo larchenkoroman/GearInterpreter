@@ -27,8 +27,14 @@ type
       class function _Rem(const Left, Right: Variant; Op: TToken): Variant; static;
       class function _Neg(const Value: Variant; Op: TToken): Variant; static;
       class function _Pow(const Left, Right: Variant; Op: TToken): Variant; static;
+      class function _Or(const Left, Right: Variant; Op: TToken): Variant; static;
+//      class function _And(const Left, Right: Variant; Op: TToken): Variant; static;
+//      class function _XOr(const Left, Right: Variant; Op: TToken): Variant; static;
+      class function _Not(const Value: Variant; Op: TToken): Variant; static;
+
 // boolean checks
     class function AreBothNumber(const Value1, Value2: Variant): Boolean; static;
+    class function AreBothBoolean(const Value1, Value2: Variant): Boolean; static;
 
   End;
 
@@ -36,6 +42,12 @@ implementation
 
 { TMath }
 
+
+class function TMath.AreBothBoolean(const Value1, Value2: Variant): Boolean;
+begin
+  Result :=    (VarType(Value1) = varBoolean)
+            and (VarType(Value2) = varBoolean);
+end;
 
 class function TMath.AreBothNumber(const Value1, Value2: Variant): Boolean;
 begin
@@ -95,6 +107,27 @@ begin
     Result := -Value
   else
     Raise ERuntimeError.Create(Op, Format(ErrMustBeNumber, ['-']));
+end;
+
+class function TMath._Not(const Value: Variant; Op: TToken): Variant;
+begin
+ if VarType(Value) = varBoolean then
+    Result := not Value
+  else
+    Raise ERuntimeError.Create(Op, Format(ErrMustBeBoolean, ['Not']));
+end;
+
+class function TMath._Or(const Left, Right: Variant; Op: TToken): Variant;
+begin
+  if AreBothBoolean(Left, Right) then
+  begin
+    if Left then
+      Result := Left
+    else
+      Result := Right;
+  end
+  else
+    Raise ERuntimeError.Create(Op, ErrMustBeBothBoolean);
 end;
 
 class function TMath._Pow(const Left, Right: Variant; Op: TToken): Variant;

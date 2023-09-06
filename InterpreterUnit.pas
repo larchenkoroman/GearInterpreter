@@ -53,11 +53,8 @@ begin
     ttMul:       Result := TMath._Mul(Left, Right, Op);
     ttDiv:       Result := TMath._Div(Left, Right, Op);
     ttRemainder: Result := TMath._Rem(Left, Right, Op);
-//    ttOr:   Result := TMath._Or(Left, Right, Op);
+    ttOr:   Result := TMath._Or(Left, Right, Op);
 //    ttAnd:  Result := TMath._And(Left, Right, Op);
-//    ttXor:  Result := TMath._Xor(Left, Right, Op);
-//    ttShl:  Result := TMath._Shl(Left, Right, Op);
-//    ttShr:  Result := TMath._Shr(Left, Right, Op);
     ttPow:  Result := TMath._Pow(Left, Right, Op);
 //    ttEQ:   Result := TMath._EQ(Left, Right, Op);
 //    ttNEQ:  Result := TMath._NEQ(Left, Right, Op);
@@ -84,7 +81,7 @@ var
 begin
   Expr := VisitFunc(AUnaryExpr.Expr);
   case AUnaryExpr.Op.TokenType of
-//    ttNot: Result := TMath._Not(Expr, UnaryExpr.Op);
+    ttNot:   Result := TMath._Not(Expr, AUnaryExpr.Op);
     ttMinus: Result := TMath._Neg(Expr, AUnaryExpr.Op);
     else Result := Expr;
   end;
