@@ -22,7 +22,7 @@ type
 
 function TVisitor.VisitFunc(Node: TObject): Variant;
 var
-  VisitName: ShortString;
+  VisitName: string;
   VisitMethod: TMethod;
   DoVisit: TVisitFunc;
   SelfName: string;
@@ -43,7 +43,7 @@ end;
 
 procedure TVisitor.VisitProc(Node: TObject);
 var
-  VisitName: shortstring;
+  VisitName: string;
   VisitMethod: TMethod;
   doVisit: TVisitProc;
   SelfName: string ;
