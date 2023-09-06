@@ -5,6 +5,7 @@ interface
 uses
   System.Classes, System.SysUtils, System.Rtti;
 
+{$M+}
 type
   TVisitor = class
     published

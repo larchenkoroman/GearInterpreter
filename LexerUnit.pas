@@ -2,7 +2,7 @@ unit LexerUnit;
 
 interface
 uses
-  System.Classes, System.SysUtils, ReaderUnit, TokenUnit, ErrorUnit, Variants;
+  System.Classes, System.SysUtils, ReaderUnit, TokenUnit, Variants;
 
 const
   Space    = #32;
@@ -162,8 +162,6 @@ begin
     FLook := GetChar;
   end;
 
-  if CharInSet(FLook, [CHAR_13, CHAR_10, CHAR_EOF]) then
-    Errors.Append(FLine, FCol, 'Lexer error: String exceeds line.');
 
   FLook := getChar;   // consume quote
   Value := Lexeme;
