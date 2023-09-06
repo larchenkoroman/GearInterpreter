@@ -12,12 +12,12 @@ type
       FCurrent: Integer;
 
       function CurrentToken: TToken;
-      function Peek: TToken;
-      function IsLastToken: Boolean;
+//      function Peek: TToken;
+//      function IsLastToken: Boolean;
       procedure Error(AToken: TToken; AMsg: string);
       procedure Expect(const ATokenType:TTokenType);
       procedure Next;
-      procedure Synchronize(ATypes: TTokenTypeSet);
+//      procedure Synchronize(ATypes: TTokenTypeSet);
       //Expressions
       function ParseExpr: TExpr;
       function IsRelOp: Boolean;
@@ -25,6 +25,11 @@ type
       function IsAddOp: Boolean;
       function ParseMulExpr: TExpr;
       function IsMulOp: Boolean;
+
+      function ParsePowExpr: TExpr;
+      function IsPowOp: Boolean;
+
+
       function ParseUnaryExpr: TExpr;
       function ParseFactor: TExpr;
       //Statements
@@ -71,14 +76,19 @@ begin
   Result := CurrentToken.TokenType in [ttPlus, ttMinus];
 end;
 
-function TParser.IsLastToken: Boolean;
-begin
-  Result := FCurrent = FTokens.Count - 1;
-end;
+//function TParser.IsLastToken: Boolean;
+//begin
+//  Result := FCurrent = FTokens.Count - 1;
+//end;
 
 function TParser.IsMulOp: Boolean;
 begin
   Result := CurrentToken.TokenType in [ttMul, ttDiv, ttPow, ttRemainder];
+end;
+
+function TParser.IsPowOp: Boolean;
+begin
+  Result := CurrentToken.TokenType = ttPow;
 end;
 
 function TParser.IsRelOp: Boolean;
@@ -168,15 +178,26 @@ function TParser.ParseMulExpr: TExpr;
 var
   MulOp: TToken;
 begin
-  Result := ParseUnaryExpr;
+  Result := ParsePowExpr;
   while IsMulOp do
   begin
     MulOp := CurrentToken;
     Next;
-    Result := TBinaryExpr.Create(Result, MulOp, ParseUnaryExpr);  
+    Result := TBinaryExpr.Create(Result, MulOp, ParsePowExpr);
   end;
 end;
 
+function TParser.ParsePowExpr: TExpr;
+var
+  PowOp: TToken;
+begin
+  Result := ParseUnaryExpr;
+  while isPowOp do begin
+    PowOp := CurrentToken;
+    Next;
+    Result := TBinaryExpr.Create(Result, PowOp, ParseUnaryExpr);
+  end;
+end;
 function TParser.ParseProduct: TProduct;
 begin
   Result := TProduct.Create(ParseExpr, CurrentToken);
@@ -196,17 +217,17 @@ begin
     Result := ParseFactor;
 end;
 
-function TParser.Peek: TToken;
-begin
-  Result := nil;
-  if not IsLastToken then
-    Result := FTokens[FCurrent + 1]
-end;
+//function TParser.Peek: TToken;
+//begin
+//  Result := nil;
+//  if not IsLastToken then
+//    Result := FTokens[FCurrent + 1]
+//end;
 
-procedure TParser.Synchronize(ATypes: TTokenTypeSet);
-begin
-  while not (CurrentToken.TokenType in ATypes) do
-    Next;
-end;
+//procedure TParser.Synchronize(ATypes: TTokenTypeSet);
+//begin
+//  while not (CurrentToken.TokenType in ATypes) do
+//    Next;
+//end;
 
 end.
