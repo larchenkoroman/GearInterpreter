@@ -29,7 +29,7 @@ type
       class function _Pow(const Left, Right: Variant; Op: TToken): Variant; static;
       class function _Or(const Left, Right: Variant; Op: TToken): Variant; static;
       class function _And(const Left, Right: Variant; Op: TToken): Variant; static;
-//      class function _XOr(const Left, Right: Variant; Op: TToken): Variant; static;
+      class function _XOr(const Left, Right: Variant; Op: TToken): Variant; static;
       class function _Not(const Value: Variant; Op: TToken): Variant; static;
 
 // boolean checks
@@ -171,6 +171,15 @@ begin
     Result := Left - Right
   else
     Raise ERuntimeError.Create(Op, Format(ErrMustBeBothNumber, ['-']));
+end;
+
+class function TMath._XOr(const Left, Right: Variant; Op: TToken): Variant;
+begin
+  Result := Null;
+  if areBothBoolean(Left, Right) then
+     Result := Left xor Right
+   else
+     Raise ERuntimeError.Create(Op, ErrMustBeBothBoolean);
 end;
 
 end.

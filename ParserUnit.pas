@@ -73,7 +73,7 @@ end;
 
 function TParser.IsAddOp: Boolean;
 begin
-  Result := CurrentToken.TokenType in [ttPlus, ttMinus, ttOr];
+  Result := CurrentToken.TokenType in [ttPlus, ttMinus, ttOr, ttXor];
 end;
 
 //function TParser.IsLastToken: Boolean;

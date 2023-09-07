@@ -256,8 +256,6 @@ begin
          else
            AddToken(ttColon);
 
-    '&': AddToken(ttAnd);
-    '|': AddToken(ttOr);
     '~': AddToken(ttXor);
     '!': AddToken(ttNot);
     '^': AddToken(ttPow);
@@ -286,10 +284,6 @@ begin
            AddToken(ttEQ);
 
     '<': case FReader.PeekChar of
-//           '<': begin
-//                  Flook := GetChar;
-//                  AddToken(ttShl);
-//                end;
            '=': begin
                   Flook := GetChar;
                   AddToken(ttLE);
@@ -302,18 +296,13 @@ begin
              AddToken(ttLT);
          end;
 
-    '>': case FReader.PeekChar of
-//           '>': begin
-//                  Flook := GetChar;
-//                  AddToken(ttShr);
-//                end;
-           '=': begin
-                  Flook := GetChar;
-                  AddToken(ttGE);
-                end;
-           else
-             AddToken(ttGT);
-         end;
+    '>': if FReader.PeekChar = '=' then
+         begin
+           Flook := GetChar;
+           AddToken(ttGE);
+         end
+         else
+           AddToken(ttGT);
 
     '?': AddToken(ttQuestion);
     '0'..'9': DoNumber(Line, Col);

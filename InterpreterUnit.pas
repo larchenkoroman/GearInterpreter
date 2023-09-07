@@ -53,9 +53,10 @@ begin
     ttMul:       Result := TMath._Mul(Left, Right, Op);
     ttDiv:       Result := TMath._Div(Left, Right, Op);
     ttRemainder: Result := TMath._Rem(Left, Right, Op);
-    ttOr:   Result := TMath._Or(Left, Right, Op);
-    ttAnd:  Result := TMath._And(Left, Right, Op);
-    ttPow:  Result := TMath._Pow(Left, Right, Op);
+    ttOr:        Result := TMath._Or(Left, Right, Op);
+    ttAnd:       Result := TMath._And(Left, Right, Op);
+    ttXor:       Result := TMath._XOr(Left, Right, Op);
+    ttPow:       Result := TMath._Pow(Left, Right, Op);
 //    ttEQ:   Result := TMath._EQ(Left, Right, Op);
 //    ttNEQ:  Result := TMath._NEQ(Left, Right, Op);
 //    ttGT:   Result := TMath._GT(Left, Right, Op);

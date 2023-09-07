@@ -115,7 +115,6 @@ begin
     ttMulIs:       Result := '*=';
     ttDivIs:       Result := '/=';
     ttRemainderIs: Result := '%=';
-    ttXor:         Result := '~';
     ttPow:         Result := '^';
     ttEQ:          Result := '=';
     ttNEQ:         Result := '<>';
@@ -202,6 +201,7 @@ initialization
   Keywords.Add('or', ttOr);
   Keywords.Add('and', ttAnd);
   Keywords.Add('not', ttNot);
+  Keywords.Add('xor', ttXor);
 
 finalization
   FreeAndNil(Keywords);
