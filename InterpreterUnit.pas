@@ -57,12 +57,12 @@ begin
     ttAnd:       Result := TMath._And(Left, Right, Op);
     ttXor:       Result := TMath._XOr(Left, Right, Op);
     ttPow:       Result := TMath._Pow(Left, Right, Op);
-//    ttEQ:   Result := TMath._EQ(Left, Right, Op);
-//    ttNEQ:  Result := TMath._NEQ(Left, Right, Op);
-//    ttGT:   Result := TMath._GT(Left, Right, Op);
-//    ttGE:   Result := TMath._GE(Left, Right, Op);
-//    ttLT:   Result := TMath._LT(Left, Right, Op);
-//    ttLE:   Result := TMath._LE(Left, Right, Op);
+    ttEQ:        Result := TMath._EQ(Left, Right, Op);
+    ttNEQ:       Result := TMath._NEQ(Left, Right, Op);
+    ttGT:        Result := TMath._GT(Left, Right, Op);
+    ttGE:        Result := TMath._GE(Left, Right, Op);
+    ttLT:        Result := TMath._LT(Left, Right, Op);
+    ttLE:        Result := TMath._LE(Left, Right, Op);
   end;
 end;
 

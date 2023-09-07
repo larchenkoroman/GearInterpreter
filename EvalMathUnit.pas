@@ -27,15 +27,24 @@ type
       class function _Rem(const Left, Right: Variant; Op: TToken): Variant; static;
       class function _Neg(const Value: Variant; Op: TToken): Variant; static;
       class function _Pow(const Left, Right: Variant; Op: TToken): Variant; static;
+
       class function _Or(const Left, Right: Variant; Op: TToken): Variant; static;
       class function _And(const Left, Right: Variant; Op: TToken): Variant; static;
       class function _XOr(const Left, Right: Variant; Op: TToken): Variant; static;
       class function _Not(const Value: Variant; Op: TToken): Variant; static;
+      class function _EQ(const Left, Right: Variant; Op: TToken): Variant; static;
+      class function _NEQ(const Left, Right: Variant; Op: TToken): Variant; static;
+      class function _GT(const Left, Right: Variant; Op: TToken): Variant; static;
+      class function _GE(const Left, Right: Variant; Op: TToken): Variant; static;
+      class function _LT(const Left, Right: Variant; Op: TToken): Variant; static;
+      class function _LE(const Left, Right: Variant; Op: TToken): Variant; static;
 
-// boolean checks
-    class function AreBothNumber(const Value1, Value2: Variant): Boolean; static;
-    class function AreBothBoolean(const Value1, Value2: Variant): Boolean; static;
-
+      // boolean checks
+      class function AreBothNumber(const Value1, Value2: Variant): Boolean; static;
+      class function AreBothBoolean(const Value1, Value2: Variant): Boolean; static;
+      class function AreBothString(const Value1, Value2: Variant): Boolean; static;
+      class function OneOfBothBoolean(const Value1, Value2: Variant): Boolean; static;
+      class function OneOfBothNull(const Value1, Value2: Variant): Boolean; static;
   End;
 
 implementation
@@ -45,7 +54,7 @@ implementation
 
 class function TMath.AreBothBoolean(const Value1, Value2: Variant): Boolean;
 begin
-  Result :=    (VarType(Value1) = varBoolean)
+  Result :=     (VarType(Value1) = varBoolean)
             and (VarType(Value2) = varBoolean);
 end;
 
@@ -54,10 +63,28 @@ begin
   Result := VarIsNumeric(Value1) and VarIsNumeric(Value2);
 end;
 
+class function TMath.AreBothString(const Value1, Value2: Variant): Boolean;
+begin
+  Result := VarIsStr(Value1) and VarIsStr(Value2);
+end;
+
+class function TMath.OneOfBothBoolean(const Value1, Value2: Variant): Boolean;
+begin
+  Result :=    (VarType(Value1) = varBoolean)
+            or (VarType(Value2) = varBoolean);
+end;
+
+class function TMath.OneOfBothNull(const Value1, Value2: Variant): Boolean;
+begin
+  Result := VarIsNull(Value1) or VarIsNull(Value2);
+end;
+
 class function TMath._Add(const Left, Right: Variant; Op: TToken): Variant;
 begin
   Result := Null;
-  if VarIsStr(Left) then
+  if OneOfBothNull(Left, Right) then
+    Result := Null
+  else if VarIsStr(Left) then
     Result := VarToStr(Left) + VarToStr(Right)
   else if AreBothNumber(Left, Right) then
     Result := Left + Right
@@ -67,7 +94,11 @@ end;
 
 class function TMath._And(const Left, Right: Variant; Op: TToken): Variant;
 begin
-  if areBothBoolean(Left, Right) then begin
+  Result := Null;
+  if OneOfBothNull(Left, Right) then
+    Result := Null
+  else if areBothBoolean(Left, Right) then
+  begin
     if not Left then
       Result := Left
     else
@@ -80,7 +111,9 @@ end;
 class function TMath._Div(const Left, Right: Variant; Op: TToken): Variant;
 begin
   Result := Null;
-  if AreBothNumber(Left, Right) then
+  if OneOfBothNull(Left, Right) then
+    Result := Null
+  else if AreBothNumber(Left, Right) then
   begin
     if Right <> 0 then
       Exit(Left / Right)
@@ -91,14 +124,83 @@ begin
     Raise ERuntimeError.Create(Op, Format(ErrMustBeBothNumber, ['/']));
 end;
 
+class function TMath._EQ(const Left, Right: Variant; Op: TToken): Variant;
+begin
+  Result := Null;
+  if OneOfBothNull(Left, Right) then
+    Result := Null
+  else if    areBothBoolean(Left, Right)
+          or areBothNumber(Left, Right)
+          or AreBothString(Left, Right) then
+  begin
+    Result := Left = Right;
+  end
+  else
+    Raise ERuntimeError.Create(Op, Format(ErrIncompatibleOperands, ['equal']));
+end;
+
+class function TMath._GE(const Left, Right: Variant; Op: TToken): Variant;
+begin
+  Result := Null;
+  if oneOfBothNull(Left, Right) then
+    Result := Null
+  else if areBothNumber(Left, Right) then
+    Result := Left >= Right
+  else if areBothString(Left, Right) then
+     Result := Left >= Right
+  else
+    Raise ERuntimeError.Create(Op, Format(ErrIncompatibleOperands, ['>=']));
+end;
+
+class function TMath._GT(const Left, Right: Variant; Op: TToken): Variant;
+begin
+  Result := Null;
+  if oneOfBothNull(Left, Right) then
+    Result := Null
+  else if areBothNumber(Left, Right) then
+    Result := Left > Right
+  else if areBothString(Left, Right) then
+    Result := Left > Right
+  else
+    Raise ERuntimeError.Create(Op, Format(ErrIncompatibleOperands, ['>']));
+end;
+
+class function TMath._LE(const Left, Right: Variant; Op: TToken): Variant;
+begin
+  Result := Null;
+  if OneOfBothNull(Left, Right) then
+    Result := Null
+  else if areBothNumber(Left, Right) then
+    Result := Left <= Right
+  else if areBothString(Left, Right) then
+    Result := Left <= Right
+  else
+    Raise ERuntimeError.Create(Op, Format(ErrIncompatibleOperands, ['<=']));
+end;
+
+class function TMath._LT(const Left, Right: Variant; Op: TToken): Variant;
+begin
+  Result := Null;
+  if oneOfBothNull(Left, Right) then
+    Result := Null
+  else if areBothNumber(Left, Right) then
+    Result := Left < Right
+  else if areBothString(Left, Right) then
+    Result := Left < Right
+  else
+    Raise ERuntimeError.Create(Op, Format(ErrIncompatibleOperands, ['<']));
+end;
+
 class function TMath._Mul(const Left, Right: Variant; Op: TToken): Variant;
 var
   str: string;
   N: Integer;
 begin
   Result := Null;
-  if     VarIsStr(Left)
-     and VarIsNumeric(Right) then
+  if OneOfBothNull(Left, Right) then
+    Result := Null
+  else if     VarIsStr(Left)
+          and VarIsNumeric(Right) then
   begin
     str := VarToStr(Left);
     N := Right;
@@ -115,15 +217,26 @@ end;
 class function TMath._Neg(const Value: Variant; Op: TToken): Variant;
 begin
   Result := Null;
-  if VarType(Value) = varDouble then
+  Result := Null;
+  if VarIsNull(Value) then
+    Result := Null
+  else if VarType(Value) = varDouble then
     Result := -Value
   else
     Raise ERuntimeError.Create(Op, Format(ErrMustBeNumber, ['-']));
 end;
 
+class function TMath._NEQ(const Left, Right: Variant; Op: TToken): Variant;
+begin
+  Result := not _EQ(Left, Right, Op);
+end;
+
 class function TMath._Not(const Value: Variant; Op: TToken): Variant;
 begin
- if VarType(Value) = varBoolean then
+  Result := Null;
+  if VarIsNull(Value) then
+    Result := Null
+  else if VarType(Value) = varBoolean then
     Result := not Value
   else
     Raise ERuntimeError.Create(Op, Format(ErrMustBeBoolean, ['Not']));
@@ -131,7 +244,10 @@ end;
 
 class function TMath._Or(const Left, Right: Variant; Op: TToken): Variant;
 begin
-  if AreBothBoolean(Left, Right) then
+  Result := Null;
+  if OneOfBothNull(Left, Right) then
+    Result := Null
+  else if AreBothBoolean(Left, Right) then
   begin
     if Left then
       Result := Left
@@ -145,7 +261,9 @@ end;
 class function TMath._Pow(const Left, Right: Variant; Op: TToken): Variant;
 begin
   Result := Null;
-  if AreBothNumber(Left, Right) then
+  if OneOfBothNull(Left, Right) then
+    Result := Null
+  else if AreBothNumber(Left, Right) then
     Result := Power(Left, Right)
   else
     Raise ERuntimeError.Create(Op, Format(ErrMustBeBothNumber, ['^']));
@@ -154,7 +272,9 @@ end;
 class function TMath._Rem(const Left, Right: Variant; Op: TToken): Variant;
 begin
   Result := Null;
-  if AreBothNumber(Left, Right) then
+  if OneOfBothNull(Left, Right) then
+    Result := Null
+  else if AreBothNumber(Left, Right) then
   begin
     if Right <> 0 then
       Exit(Left mod Right)
@@ -167,7 +287,9 @@ end;
 class function TMath._Sub(const Left, Right: Variant; Op: TToken): Variant;
 begin
   Result := Null;
-  if AreBothNumber(Left, Right) then
+  if OneOfBothNull(Left, Right) then
+    Result := Null
+  else if AreBothNumber(Left, Right) then
     Result := Left - Right
   else
     Raise ERuntimeError.Create(Op, Format(ErrMustBeBothNumber, ['-']));
@@ -176,7 +298,9 @@ end;
 class function TMath._XOr(const Left, Right: Variant; Op: TToken): Variant;
 begin
   Result := Null;
-  if areBothBoolean(Left, Right) then
+  if OneOfBothNull(Left, Right) then
+    Result := Null
+  else if areBothBoolean(Left, Right) then
      Result := Left xor Right
    else
      Raise ERuntimeError.Create(Op, ErrMustBeBothBoolean);

@@ -64,7 +64,7 @@ var
 begin
   Source := '';
   Quit := False;
-  WriteLn('Gear REPL ', GearVersion, ' - (c) J. de Haan 2018', sLineBreak);
+  WriteLn('Gear REPL ', GearVersion, ' - (c) J. de Haan 2018 & Roman Ltd', sLineBreak);
   while not Quit do
   begin
     Write('Gear> ');
