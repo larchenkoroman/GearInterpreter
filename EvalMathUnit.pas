@@ -28,7 +28,7 @@ type
       class function _Neg(const Value: Variant; Op: TToken): Variant; static;
       class function _Pow(const Left, Right: Variant; Op: TToken): Variant; static;
       class function _Or(const Left, Right: Variant; Op: TToken): Variant; static;
-//      class function _And(const Left, Right: Variant; Op: TToken): Variant; static;
+      class function _And(const Left, Right: Variant; Op: TToken): Variant; static;
 //      class function _XOr(const Left, Right: Variant; Op: TToken): Variant; static;
       class function _Not(const Value: Variant; Op: TToken): Variant; static;
 
@@ -63,6 +63,18 @@ begin
     Result := Left + Right
   else
     Raise ERuntimeError.Create(Op, Format(ErrIncompatibleOperands, ['+']));
+end;
+
+class function TMath._And(const Left, Right: Variant; Op: TToken): Variant;
+begin
+  if areBothBoolean(Left, Right) then begin
+    if not Left then
+      Result := Left
+    else
+      Result := Right;
+  end
+  else
+    Raise ERuntimeError.Create(Op, ErrMustBeBothBoolean);
 end;
 
 class function TMath._Div(const Left, Right: Variant; Op: TToken): Variant;

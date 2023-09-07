@@ -115,12 +115,7 @@ begin
     ttMulIs:       Result := '*=';
     ttDivIs:       Result := '/=';
     ttRemainderIs: Result := '%=';
-//    ttOr:          Result := '|';
-//    ttAnd:         Result := '&';
-//    ttNot:         Result := '!';
     ttXor:         Result := '~';
-//    ttShl:         Result := '<<';
-//    ttShr:         Result := '>>';
     ttPow:         Result := '^';
     ttEQ:          Result := '=';
     ttNEQ:         Result := '<>';

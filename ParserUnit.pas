@@ -83,7 +83,7 @@ end;
 
 function TParser.IsMulOp: Boolean;
 begin
-  Result := CurrentToken.TokenType in [ttMul, ttDiv, ttPow, ttRemainder];
+  Result := CurrentToken.TokenType in [ttMul, ttDiv, ttPow, ttRemainder, ttAnd];
 end;
 
 function TParser.IsPowOp: Boolean;
