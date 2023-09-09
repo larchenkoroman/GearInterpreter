@@ -198,6 +198,7 @@ begin
     Result := TBinaryExpr.Create(Result, PowOp, ParseUnaryExpr);
   end;
 end;
+
 function TParser.ParseProduct: TProduct;
 begin
   Result := TProduct.Create(ParseExpr, CurrentToken);

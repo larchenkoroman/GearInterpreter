@@ -25,7 +25,6 @@ const
 type
   TLexer = class
     private
-      FFormatSettings: TFormatSettings;
       FLook : Char;              // next input character (still unprocessed)
       FLine, FCol : integer;     // line and column number of the input character
       FReader: TReader;          // contains the text to scan
@@ -35,7 +34,6 @@ type
       procedure DoKeywordOrIdentifier(const Line, Col: Integer);
       procedure DoNumber(const Line, Col: Integer);
       procedure DoString(const QuoteChar: Char; const Line, Col: Integer);
-//      procedure DoChar(const Line, Col: Integer);
       procedure ScanToken(const Line, Col: Integer);
       procedure ScanTokens;
       procedure SingleLineComment;
@@ -53,9 +51,6 @@ implementation
 
 constructor TLexer.Create(Reader: TReader);
 begin
-  FFormatSettings := FormatSettings;
-  FFormatSettings.DecimalSeparator := '.';
-
   FReader := Reader;
   FTokens := TTokens.Create(True); //AOwnsObjects
   FLine := 0;
@@ -70,11 +65,6 @@ begin
   FreeAndNil(FTokens);
   inherited;
 end;
-
-//procedure TLexer.DoChar(const Line, Col: Integer);
-//begin
-//
-//end;
 
 procedure TLexer.DoKeywordOrIdentifier(const Line, Col: Integer);
 var
@@ -104,6 +94,7 @@ var
   Value: Extended;
   Token: TToken;
   IsFoundDotDot: Boolean;
+  StrNumber: string;
 begin
   Lexeme := FLook;
   Flook := GetChar;
@@ -144,7 +135,11 @@ begin
     end;
   end;
 
-  Value := StrToFloat(Lexeme, FFormatSettings);
+  StrNumber := Lexeme;
+  if FormatSettings.DecimalSeparator <> '.' then
+    StrNumber := StrNumber.Replace('.', FormatSettings.DecimalSeparator);
+
+  Value := StrToFloat(StrNumber);
   Token := TToken.Create(ttNumber,Lexeme, Value, Line, Col);
   Tokens.Add(Token);
 end;
