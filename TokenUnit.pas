@@ -15,7 +15,7 @@ type
 
     //Keywords declarations
     ttArray, ttClass, ttDictionary, ttEach, ttEnum, ttExtension, ttFunc,
-    ttInit, ttLet, ttVal, ttVar, ttTrait,
+    ttInit, ttConst, ttVal, ttVar, ttTrait,
 
     //Keywords statements and expressions
     ttIf, ttThen, ttElse, ttWhile, ttDo, ttRepeat, ttUntil,
@@ -182,7 +182,7 @@ initialization
   Keywords.Add('is', ttIs);
   Keywords.Add('inherited', ttInherited);
   Keywords.Add('init', ttInit);
-  Keywords.Add('let', ttLet);
+  Keywords.Add('let', ttConst);
   Keywords.Add('match', ttMatch);
   Keywords.Add('on', ttOn);
   Keywords.Add('print', ttPrint);

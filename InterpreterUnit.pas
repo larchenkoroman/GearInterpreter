@@ -15,9 +15,11 @@ type
       function VisitConstExpr(AConstExpr: TConstExpr): Variant;
       function VisitUnaryExpr(AUnaryExpr: TUnaryExpr): Variant;
       //statements
-      //declaretions
+      procedure VisitPrintStmt(PrintStmt: TPrintStmt);
+      //declarations
       //blocks
-      function VisitProduct(Product: TProduct): Variant;
+      procedure VisitBlock(ABlock: TBlock);
+      procedure VisitProduct(AProduct: TProduct);
   end;
 
 implementation
@@ -25,18 +27,13 @@ implementation
 { TInterpreter }
 
 procedure TInterpreter.Execute(Tree: TProduct);
-var
-  Value: Variant;
 begin
   try
-    Value := VisitFunc(Tree);
-    Writeln(VarToStrDef(Value, 'Null'));
+    VisitProc(Tree);
   except
-    on E: ERunTimeError do
+    on E: ERuntimeError do
       RuntimeError(E);
   end;
-
-
 end;
 
 function TInterpreter.VisitBinaryExpr(ABinaryExpr: TBinaryExpr): Variant;
@@ -66,14 +63,40 @@ begin
   end;
 end;
 
+procedure TInterpreter.VisitBlock(ABlock: TBlock);
+var
+  Node: TNode;
+begin
+  for Node in ABlock.Nodes do
+    VisitProc(Node);
+end;
+
 function TInterpreter.VisitConstExpr(AConstExpr: TConstExpr): Variant;
 begin
   Result := AConstExpr.Value;
 end;
 
-function TInterpreter.VisitProduct(Product: TProduct): Variant;
+procedure TInterpreter.VisitPrintStmt(PrintStmt: TPrintStmt);
+var
+  Value: String;
+  Expr: TExpr;
 begin
-  Result := VisitFunc(Product.Node);
+  Value := '';
+  for Expr in PrintStmt.ExprList do
+  begin
+    Value := VarToStrDef(VisitFunc(Expr), 'Null');
+    Value := StringReplace(Value, '\n', sLineBreak, [rfReplaceAll]);
+    Value := StringReplace(Value, '\t', #9, [rfReplaceAll]);
+    Write(Value);
+  end;
+end;
+
+procedure TInterpreter.VisitProduct(AProduct: TProduct);
+var
+  Node: TNode;
+begin
+  for Node in AProduct.Nodes do
+    VisitProc(Node);
 end;
 
 function TInterpreter.VisitUnaryExpr(AUnaryExpr: TUnaryExpr): Variant;

@@ -70,9 +70,6 @@ begin
         Language.ExecuteFromFile(InputFileName)
       else
         Language.ExecuteFromPrompt;
-
-
-
     end
     else
     begin

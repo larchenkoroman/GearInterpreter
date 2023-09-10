@@ -2,7 +2,7 @@ unit AstUnit;
 
 interface
 uses
-  System.Classes, System.SysUtils, TokenUnit, Variants;
+  System.Classes, System.SysUtils, TokenUnit, Variants, System.Generics.Collections;
 
 type
   TNode = class
@@ -13,9 +13,42 @@ type
       constructor Create(AToken: TToken);
   end;
 
+  TNodeList = TObjectList<TNode>;
+
+  TBlock = class(TNode)
+    private
+      FNodes: TNodeList;
+    public
+      property Nodes: TNodeList read FNodes;
+      constructor Create(ANodes: TNodeList; AToken: TToken);
+      destructor Destroy; override;
+  end;
+
   TExpr = class(TNode)
     // Base node for expression
   end;
+
+  TExprList = TObjectList<TExpr>;
+
+  TStmt = class(TNode)
+    // Base class for statements
+  end;
+
+  TPrintStmt = class(TStmt)
+    private
+      FExprList: TExprList;
+    public
+      property ExprList: TExprList read FExprList;
+      constructor Create(AExprList: TExprList; AToken: TToken);
+      destructor Destroy; override;
+  end;
+
+  TDecl = class(TNode)
+    // Base class for statements
+  end;
+
+
+
 
   TFactorExpr = class(TExpr)
     //Base node fo parsing a factor
@@ -52,13 +85,7 @@ type
       constructor Create(Constant: Variant; AToken: TToken);
   end;
 
-  TProduct = class(TNode)
-    private
-      FNode: TNode;
-    public
-      property Node: TNode read FNode;
-      constructor Create(ANode: TNode; AToken: TToken);
-      destructor Destroy; override;
+  TProduct = class(TBlock)
   end;
 
 
@@ -120,20 +147,37 @@ begin
 //  Writeln('TConstExpr.Create ', VarToStr(Constant));
 end;
 
-{ TProduct }
+{ TBlock }
 
-constructor TProduct.Create(ANode: TNode; AToken: TToken);
+constructor TBlock.Create(ANodes: TNodeList; AToken: TToken);
 begin
   inherited Create(AToken);
-  FNode := ANode;
+  FNodes := ANodes;
 end;
 
-destructor TProduct.Destroy;
+destructor TBlock.Destroy;
 begin
-  if Assigned(FNode) then
-    FreeAndNil(FNode);
+  if Assigned(FNodes) then
+    FreeAndNil(FNodes);
+
+  inherited;
+end;
+
+{ TPrintStmt }
+
+constructor TPrintStmt.Create(AExprList: TExprList; AToken: TToken);
+begin
+  inherited Create(AToken);
+  FExprList := AExprList;
+end;
+
+destructor TPrintStmt.Destroy;
+begin
+  if Assigned(FExprList) then
+    FreeAndNil(FExprList);
 
   inherited;
 end;
 
 end.
+

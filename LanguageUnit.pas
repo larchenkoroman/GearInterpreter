@@ -67,6 +67,7 @@ begin
   WriteLn('Gear REPL ', GearVersion, ' - (c) J. de Haan 2018 & Roman Ltd', sLineBreak);
   while not Quit do
   begin
+    Writeln;
     Write('Gear> ');
     ReadLn(Source);
     Quit := LowerCase(Source) = 'quit';

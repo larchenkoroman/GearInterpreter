@@ -27,6 +27,8 @@ type
       //statements
       //declarattions
       //blocks
+      procedure VisitBlock(ABlock: TBlock);
+      procedure VisitPrintStmt(ANode: TPrintStmt);
       procedure VisitProduct(AProduct: TProduct);
   end;
 
@@ -65,6 +67,17 @@ begin
   DecIndent;
 end;
 
+procedure TPrinter.VisitBlock(ABlock: TBlock);
+var
+  Node: TNode;
+begin
+  IncIndent;
+  VisitNode(ABlock);
+  for Node in ABlock.Nodes do
+    VisitProc(Node);
+  DecIndent;
+end;
+
 procedure TPrinter.VisitConstExpr(AConstExpr: TConstExpr);
 begin
   IncIndent;
@@ -77,11 +90,25 @@ begin
   Writeln(FIndent + string(Node.ClassName).Substring(1));
 end;
 
-procedure TPrinter.VisitProduct(AProduct: TProduct);
+procedure TPrinter.VisitPrintStmt(ANode: TPrintStmt);
+var
+  Expr: TExpr;
 begin
+  IncIndent;
+  VisitNode(ANode);
+  for Expr in ANode.ExprList do
+    VisitProc(Expr);
   DecIndent;
+end;
+
+procedure TPrinter.VisitProduct(AProduct: TProduct);
+var
+  Node: TNode;
+begin
+  IncIndent;
   VisitNode(AProduct);
-  VisitProc(AProduct.Node);
+  for Node in AProduct.Nodes do
+    VisitProc(Node);
   DecIndent;
 end;
 

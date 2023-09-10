@@ -5,6 +5,11 @@ interface
 uses
   System.Classes, System.SysUtils, Variants, LexerUnit, TokenUnit, AstUnit, ErrorUnit;
 
+const
+  DeclStartSet: TTokenTypeSet = [ttConst, ttVar];
+  StmtStartSet: TTokenTypeSet = [ttPrint, ttIdentifier];
+  BlockEndSet: TTokenTypeSet  = [ttElse, ttUntil, ttEnd, ttCase, ttEOF];
+
 type
   TParser = class
     private
@@ -12,12 +17,12 @@ type
       FCurrent: Integer;
 
       function CurrentToken: TToken;
-//      function Peek: TToken;
-//      function IsLastToken: Boolean;
+      function Peek: TToken;
+      function IsLastToken: Boolean;
       procedure Error(AToken: TToken; AMsg: string);
       procedure Expect(const ATokenType:TTokenType);
       procedure Next;
-//      procedure Synchronize(ATypes: TTokenTypeSet);
+      procedure Synchronize(ATypes: TTokenTypeSet);
       //Expressions
       function ParseExpr: TExpr;
       function IsRelOp: Boolean;
@@ -33,8 +38,13 @@ type
       function ParseUnaryExpr: TExpr;
       function ParseFactor: TExpr;
       //Statements
+      function ParseStmt: TStmt;
+      function ParsePrintStmt: TStmt;
       //Declarations
+      function ParseDecl: TDecl;
       //Blocks
+      function ParseNode: TNode;
+      function ParseBlock: TBlock;
       function ParseProduct: TProduct;
     public
       constructor Create(ALexer: TLexer);
@@ -42,6 +52,27 @@ type
   end;
 
 implementation
+
+const
+  ErrSyntax = 'Syntax error, "%s" expected.';
+  ErrUnexpectedToken = 'Unexpected token: %s.';
+  ErrDuplicateTerminator = 'Duplicate terminator not allowed.';
+  ErrUnexpectedAttribute = 'Unexpected attribute "%s:".';
+  ErrInvalidAssignTarget = 'Invalid assignment target.';
+  ErrExpectedAssignOpFunc = 'Expected assignment operator, or function call.';
+  ErrUnrecognizedDeclOrStmt = 'Unrecognized declaration or statement.';
+  ErrBreakInLoop = 'Break can only be used from inside a loop.';
+  ErrExpectedArrow = 'Expected arrow "=>".';
+  ErrIncorrectInherit = 'Incorrect inheritance expression.';
+  ErrUnallowedDeclIn = 'Unallowed declaration in "%s".';
+  ErrNotExistsUseFile = 'Used file "%s" does not exist.';
+  ErrIncorrectUseFile = 'Used file "%s" is incorrect or corrupt.';
+  ErrNotAllowedInRange = 'Token "%s" not allowed in range expression.';
+  ErrAtLeastOneEnum = 'At least one enum is required in declaration.';
+  ErrDuplicateEnum = 'Duplicate enum name "%s".';
+  ErrNotAllowedInEnum = 'Constant value "%s" not allowed in enum declaration.';
+  ErrDuplicateSetName = 'Duplicate enum set name "%s".';
+
 
 { TParser }
 
@@ -59,6 +90,7 @@ end;
 procedure TParser.Error(AToken: TToken; AMsg: string);
 begin
   Errors.Append(AToken.Line, AToken.Col, AMsg);
+  Raise EParseError.Create(AMsg);
 end;
 
 procedure TParser.Expect(const ATokenType: TTokenType);
@@ -76,10 +108,10 @@ begin
   Result := CurrentToken.TokenType in [ttPlus, ttMinus, ttOr, ttXor];
 end;
 
-//function TParser.IsLastToken: Boolean;
-//begin
-//  Result := FCurrent = FTokens.Count - 1;
-//end;
+function TParser.IsLastToken: Boolean;
+begin
+  Result := FCurrent = FTokens.Count - 1;
+end;
 
 function TParser.IsMulOp: Boolean;
 begin
@@ -103,13 +135,7 @@ end;
 
 function TParser.Parse: TProduct;
 begin
-  try
-    Result := ParseProduct;
-    Expect(ttEOF);  
-  except
-    on E: EParseError do
-      Result := nil;
-  end;
+  Result := ParseProduct;
 end;
 
 function TParser.ParseAddExpr: TExpr;
@@ -123,6 +149,19 @@ begin
     Next;
     Result := TBinaryExpr.Create(Result, AddOp, ParseMulExpr);
   end;
+end;
+
+
+function TParser.ParseBlock: TBlock;
+begin
+  Result := TBlock.Create(TNodeList.Create(), CurrentToken);
+  while CurrentToken.TokenType in (DeclStartSet + StmtStartSet) do
+    Result.Nodes.Add(ParsePrintStmt);
+end;
+
+function TParser.ParseDecl: TDecl;
+begin
+  Result := nil;
 end;
 
 function TParser.ParseExpr: TExpr;
@@ -187,6 +226,22 @@ begin
   end;
 end;
 
+function TParser.ParseNode: TNode;
+begin
+  Result := nil;
+  try
+    if CurrentToken.TokenType in DeclStartSet then
+      Result := ParseDecl
+    else if CurrentToken.TokenType in  StmtStartSet then
+      Result := ParseStmt
+    else
+      Error(CurrentToken, ErrUnrecognizedDeclOrStmt);
+  except
+    Synchronize(DeclStartSet + StmtStartSet + [ttEOF]);
+    Result := nil;//TNode.Create(CurrentToken);
+  end;
+end;
+
 function TParser.ParsePowExpr: TExpr;
 var
   PowOp: TToken;
@@ -199,9 +254,44 @@ begin
   end;
 end;
 
-function TParser.ParseProduct: TProduct;
+function TParser.ParsePrintStmt: TStmt;
+var
+  ExprList: TExprList;
+  Token: TToken;
 begin
-  Result := TProduct.Create(ParseExpr, CurrentToken);
+  try
+    Token := CurrentToken;
+    Next; // skip print
+    Expect(ttOpenParen);
+    ExprList := TExprList.Create(false);
+    if CurrentToken.TokenType <> ttCloseParen then
+    begin
+      ExprList.Add(ParseExpr);
+      while CurrentToken.TokenType = ttComma do
+      begin
+        Next; // skip ,
+        ExprList.Add(ParseExpr);
+      end;
+    end;
+    Expect(ttCloseParen);
+    Result := TPrintStmt.Create(ExprList, Token);
+  except
+      Synchronize(DeclStartSet + StmtStartSet + [ttEOF]);
+      Result := nil;
+  end;
+end;
+
+function TParser.ParseProduct: TProduct;
+var
+  Token: TToken;
+begin
+  Token := CurrentToken;
+  Result := TProduct.Create(ParseBlock.Nodes, Token);
+end;
+
+function TParser.ParseStmt: TStmt;
+begin
+  Result := nil;
 end;
 
 function TParser.ParseUnaryExpr: TExpr;
@@ -218,17 +308,17 @@ begin
     Result := ParseFactor;
 end;
 
-//function TParser.Peek: TToken;
-//begin
-//  Result := nil;
-//  if not IsLastToken then
-//    Result := FTokens[FCurrent + 1]
-//end;
-
-//procedure TParser.Synchronize(ATypes: TTokenTypeSet);
-//begin
-//  while not (CurrentToken.TokenType in ATypes) do
-//    Next;
-//end;
+function TParser.Peek: TToken;
+begin
+  Result := nil;
+  if not IsLastToken then
+    Result := FTokens[FCurrent + 1]
+end;
+//
+procedure TParser.Synchronize(ATypes: TTokenTypeSet);
+begin
+  while not (CurrentToken.TokenType in ATypes) do
+    Next;
+end;
 
 end.
