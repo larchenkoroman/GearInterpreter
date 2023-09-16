@@ -26,6 +26,8 @@ type
       procedure VisitUnaryExpr(AUnaryExpr: TUnaryExpr);
       //statements
       //declarattions
+      procedure VisitIdentifier(AIdentifier: TIdentifier);
+      procedure VisitVarDecl(AVarDecl: TVarDecl);
       //blocks
       procedure VisitBlock(ABlock: TBlock);
       procedure VisitPrintStmt(ANode: TPrintStmt);
@@ -85,6 +87,13 @@ begin
   DecIndent;
 end;
 
+procedure TPrinter.VisitIdentifier(AIdentifier: TIdentifier);
+begin
+  IncIndent;
+  Writeln(FIndent + 'Identifier: ' + AIdentifier.Text);
+  DecIndent;
+end;
+
 procedure TPrinter.VisitNode(Node: TNode);
 begin
   Writeln(FIndent + string(Node.ClassName).Substring(1));
@@ -117,6 +126,15 @@ begin
   IncIndent;
   Writeln(FIndent, '(', AUnaryExpr.Op.TokenType.ToString, ')');
   VisitProc(AUnaryExpr.Expr);
+  DecIndent;
+end;
+
+procedure TPrinter.VisitVarDecl(AVarDecl: TVarDecl);
+begin
+  IncIndent;
+  VisitNode(AVarDecl);
+  VisitProc(AVarDecl.Identifier);
+  VisitProc(AVarDecl.Expr);
   DecIndent;
 end;
 

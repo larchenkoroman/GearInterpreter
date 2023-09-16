@@ -30,26 +30,6 @@ type
 
   TExprList = TObjectList<TExpr>;
 
-  TStmt = class(TNode)
-    // Base class for statements
-  end;
-
-  TPrintStmt = class(TStmt)
-    private
-      FExprList: TExprList;
-    public
-      property ExprList: TExprList read FExprList;
-      constructor Create(AExprList: TExprList; AToken: TToken);
-      destructor Destroy; override;
-  end;
-
-  TDecl = class(TNode)
-    // Base class for statements
-  end;
-
-
-
-
   TFactorExpr = class(TExpr)
     //Base node fo parsing a factor
   end;
@@ -84,6 +64,50 @@ type
       property Value: Variant read FValue;
       constructor Create(Constant: Variant; AToken: TToken);
   end;
+
+  TIdentifier = class(TNode)
+    private
+      FText: string;
+    public
+      property Text: string read FText;
+      constructor Create(AToken: TToken);
+  end;
+
+  //Statements
+  TStmt = class(TNode)
+    // Base class for statements
+  end;
+
+  TPrintStmt = class(TStmt)
+    private
+      FExprList: TExprList;
+    public
+      property ExprList: TExprList read FExprList;
+      constructor Create(AExprList: TExprList; AToken: TToken);
+      destructor Destroy; override;
+  end;
+
+  TDecl = class(TNode)
+    // Base class for statements
+    private
+      FIdentifier: TIdentifier;
+    public
+      property Identifier: TIdentifier read FIdentifier;
+      constructor Create(AIdentifier: TIdentifier; AToken: TToken);
+      destructor Destroy; override;
+  end;
+
+  TVarDecl = class(TDecl)
+    private
+      FExpr: TExpr;
+      FIsConst: Boolean;
+    public
+      property Expr: TExpr read FExpr;
+      property IsConst: Boolean read FIsConst;
+      constructor Create(AIdentifier: TIdentifier; AExpr: TExpr; AToken: TToken; AIsConst: Boolean);
+      destructor Destroy; override;
+  end;
+
 
   TProduct = class(TBlock)
   end;
@@ -175,6 +199,47 @@ destructor TPrintStmt.Destroy;
 begin
   if Assigned(FExprList) then
     FreeAndNil(FExprList);
+
+  inherited;
+end;
+
+{ TIdentifier }
+
+constructor TIdentifier.Create(AToken: TToken);
+begin
+  inherited Create(AToken);
+  FText := Atoken.Lexeme;
+end;
+
+{ TDecl }
+
+constructor TDecl.Create(AIdentifier: TIdentifier; AToken: TToken);
+begin
+  inherited Create(AToken);
+  FIdentifier := AIdentifier;
+end;
+
+destructor TDecl.Destroy;
+begin
+  if Assigned(FIdentifier) then
+    FreeAndNil(FIdentifier);
+
+  inherited;
+end;
+
+{ TVarDecl }
+
+constructor TVarDecl.Create(AIdentifier: TIdentifier; AExpr: TExpr;  AToken: TToken; AIsConst: Boolean);
+begin
+  inherited Create(AIdentifier, AToken);
+  FExpr := AExpr;
+  FIsConst := AIsConst;
+end;
+
+destructor TVarDecl.Destroy;
+begin
+  if Assigned(FExpr) then
+    FreeAndNil(FExpr);
 
   inherited;
 end;

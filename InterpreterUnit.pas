@@ -17,6 +17,8 @@ type
       //statements
       procedure VisitPrintStmt(PrintStmt: TPrintStmt);
       //declarations
+      procedure VisitIdentifier(AIdentifier: TIdentifier);
+      procedure VisitVarDecl(AVarDecl: TVarDecl);
       //blocks
       procedure VisitBlock(ABlock: TBlock);
       procedure VisitProduct(AProduct: TProduct);
@@ -76,6 +78,11 @@ begin
   Result := AConstExpr.Value;
 end;
 
+procedure TInterpreter.VisitIdentifier(AIdentifier: TIdentifier);
+begin
+
+end;
+
 procedure TInterpreter.VisitPrintStmt(PrintStmt: TPrintStmt);
 var
   Value: String;
@@ -109,6 +116,11 @@ begin
     ttMinus: Result := TMath._Neg(Expr, AUnaryExpr.Op);
     else Result := Expr;
   end;
+end;
+
+procedure TInterpreter.VisitVarDecl(AVarDecl: TVarDecl);
+begin
+
 end;
 
 end.

@@ -182,7 +182,7 @@ initialization
   Keywords.Add('is', ttIs);
   Keywords.Add('inherited', ttInherited);
   Keywords.Add('init', ttInit);
-  Keywords.Add('let', ttConst);
+  Keywords.Add('const', ttConst);
   Keywords.Add('match', ttMatch);
   Keywords.Add('on', ttOn);
   Keywords.Add('print', ttPrint);

@@ -40,8 +40,11 @@ type
       //Statements
       function ParseStmt: TStmt;
       function ParsePrintStmt: TStmt;
+      function ParseAssignStmt:TStmt;
       //Declarations
       function ParseDecl: TDecl;
+      function ParseVarDecl(AIsConst: Boolean): TDecl;
+      function ParseIdentifier: TIdentifier;
       //Blocks
       function ParseNode: TNode;
       function ParseBlock: TBlock;
@@ -152,16 +155,24 @@ begin
 end;
 
 
+function TParser.ParseAssignStmt: TStmt;
+begin
+  Result := TStmt.Create(CurrentToken);
+end;
+
 function TParser.ParseBlock: TBlock;
 begin
   Result := TBlock.Create(TNodeList.Create(), CurrentToken);
   while CurrentToken.TokenType in (DeclStartSet + StmtStartSet) do
-    Result.Nodes.Add(ParsePrintStmt);
+    Result.Nodes.Add(ParseNode);
 end;
 
 function TParser.ParseDecl: TDecl;
 begin
   Result := nil;
+  case CurrentToken.TokenType of
+    ttVar, ttConst: Result := ParseVarDecl(CurrentToken.TokenType = ttConst);
+  end;
 end;
 
 function TParser.ParseExpr: TExpr;
@@ -211,6 +222,15 @@ begin
       Error(CurrentToken, 'Unexpected token: ' + CurrentToken.ToString + '.');
     end;
   end;
+end;
+
+function TParser.ParseIdentifier: TIdentifier;
+var
+  Token: TToken;
+begin
+  Token := CurrentToken;
+  Expect(ttIdentifier);
+  Result := TIdentifier.Create(Token);
 end;
 
 function TParser.ParseMulExpr: TExpr;
@@ -291,6 +311,11 @@ end;
 
 function TParser.ParseStmt: TStmt;
 begin
+  case CurrentToken.TokenType of
+    ttPrint: Result := ParsePrintStmt;
+  else
+    Result := ParseAssignStmt;
+  end;
   Result := nil;
 end;
 
@@ -306,6 +331,18 @@ begin
   end
   else
     Result := ParseFactor;
+end;
+
+function TParser.ParseVarDecl(AIsConst: Boolean): TDecl;
+var
+  Identifier: TIdentifier;
+  Token: TToken;
+begin
+  Token := CurrentToken;
+  Next; //skip var or const
+  Identifier := ParseIdentifier;
+  Expect(ttAssign);
+  Result := TVarDecl.Create(Identifier, ParseExpr, Token, AIsConst);
 end;
 
 function TParser.Peek: TToken;
