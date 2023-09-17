@@ -243,16 +243,7 @@ begin
          else
            AddToken(ttRemainder);
 
-    ':': if FReader.PeekChar = '=' then
-         begin
-           FLook := GetChar;
-           AddToken(ttAssign); // :=
-         end
-         else
-           AddToken(ttColon);
-
-    '~': AddToken(ttXor);
-    '!': AddToken(ttNot);
+    ':': AddToken(ttColon);
     '^': AddToken(ttPow);
     '(': AddToken(ttOpenParen);
     ')': AddToken(ttCloseParen);
@@ -270,13 +261,18 @@ begin
          else
            AddToken(ttDot);
 
-    '=': if FReader.PeekChar = '>' then
-         begin
-           FLook := GetChar;
-           AddToken(ttArrow);
-         end
+    '=': case FReader.PeekChar of
+           '=': begin
+                  FLook := GetChar;
+                  AddToken(ttEq);
+                end;
+           '>': begin
+               FLook := GetChar;
+               AddToken(ttArrow);
+             end;
          else
-           AddToken(ttEQ);
+           AddToken(ttAssign);
+         end;
 
     '<': case FReader.PeekChar of
            '=': begin

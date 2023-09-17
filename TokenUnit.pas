@@ -116,7 +116,7 @@ begin
     ttDivIs:       Result := '/=';
     ttRemainderIs: Result := '%=';
     ttPow:         Result := '^';
-    ttEQ:          Result := '=';
+    ttEQ:          Result := '==';
     ttNEQ:         Result := '<>';
     ttGT:          Result := '>';
     ttGE:          Result := '>=';
@@ -125,7 +125,7 @@ begin
     ttComma:       Result := ',';
     ttDot:         Result := '.';
     ttDotDot:      Result := '..';
-    ttAssign:      Result := ':=';
+    ttAssign:      Result := '=';
     ttQuestion:    Result := '?';
     ttArrow:       Result := '=>';
     ttColon:       Result := ':';
