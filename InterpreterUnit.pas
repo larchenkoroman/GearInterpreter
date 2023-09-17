@@ -3,11 +3,16 @@ unit InterpreterUnit;
 interface
 
 uses
-  System.Classes, System.SysUtils, System.Variants, VisitorUnit, AstUnit, TokenUnit, ErrorUnit, EvalMathUnit;
+  System.Classes, System.SysUtils, System.Variants, VisitorUnit, AstUnit, TokenUnit, ErrorUnit, EvalMathUnit, MemoryUnit;
 
 type
   TInterpreter = class(TVisitor)
+    private
+      FCurrentSpace: TMemorySpace;
+      procedure CheckDuplicate(AIdentifier: TIdentifier; const ATypeName: String);
     public
+      constructor Create;
+      destructor Destroy; override;
       procedure Execute(Tree: TProduct);
     published
       //expressions
@@ -19,6 +24,7 @@ type
       //declarations
       procedure VisitIdentifier(AIdentifier: TIdentifier);
       procedure VisitVarDecl(AVarDecl: TVarDecl);
+      function VisitVariable(AVariable: TVariable): Variant;
       //blocks
       procedure VisitBlock(ABlock: TBlock);
       procedure VisitProduct(AProduct: TProduct);
@@ -27,6 +33,28 @@ type
 implementation
 
 { TInterpreter }
+
+const
+  ErrDuplicateID = 'Duplicate identifier: %s "%s" is already declared.';
+
+procedure TInterpreter.CheckDuplicate(AIdentifier: TIdentifier; const ATypeName: String);
+begin
+  if FCurrentSpace.ContainsKey(AIdentifier.Text) then
+    raise ERunTimeError.Create(AIdentifier.Token, Format(ErrDuplicateID, [ATypeName, AIdentifier.Text]));
+end;
+
+constructor TInterpreter.Create;
+begin
+  FCurrentSpace := TMemorySpace.Create;
+end;
+
+destructor TInterpreter.Destroy;
+begin
+  if Assigned(FCurrentSpace) then
+    FreeAndNil(FCurrentSpace);
+
+  inherited;
+end;
 
 procedure TInterpreter.Execute(Tree: TProduct);
 begin
@@ -120,7 +148,13 @@ end;
 
 procedure TInterpreter.VisitVarDecl(AVarDecl: TVarDecl);
 begin
+  CheckDuplicate(AVarDecl.Identifier, 'Variable');
+  FCurrentSpace.Store(AVarDecl.Identifier, VisitFunc(AVarDecl.Expr));
+end;
 
+function TInterpreter.VisitVariable(AVariable: TVariable): Variant;
+begin
+  Result := FCurrentSpace.Load(AVariable.Identifier);
 end;
 
 end.

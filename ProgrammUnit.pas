@@ -3,7 +3,7 @@ unit ProgrammUnit;
 interface
 
 uses
-  System.SysUtils, LanguageUnit;
+  System.SysUtils, System.IOUtils, LanguageUnit;
 
 procedure DoRun;
 procedure WriteHelp;
@@ -24,19 +24,19 @@ begin
   ErrorMsg := '';
 
   if   FindCmdLineSwitch('h')
-    or FindCmdLineSwitch('help') then
+    or FindCmdLineSwitch('-help') then
   begin
     WriteHelp;
   end
   else
   begin
-    IsAstInArgs :=    FindCmdLineSwitch('ast')
+    IsAstInArgs :=    FindCmdLineSwitch('-ast')
                    or FindCmdLineSwitch('a');
 
-    IsExecuteInArgs :=    FindCmdLineSwitch('execute')
+    IsExecuteInArgs :=    FindCmdLineSwitch('-execute')
                        or FindCmdLineSwitch('e');
 
-    IsFileInArgs :=    FindCmdLineSwitch('file')
+    IsFileInArgs :=    FindCmdLineSwitch('-file')
                     or FindCmdLineSwitch('f');
 
     IsFileNeeded := IsAstInArgs or IsExecuteInArgs;
@@ -47,7 +47,7 @@ begin
 
     if    (ErrorMsg = '')
       and IsFileInArgs
-      and (   FindCmdLineSwitch('file', InputFileName)
+      and (   FindCmdLineSwitch('-file', InputFileName)
            or FindCmdLineSwitch('f', InputFileName)
           ) then
     begin
@@ -65,9 +65,15 @@ begin
     if ErrorMsg = '' then
     begin
       if IsAstInArgs then
-        Language.ExecutePrintAST(InputFileName)
+      begin
+        Language.ExecutePrintAST(InputFileName);
+        Readln;
+      end
       else if IsExecuteInArgs then
-        Language.ExecuteFromFile(InputFileName)
+      begin
+        Language.ExecuteFromFile(InputFileName);
+        Readln;
+      end
       else
         Language.ExecuteFromPrompt;
     end
@@ -82,7 +88,14 @@ end;
 
 procedure WriteHelp;
 begin
-  Writeln('Поиогаю');
+  writeln('Usage: ', TPath.GetFileNameWithoutExtension(ParamStr(0)), ' -h -(a|x|c) -f filename.gear');
+  writeln('Option:    -h --help               Show help');
+  writeln('Option:    -a --ast                Print AST');
+  writeln('Option:    -x --execute            Execute product');
+  writeln('Option:    -c --compile            Compile product');
+  writeln('Required:  -f --file= filename     Input product');
+  writeln('No parameters: start REPL');
+  Readln;
 end;
 
 

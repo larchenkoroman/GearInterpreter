@@ -216,6 +216,11 @@ begin
       Expect(ttCloseParen);
     end;
 
+    ttIdentifier:
+    begin
+      Result := TVariable.Create(ParseIdentifier);
+    end;
+
     else
     begin
       Result := TExpr.Create(CurrentToken);
@@ -311,12 +316,12 @@ end;
 
 function TParser.ParseStmt: TStmt;
 begin
+  Result := nil;
   case CurrentToken.TokenType of
     ttPrint: Result := ParsePrintStmt;
   else
     Result := ParseAssignStmt;
   end;
-  Result := nil;
 end;
 
 function TParser.ParseUnaryExpr: TExpr;

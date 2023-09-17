@@ -28,6 +28,7 @@ type
       //declarattions
       procedure VisitIdentifier(AIdentifier: TIdentifier);
       procedure VisitVarDecl(AVarDecl: TVarDecl);
+      procedure VisitVariable(AVariable: TVariable);
       //blocks
       procedure VisitBlock(ABlock: TBlock);
       procedure VisitPrintStmt(ANode: TPrintStmt);
@@ -96,7 +97,7 @@ end;
 
 procedure TPrinter.VisitNode(Node: TNode);
 begin
-  Writeln(FIndent + string(Node.ClassName).Substring(1));
+  Writeln(FIndent, Node.ClassName.Substring(1));
 end;
 
 procedure TPrinter.VisitPrintStmt(ANode: TPrintStmt);
@@ -133,8 +134,22 @@ procedure TPrinter.VisitVarDecl(AVarDecl: TVarDecl);
 begin
   IncIndent;
   VisitNode(AVarDecl);
+
+  if AVarDecl.IsConst then
+    Writeln(FIndent, 'Const ')
+  else
+    Writeln(FIndent, 'Var ');
+
   VisitProc(AVarDecl.Identifier);
+
   VisitProc(AVarDecl.Expr);
+  DecIndent;
+end;
+
+procedure TPrinter.VisitVariable(AVariable: TVariable);
+begin
+  IncIndent;
+  WriteLn(FIndent, 'Var: ', AVariable.Identifier.Text);
   DecIndent;
 end;
 

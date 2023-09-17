@@ -73,6 +73,15 @@ type
       constructor Create(AToken: TToken);
   end;
 
+  TVariable = class(TFactorExpr)
+    private
+      FIdentifier: TIdentifier;
+    public
+      property Identifier: TIdentifier read FIdentifier;
+      constructor Create(AIdentifier: TIdentifier);
+      destructor Destroy; override;
+  end;
+
   //Statements
   TStmt = class(TNode)
     // Base class for statements
@@ -240,6 +249,22 @@ destructor TVarDecl.Destroy;
 begin
   if Assigned(FExpr) then
     FreeAndNil(FExpr);
+
+  inherited;
+end;
+
+{ TVariable }
+
+constructor TVariable.Create(AIdentifier: TIdentifier);
+begin
+  inherited Create(AIdentifier.Token);
+  FIdentifier := AIdentifier;
+end;
+
+destructor TVariable.Destroy;
+begin
+  if Assigned(FIdentifier) then
+    FreeAndNil(FIdentifier);
 
   inherited;
 end;

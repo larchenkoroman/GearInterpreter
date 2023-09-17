@@ -17,7 +17,8 @@ uses
   InterpreterUnit in 'InterpreterUnit.pas',
   EvalMathUnit in 'EvalMathUnit.pas',
   LanguageUnit in 'LanguageUnit.pas',
-  ProgrammUnit in 'ProgrammUnit.pas';
+  ProgrammUnit in 'ProgrammUnit.pas',
+  MemoryUnit in 'MemoryUnit.pas';
 
 begin
 
