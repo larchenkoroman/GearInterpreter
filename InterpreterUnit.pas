@@ -9,7 +9,11 @@ type
   TInterpreter = class(TVisitor)
     private
       FCurrentSpace: TMemorySpace;
+      function Lookup(Variable: TVariable): Variant;
       procedure CheckDuplicate(AIdentifier: TIdentifier; const ATypeName: String);
+      function TypeOf(AValue: Variant): String;
+      function getAssignValue(OldValue, NewValue: Variant; ID, Op: TToken): Variant;
+      procedure Assign(AVariable: TVariable; AValue: Variant);
     public
       constructor Create;
       destructor Destroy; override;
@@ -20,7 +24,8 @@ type
       function VisitConstExpr(AConstExpr: TConstExpr): Variant;
       function VisitUnaryExpr(AUnaryExpr: TUnaryExpr): Variant;
       //statements
-      procedure VisitPrintStmt(PrintStmt: TPrintStmt);
+      procedure VisitPrintStmt(APrintStmt: TPrintStmt);
+      procedure VisitAssignStmt(AAssignStmt: TAssignStmt);
       //declarations
       procedure VisitIdentifier(AIdentifier: TIdentifier);
       procedure VisitVarDecl(AVarDecl: TVarDecl);
@@ -36,6 +41,12 @@ implementation
 
 const
   ErrDuplicateID = 'Duplicate identifier: %s "%s" is already declared.';
+  ErrIncompatibleTypes = 'Incompatible types in assignment: %s vs. %s.';
+
+procedure TInterpreter.Assign(AVariable: TVariable; AValue: Variant);
+begin
+  FCurrentSpace.Update(AVariable.Identifier, AValue);
+end;
 
 procedure TInterpreter.CheckDuplicate(AIdentifier: TIdentifier; const ATypeName: String);
 begin
@@ -64,6 +75,65 @@ begin
     on E: ERuntimeError do
       RuntimeError(E);
   end;
+end;
+
+function TInterpreter.getAssignValue(OldValue, NewValue: Variant; ID, Op: TToken): Variant;
+var
+  OldType, NewType: String;
+begin
+  OldType := TypeOf(OldValue);
+  NewType := TypeOf(NewValue);
+  if VarIsNull(OldValue) and (Op.TokenType = ttAssign) then
+    Exit(NewValue);
+
+  if VarIsNull(NewValue) and (Op.TokenType = ttAssign) then
+    Exit(Null);
+
+  if OldType <> NewType then
+    raise ERuntimeError.Create(ID, Format(ErrIncompatibleTypes, [OldType, NewType]));
+
+  if not VarIsNull(OldValue) then begin
+    if Op.TokenType <> ttAssign then
+    case Op.TokenType of
+      ttPlusIs:      NewValue := TMath._Add(OldValue, NewValue, Op);
+      ttMinusIs:     NewValue := TMath._Sub(OldValue, NewValue, Op);
+      ttMulIs:       NewValue := TMath._Mul(OldValue, NewValue, Op);
+      ttDivIs:       NewValue := TMath._Div(OldValue, NewValue, Op);
+      ttRemainderIs: NewValue := TMath._Rem(OldValue, NewValue, Op);
+    end;
+    Exit(NewValue);
+  end;
+
+  Raise ERuntimeError.Create(ID, Format(ErrIncompatibleTypes, [OldType, NewType]));
+end;
+
+function TInterpreter.Lookup(Variable: TVariable): Variant;
+begin
+  Result := FCurrentSpace.Load(Variable.Identifier);
+end;
+
+function TInterpreter.TypeOf(AValue: Variant): String;
+begin
+  if VarIsNull(AValue) then
+    Result := 'Null'
+  else if VarIsStr(AValue) then
+    Result := 'String'
+  else if varIsType(AValue, varBoolean) then
+    Result := 'Boolean'
+  else if VarIsNumeric(AValue) then
+    Result := 'Number'
+  else
+    Result := 'Unknown';
+end;
+
+procedure TInterpreter.VisitAssignStmt(AAssignStmt: TAssignStmt);
+var
+  OldValue, NewValue, Value: Variant;
+begin
+  OldValue := Lookup(AAssignStmt.Variable);
+  NewValue := VisitFunc(AAssignStmt.Expr);
+  Value := getAssignValue(OldValue, NewValue, AAssignStmt.Variable.Token, AAssignStmt.Op);
+  Assign(AAssignStmt.Variable, Value);
 end;
 
 function TInterpreter.VisitBinaryExpr(ABinaryExpr: TBinaryExpr): Variant;
@@ -111,13 +181,13 @@ begin
 
 end;
 
-procedure TInterpreter.VisitPrintStmt(PrintStmt: TPrintStmt);
+procedure TInterpreter.VisitPrintStmt(APrintStmt: TPrintStmt);
 var
   Value: String;
   Expr: TExpr;
 begin
   Value := '';
-  for Expr in PrintStmt.ExprList do
+  for Expr in APrintStmt.ExprList do
   begin
     Value := VarToStrDef(VisitFunc(Expr), 'Null');
     Value := StringReplace(Value, '\n', sLineBreak, [rfReplaceAll]);
@@ -154,7 +224,7 @@ end;
 
 function TInterpreter.VisitVariable(AVariable: TVariable): Variant;
 begin
-  Result := FCurrentSpace.Load(AVariable.Identifier);
+   Result := Lookup(AVariable);
 end;
 
 end.

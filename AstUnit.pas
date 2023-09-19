@@ -96,6 +96,19 @@ type
       destructor Destroy; override;
   end;
 
+  TAssignStmt = class(TStmt)
+    private
+      FVariable: TVariable;
+      FOp: TToken;
+      FExpr: TExpr;
+    public
+      property Variable: TVariable read FVariable;
+      property Op: TToken read FOp;
+      property Expr: TExpr read FExpr;
+      constructor Create(AVariable: TVariable; AOp: TToken; AExpr: TExpr);
+      destructor Destroy; override;
+  end;
+
   TDecl = class(TNode)
     // Base class for statements
     private
@@ -265,6 +278,27 @@ destructor TVariable.Destroy;
 begin
   if Assigned(FIdentifier) then
     FreeAndNil(FIdentifier);
+
+  inherited;
+end;
+
+{ TAssignStmt }
+
+constructor TAssignStmt.Create(AVariable: TVariable; AOp: TToken; AExpr: TExpr);
+begin
+ inherited Create(AOp);
+  FVariable := AVariable;
+  FOp := AOp;
+  FExpr := AExpr;
+end;
+
+destructor TAssignStmt.Destroy;
+begin
+  if Assigned(FVariable) then
+    FreeAndNil(FVariable);
+
+  if Assigned(FExpr) then
+    FreeAndNil(FExpr);
 
   inherited;
 end;

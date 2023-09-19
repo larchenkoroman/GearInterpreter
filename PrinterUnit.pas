@@ -25,6 +25,7 @@ type
       procedure VisitConstExpr(AConstExpr: TConstExpr);
       procedure VisitUnaryExpr(AUnaryExpr: TUnaryExpr);
       //statements
+      procedure VisitAssignStmt(AssignStmt: TAssignStmt);
       //declarattions
       procedure VisitIdentifier(AIdentifier: TIdentifier);
       procedure VisitVarDecl(AVarDecl: TVarDecl);
@@ -59,6 +60,16 @@ procedure TPrinter.Print;
 begin
   VisitProc(FTree);
   Writeln;
+end;
+
+procedure TPrinter.VisitAssignStmt(AssignStmt: TAssignStmt);
+begin
+  IncIndent;
+  VisitNode(AssignStmt);
+  WriteLn(FIndent, '(', AssignStmt.Op.TokenType.toString, ')');
+  VisitProc(AssignStmt.Variable);
+  VisitProc(AssignStmt.Expr);
+  DecIndent;
 end;
 
 procedure TPrinter.VisitBinaryExpr(ABinaryExpr: TBinaryExpr);

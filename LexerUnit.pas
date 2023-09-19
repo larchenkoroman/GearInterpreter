@@ -12,15 +12,15 @@ const
   Quote1   = #39; // '
   Quote2   = #34; // "
 
-  WhiteSpace   = [Tab, CHAR_13, CHAR_10, Space];
-  Underscore   = ['_'];
-  LoCaseLetter = ['a'..'z'];
-  UpCaseLetter = ['A'..'Z'];
-  Letters      = UpCaseLetter + LoCaseLetter;
-  AlphaChars   = UpCaseLetter + LoCaseLetter + Underscore;
-  NumberChars  = ['0'..'9'];
-  SpecialChar  = '#';
-  IdentChars   = NumberChars + AlphaChars;
+  WhiteSpace      = [Tab, CHAR_13, CHAR_10, Space];
+  Underscore      = ['_'];
+  LoCaseLetter    = ['a'..'z'];
+  UpCaseLetter    = ['A'..'Z'];
+  Letters         = UpCaseLetter + LoCaseLetter;
+  AlphaChars      = UpCaseLetter + LoCaseLetter + Underscore;
+  NumberChars     = ['0'..'9'];
+  SpecialChar     = '#';
+  IdentifierChars = NumberChars + AlphaChars;
 
 type
   TLexer = class
@@ -74,7 +74,7 @@ var
 begin
   Lexeme := FLook;
   FLook := GetChar;
-  while CharInSet(FLook, IdentChars) do
+  while CharInSet(FLook, IdentifierChars) do
   begin
     Lexeme := Lexeme + Flook;
     Flook := GetChar;

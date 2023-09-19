@@ -9,6 +9,7 @@ const
   DeclStartSet: TTokenTypeSet = [ttConst, ttVar];
   StmtStartSet: TTokenTypeSet = [ttPrint, ttIdentifier];
   BlockEndSet: TTokenTypeSet  = [ttElse, ttUntil, ttEnd, ttCase, ttEOF];
+  AssignSet: TTokenTypeSet    = [ttPlusIs, ttMinusIs, ttMulIs, ttDivIs, ttRemainderIs, ttAssign];
 
 type
   TParser = class
@@ -98,7 +99,7 @@ end;
 
 procedure TParser.Expect(const ATokenType: TTokenType);
 const
-  Msg = 'Syntax error, "%s: expected.';
+  Msg = 'Syntax error, ''%s'' expected.';
 begin
   if CurrentToken.TokenType = ATokenType then
     Next
@@ -156,8 +157,27 @@ end;
 
 
 function TParser.ParseAssignStmt: TStmt;
+var
+  Token, Op: TToken;
+  Left, Right: TExpr;
 begin
-  Result := TStmt.Create(CurrentToken);
+  Result := nil;
+  Token := CurrentToken;
+  Left := ParseExpr;
+  if CurrentToken.TokenType in AssignSet then
+  begin
+    Op := CurrentToken;
+    Next; // skip assign token
+    Right := ParseExpr;
+    if Left is TVariable then
+    begin
+      Result := TAssignStmt.Create(Left as TVariable, Op, Right);
+    end
+    else
+      Error(Token, ErrInvalidAssignTarget);
+  end
+  else
+    Error(CurrentToken, ErrExpectedAssignOpFunc);
 end;
 
 function TParser.ParseBlock: TBlock;
