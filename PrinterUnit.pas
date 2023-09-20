@@ -29,6 +29,7 @@ type
       //declarattions
       procedure VisitIdentifier(AIdentifier: TIdentifier);
       procedure VisitVarDecl(AVarDecl: TVarDecl);
+      procedure VisitVarDecls(AVarDecls: TVarDecls);
       procedure VisitVariable(AVariable: TVariable);
       //blocks
       procedure VisitBlock(ABlock: TBlock);
@@ -155,6 +156,14 @@ begin
 
   VisitProc(AVarDecl.Expr);
   DecIndent;
+end;
+
+procedure TPrinter.VisitVarDecls(AVarDecls: TVarDecls);
+var
+  Decl: TDecl;
+begin
+  for Decl in AVarDecls.List do
+    VisitProc(Decl);
 end;
 
 procedure TPrinter.VisitVariable(AVariable: TVariable);

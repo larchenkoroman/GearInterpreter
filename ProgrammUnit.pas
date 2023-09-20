@@ -67,12 +67,10 @@ begin
       if IsAstInArgs then
       begin
         Language.ExecutePrintAST(InputFileName);
-        Readln;
       end
       else if IsExecuteInArgs then
       begin
         Language.ExecuteFromFile(InputFileName);
-        Readln;
       end
       else
         Language.ExecuteFromPrompt;

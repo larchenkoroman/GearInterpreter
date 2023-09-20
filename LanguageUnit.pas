@@ -53,7 +53,7 @@ end;
 
 class procedure Language.ExecuteFromFile(const ASource: string);
 begin
-  WriteLn('Gear Interpreter ', GearVersion, ' - (c) J. de Haan 2018', sLineBreak);
+  WriteLn('Gear Interpreter ', GearVersion, ' - (c) Roman Ltd 2023');
   Language.Execute(ASource, itFile);
 end;
 
@@ -64,7 +64,7 @@ var
 begin
   Source := '';
   Quit := False;
-  WriteLn('Gear REPL ', GearVersion, ' - (c) J. de Haan 2018 & Roman Ltd', sLineBreak);
+  WriteLn('Gear REPL ', GearVersion, ' - (c) Roman Ltd 2023', sLineBreak);
   while not Quit do
   begin
     Writeln;
@@ -83,7 +83,7 @@ var
   Tree: TProduct;
 begin
   Tree := nil;
-  WriteLn('Gear AST ', GearVersion, ' - (c) J. de Haan 2018', sLineBreak);
+  WriteLn('Gear AST ', GearVersion, ' - (c) Roman Ltd 2023');
   try
     Parser := TParser.Create(TLexer.Create(TReader.Create(ASource, itFile)));
     Tree := Parser.Parse;

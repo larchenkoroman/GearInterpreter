@@ -29,6 +29,7 @@ type
       //declarations
       procedure VisitIdentifier(AIdentifier: TIdentifier);
       procedure VisitVarDecl(AVarDecl: TVarDecl);
+      procedure VisitVarDecls(AVarDecls: TVarDecls);
       function VisitVariable(AVariable: TVariable): Variant;
       //blocks
       procedure VisitBlock(ABlock: TBlock);
@@ -89,7 +90,7 @@ begin
   if VarIsNull(NewValue) and (Op.TokenType = ttAssign) then
     Exit(Null);
 
-  if OldType <> NewType then
+  if OldType <> NewType then //добавить *= для строк
     raise ERuntimeError.Create(ID, Format(ErrIncompatibleTypes, [OldType, NewType]));
 
   if not VarIsNull(OldValue) then begin
@@ -220,6 +221,14 @@ procedure TInterpreter.VisitVarDecl(AVarDecl: TVarDecl);
 begin
   CheckDuplicate(AVarDecl.Identifier, 'Variable');
   FCurrentSpace.Store(AVarDecl.Identifier, VisitFunc(AVarDecl.Expr));
+end;
+
+procedure TInterpreter.VisitVarDecls(AVarDecls: TVarDecls);
+var
+  Decl: TDecl;
+begin
+  for Decl in AVarDecls.List do
+    VisitProc(Decl);
 end;
 
 function TInterpreter.VisitVariable(AVariable: TVariable): Variant;

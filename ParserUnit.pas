@@ -45,6 +45,7 @@ type
       //Declarations
       function ParseDecl: TDecl;
       function ParseVarDecl(AIsConst: Boolean): TDecl;
+      function ParseVarDecls(AIsConst: Boolean): TDecl;
       function ParseIdentifier: TIdentifier;
       //Blocks
       function ParseNode: TNode;
@@ -191,7 +192,7 @@ function TParser.ParseDecl: TDecl;
 begin
   Result := nil;
   case CurrentToken.TokenType of
-    ttVar, ttConst: Result := ParseVarDecl(CurrentToken.TokenType = ttConst);
+    ttVar, ttConst: Result := ParseVarDecls(CurrentToken.TokenType = ttConst);
   end;
 end;
 
@@ -364,10 +365,25 @@ var
   Token: TToken;
 begin
   Token := CurrentToken;
-  Next; //skip var or const
   Identifier := ParseIdentifier;
   Expect(ttAssign);
   Result := TVarDecl.Create(Identifier, ParseExpr, Token, AIsConst);
+end;
+
+
+function TParser.ParseVarDecls(AIsConst: Boolean): TDecl;
+var
+  VarDecls: TVarDecls;
+begin
+  VarDecls := TVarDecls.Create(TDeclList.Create(), CurrentToken);
+  Next; // skip var or const
+  VarDecls.List.Add(ParseVarDecl(AIsConst));
+  while CurrentToken.TokenType = ttComma do
+  begin
+    Next; // skip ,
+    VarDecls.List.Add(ParseVarDecl(AIsConst));
+  end;
+  Result := VarDecls;
 end;
 
 function TParser.Peek: TToken;

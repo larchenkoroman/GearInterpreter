@@ -109,8 +109,8 @@ type
       destructor Destroy; override;
   end;
 
+  //Base class for declarations
   TDecl = class(TNode)
-    // Base class for statements
     private
       FIdentifier: TIdentifier;
     public
@@ -127,6 +127,17 @@ type
       property Expr: TExpr read FExpr;
       property IsConst: Boolean read FIsConst;
       constructor Create(AIdentifier: TIdentifier; AExpr: TExpr; AToken: TToken; AIsConst: Boolean);
+      destructor Destroy; override;
+  end;
+
+  TDeclList = TObjectList<TDecl>;
+
+  TVarDecls = class(TDecl)
+    private
+      FList: TDeclList;
+    public
+      property List: TDeclList read FList;
+      constructor Create(AList: TDeclList; AToken: TToken);
       destructor Destroy; override;
   end;
 
@@ -299,6 +310,22 @@ begin
 
   if Assigned(FExpr) then
     FreeAndNil(FExpr);
+
+  inherited;
+end;
+
+{ TVarDecls }
+
+constructor TVarDecls.Create(AList: TDeclList; AToken: TToken);
+begin
+  Inherited Create(Nil, AToken);
+  FList := AList;
+end;
+
+destructor TVarDecls.Destroy;
+begin
+  if Assigned(FList) then
+    FreeAndNil(FList);
 
   inherited;
 end;
