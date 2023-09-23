@@ -102,6 +102,7 @@
         <DCCReference Include="LanguageUnit.pas"/>
         <DCCReference Include="ProgrammUnit.pas"/>
         <DCCReference Include="MemoryUnit.pas"/>
+        <DCCReference Include="ResolverUnit.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

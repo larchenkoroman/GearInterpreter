@@ -15,7 +15,8 @@ type
   TErrors = class(TObjectList<TErrorItem>)
     function IsEmpty: Boolean;
     function ToString: string; override;
-    procedure Append(const ALine, ACol: Integer; const AMsg: string);
+    procedure Append(const ALine, ACol: Integer; const AMsg: string); overload;
+    procedure Append(const AToken: TToken; const AMsg: string); overload;
     procedure Reset;
   end;
 
@@ -42,6 +43,7 @@ begin
   Msg := AMsg;
 end;
 
+
 function TErrorItem.ToString: string;
 begin
   Result := Format('[%d,%d]: %s', [Line, Col, Msg]);
@@ -52,6 +54,11 @@ end;
 procedure TErrors.Append(const ALine, ACol: Integer; const AMsg: string);
 begin
   Add(TErrorItem.Create(ALine, ACol, AMsg));
+end;
+
+procedure TErrors.Append(const AToken: TToken; const AMsg: string);
+begin
+  Append(AToken.Line, AToken.Col, AMsg);
 end;
 
 function TErrors.IsEmpty: Boolean;

@@ -9,7 +9,8 @@ type
   TInterpreter = class(TVisitor)
     private
       FCurrentSpace: TMemorySpace;
-      function Lookup(Variable: TVariable): Variant;
+      FGlobals: TMemorySpace;
+      function Lookup(AVariable: TVariable): Variant;
       procedure CheckDuplicate(AIdentifier: TIdentifier; const ATypeName: String);
       function TypeOf(AValue: Variant): String;
       function getAssignValue(OldValue, NewValue: Variant; ID, Op: TToken): Variant;
@@ -18,6 +19,7 @@ type
       constructor Create;
       destructor Destroy; override;
       procedure Execute(Tree: TProduct);
+      property Globals: TMemorySpace read FGlobals;
     published
       //expressions
       function VisitBinaryExpr(ABinaryExpr: TBinaryExpr): Variant;
@@ -46,7 +48,10 @@ const
 
 procedure TInterpreter.Assign(AVariable: TVariable; AValue: Variant);
 begin
-  FCurrentSpace.Update(AVariable.Identifier, AValue);
+ if AVariable.Distance >= 0 then
+    FCurrentSpace.UpdateAt(AVariable.Distance, AVariable.Identifier, AValue)
+  else
+    Globals.Update(AVariable.Identifier, AValue);
 end;
 
 procedure TInterpreter.CheckDuplicate(AIdentifier: TIdentifier; const ATypeName: String);
@@ -57,7 +62,8 @@ end;
 
 constructor TInterpreter.Create;
 begin
-  FCurrentSpace := TMemorySpace.Create;
+  FGlobals := TMemorySpace.Create;
+  FCurrentSpace := FGlobals;
 end;
 
 destructor TInterpreter.Destroy;
@@ -90,8 +96,14 @@ begin
   if VarIsNull(NewValue) and (Op.TokenType = ttAssign) then
     Exit(Null);
 
-  if OldType <> NewType then //добавить *= для строк
+  if    (OldType <> NewType)
+    and not (    (OldType = 'String')
+             and (NewType = 'Number')
+             and (Op.TokenType = ttMulIs) // для строк допустимо *=
+            ) then
+  begin
     raise ERuntimeError.Create(ID, Format(ErrIncompatibleTypes, [OldType, NewType]));
+  end;
 
   if not VarIsNull(OldValue) then begin
     if Op.TokenType <> ttAssign then
@@ -108,9 +120,12 @@ begin
   Raise ERuntimeError.Create(ID, Format(ErrIncompatibleTypes, [OldType, NewType]));
 end;
 
-function TInterpreter.Lookup(Variable: TVariable): Variant;
+function TInterpreter.Lookup(AVariable: TVariable): Variant;
 begin
-  Result := FCurrentSpace.Load(Variable.Identifier);
+  if AVariable.Distance >= 0 then
+    Result := FCurrentSpace.LoadAt(AVariable.Distance, AVariable.Identifier.Text)
+  else
+    Result := Globals.Load(AVariable.Identifier);
 end;
 
 function TInterpreter.TypeOf(AValue: Variant): String;
@@ -167,9 +182,16 @@ end;
 procedure TInterpreter.VisitBlock(ABlock: TBlock);
 var
   Node: TNode;
+  EnclosingSpace: TMemorySpace;
 begin
-  for Node in ABlock.Nodes do
-    VisitProc(Node);
+  EnclosingSpace := FCurrentSpace;
+  try
+    FCurrentSpace := TMemorySpace.Create(EnclosingSpace);
+    for Node in ABlock.Nodes do
+      VisitProc(Node);
+  finally
+    FCurrentSpace := EnclosingSpace;
+  end;
 end;
 
 function TInterpreter.VisitConstExpr(AConstExpr: TConstExpr): Variant;

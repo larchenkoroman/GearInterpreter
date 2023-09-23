@@ -3,7 +3,7 @@ unit LanguageUnit;
 interface
 
 uses
-  System.Classes, System.SysUtils, ReaderUnit, ParserUnit, LexerUnit, AstUnit, ErrorUnit, InterpreterUnit, PrinterUnit;
+  System.Classes, System.SysUtils, ReaderUnit, ParserUnit, LexerUnit, AstUnit, ErrorUnit, InterpreterUnit, PrinterUnit, ResolverUnit;
 
 type
   Language = record
@@ -30,6 +30,7 @@ var
   Lexer: TLexer;
   Parser: TParser;
   Tree: TProduct;
+  Resolver: TResolver;
 begin
   Tree := nil;
   try
@@ -37,6 +38,10 @@ begin
     Lexer := TLexer.Create(Reader);
     Parser := TParser.Create(Lexer);
     Tree := Parser.Parse;
+
+    Resolver := TResolver.Create;
+    Resolver.Resolve(Tree);
+
     if not Errors.IsEmpty then
       Writeln(Errors.ToString)
     else
@@ -48,6 +53,7 @@ begin
     FreeAndNil(Reader);
     FreeAndNil(Lexer);
     FreeAndNil(Parser);
+    FreeAndNil(Resolver);
   end;
 end;
 

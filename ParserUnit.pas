@@ -184,7 +184,7 @@ end;
 function TParser.ParseBlock: TBlock;
 begin
   Result := TBlock.Create(TNodeList.Create(), CurrentToken);
-  while CurrentToken.TokenType in (DeclStartSet + StmtStartSet) do
+  while not (CurrentToken.TokenType in BlockEndSet) do
     Result.Nodes.Add(ParseNode);
 end;
 

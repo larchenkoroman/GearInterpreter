@@ -76,8 +76,10 @@ type
   TVariable = class(TFactorExpr)
     private
       FIdentifier: TIdentifier;
+      FDistance: Integer;
     public
       property Identifier: TIdentifier read FIdentifier;
+      property Distance: Integer read FDistance write FDistance;
       constructor Create(AIdentifier: TIdentifier);
       destructor Destroy; override;
   end;
@@ -283,6 +285,7 @@ constructor TVariable.Create(AIdentifier: TIdentifier);
 begin
   inherited Create(AIdentifier.Token);
   FIdentifier := AIdentifier;
+  FDistance := -1;
 end;
 
 destructor TVariable.Destroy;
