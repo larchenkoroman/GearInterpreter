@@ -28,6 +28,7 @@ type
       //statements
       procedure VisitPrintStmt(APrintStmt: TPrintStmt);
       procedure VisitAssignStmt(AAssignStmt: TAssignStmt);
+      procedure VisitIfStmt(AIfStmt: TIfStmt);
       //declarations
       procedure VisitIdentifier(AIdentifier: TIdentifier);
       procedure VisitVarDecl(AVarDecl: TVarDecl);
@@ -45,6 +46,7 @@ implementation
 const
   ErrDuplicateID = 'Duplicate identifier: %s "%s" is already declared.';
   ErrIncompatibleTypes = 'Incompatible types in assignment: %s vs. %s.';
+  ErrConditionNotBoolean = 'Condition is not Boolean.';
 
 procedure TInterpreter.Assign(AVariable: TVariable; AValue: Variant);
 begin
@@ -146,10 +148,13 @@ procedure TInterpreter.VisitAssignStmt(AAssignStmt: TAssignStmt);
 var
   OldValue, NewValue, Value: Variant;
 begin
-  OldValue := Lookup(AAssignStmt.Variable);
-  NewValue := VisitFunc(AAssignStmt.Expr);
-  Value := getAssignValue(OldValue, NewValue, AAssignStmt.Variable.Token, AAssignStmt.Op);
-  Assign(AAssignStmt.Variable, Value);
+  if Assigned(AAssignStmt) then
+  begin
+    OldValue := Lookup(AAssignStmt.Variable);
+    NewValue := VisitFunc(AAssignStmt.Expr);
+    Value := getAssignValue(OldValue, NewValue, AAssignStmt.Variable.Token, AAssignStmt.Op);
+    Assign(AAssignStmt.Variable, Value);
+  end;
 end;
 
 function TInterpreter.VisitBinaryExpr(ABinaryExpr: TBinaryExpr): Variant;
@@ -204,6 +209,23 @@ begin
 
 end;
 
+procedure TInterpreter.VisitIfStmt(AIfStmt: TIfStmt);
+var
+  Condition: Variant;
+  SavedSpace: TMemorySpace;
+begin
+  Condition := VisitFunc(AIfStmt.Condition);
+  if varIsType(Condition, varBoolean) then
+  begin
+    if Condition then
+      VisitProc(AIfStmt.ThenPart)
+    else if Assigned(AIfStmt.ElsePart) then
+      VisitProc(AIfStmt.ElsePart)
+  end
+  else
+    Raise ERuntimeError.Create(AIfStmt.Token, ErrConditionNotBoolean);
+end;
+
 procedure TInterpreter.VisitPrintStmt(APrintStmt: TPrintStmt);
 var
   Value: String;
@@ -217,6 +239,7 @@ begin
     Value := StringReplace(Value, '\t', #9, [rfReplaceAll]);
     Write(Value);
   end;
+  Writeln;
 end;
 
 procedure TInterpreter.VisitProduct(AProduct: TProduct);
@@ -241,8 +264,11 @@ end;
 
 procedure TInterpreter.VisitVarDecl(AVarDecl: TVarDecl);
 begin
-  CheckDuplicate(AVarDecl.Identifier, 'Variable');
-  FCurrentSpace.Store(AVarDecl.Identifier, VisitFunc(AVarDecl.Expr));
+  if Assigned(AVarDecl) then
+  begin
+    CheckDuplicate(AVarDecl.Identifier, 'Variable');
+    FCurrentSpace.Store(AVarDecl.Identifier, VisitFunc(AVarDecl.Expr));
+  end;
 end;
 
 procedure TInterpreter.VisitVarDecls(AVarDecls: TVarDecls);

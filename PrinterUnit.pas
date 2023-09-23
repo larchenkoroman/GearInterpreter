@@ -25,7 +25,8 @@ type
       procedure VisitConstExpr(AConstExpr: TConstExpr);
       procedure VisitUnaryExpr(AUnaryExpr: TUnaryExpr);
       //statements
-      procedure VisitAssignStmt(AssignStmt: TAssignStmt);
+      procedure VisitAssignStmt(AAssignStmt: TAssignStmt);
+      procedure VisitIfStmt(AIfStmt: TIfStmt);
       //declarattions
       procedure VisitIdentifier(AIdentifier: TIdentifier);
       procedure VisitVarDecl(AVarDecl: TVarDecl);
@@ -63,13 +64,13 @@ begin
   Writeln;
 end;
 
-procedure TPrinter.VisitAssignStmt(AssignStmt: TAssignStmt);
+procedure TPrinter.VisitAssignStmt(AAssignStmt: TAssignStmt);
 begin
   IncIndent;
-  VisitNode(AssignStmt);
-  WriteLn(FIndent, '(', AssignStmt.Op.TokenType.toString, ')');
-  VisitProc(AssignStmt.Variable);
-  VisitProc(AssignStmt.Expr);
+  VisitNode(AAssignStmt);
+  WriteLn(FIndent, '(', AAssignStmt.Op.TokenType.toString, ')');
+  VisitProc(AAssignStmt.Variable);
+  VisitProc(AAssignStmt.Expr);
   DecIndent;
 end;
 
@@ -104,6 +105,23 @@ procedure TPrinter.VisitIdentifier(AIdentifier: TIdentifier);
 begin
   IncIndent;
   Writeln(FIndent + 'Identifier: ' + AIdentifier.Text);
+  DecIndent;
+end;
+
+procedure TPrinter.VisitIfStmt(AIfStmt: TIfStmt);
+begin
+  IncIndent;
+  VisitNode(AIfStmt);
+  VisitProc(AIfStmt.Condition);
+  IncIndent;
+  WriteLn(FIndent, 'ThenPart:');
+  VisitProc(AIfStmt.ThenPart);
+  if Assigned(AIfStmt.ElsePart) then
+  begin
+    WriteLn(FIndent, 'ElsePart:');
+    VisitProc(AIfStmt.ElsePart);
+  end;
+  DecIndent;
   DecIndent;
 end;
 

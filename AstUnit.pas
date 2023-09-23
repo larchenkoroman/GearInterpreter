@@ -111,6 +111,19 @@ type
       destructor Destroy; override;
   end;
 
+  TIfStmt = class(TStmt)
+    private
+      FCondition: TExpr;
+      FThenPart: TBlock;
+      FElsePart: TBlock;
+    public
+      property Condition: TExpr read FCondition;
+      property ThenPart: TBlock read FThenPart;
+      property ElsePart: TBlock read FElsePart;
+      constructor Create(ACondition: TExpr; AThenPart, AElsePart: TBlock; AToken: TToken);
+      destructor Destroy; override;
+  end;
+
   //Base class for declarations
   TDecl = class(TNode)
     private
@@ -331,6 +344,30 @@ begin
     FreeAndNil(FList);
 
   inherited;
+end;
+
+{ TIfStmt }
+
+constructor TIfStmt.Create(ACondition: TExpr; AThenPart, AElsePart: TBlock; AToken: TToken);
+begin
+  inherited Create(AToken);
+  FCondition := ACondition;
+  FThenPart := AThenPart;
+  FElsePart := AElsePart;
+end;
+
+destructor TIfStmt.Destroy;
+begin
+  if Assigned(FCondition) then
+    FreeAndNil(FCondition);
+
+  if Assigned(FThenPart) then
+    FreeAndNil(FThenPart);
+
+  if Assigned(FElsePart) then
+    FreeAndNil(FElsePart);
+
+  inherited Destroy;
 end;
 
 end.

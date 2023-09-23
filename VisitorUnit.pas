@@ -3,14 +3,14 @@ unit VisitorUnit;
 interface
 
 uses
-  System.Classes, System.SysUtils, System.Rtti;
+  System.Classes, System.SysUtils, System.Rtti, System.Variants;
 
 {$M+}
 type
   TVisitor = class
     published
-      function VisitFunc(Node: TObject): Variant; virtual;
-      procedure VisitProc(Node: TObject); virtual;
+      function VisitFunc(ANode: TObject): Variant; virtual;
+      procedure VisitProc(ANode: TObject); virtual;
   end;
 
 implementation
@@ -21,28 +21,32 @@ type
 
 { TVisitor }
 
-function TVisitor.VisitFunc(Node: TObject): Variant;
+function TVisitor.VisitFunc(ANode: TObject): Variant;
 var
   VisitName: string;
   VisitMethod: TMethod;
   DoVisit: TVisitFunc;
   SelfName: string;
 begin
+  Result := Null;
   // Build visitor name: e.g. VisitBinaryExpr from 'Visit' and TBinaryExpr
-  VisitName := 'Visit' + Copy(Node.ClassName, 2, 255); //remove T
-  SelfName := Self.ClassName;
-  VisitMethod.Data := Self;
-  VisitMethod.Code := Self.MethodAddress(VisitName);
-  if Assigned(VisitMethod.Code) then
+  if Assigned(ANode) then
   begin
-    DoVisit := TVisitFunc(VisitMethod);
-    Result := DoVisit(Node);
-  end
-  else
-    raise Exception.Create(Format('No %s.%s method was found.', [SelfName, VisitName]));
+    VisitName := 'Visit' + Copy(ANode.ClassName, 2, 255); //remove T
+    SelfName := Self.ClassName;
+    VisitMethod.Data := Self;
+    VisitMethod.Code := Self.MethodAddress(VisitName);
+    if Assigned(VisitMethod.Code) then
+    begin
+      DoVisit := TVisitFunc(VisitMethod);
+      Result := DoVisit(ANode);
+    end
+    else
+      raise Exception.Create(Format('No %s.%s method was found.', [SelfName, VisitName]));
+  end;
 end;
 
-procedure TVisitor.VisitProc(Node: TObject);
+procedure TVisitor.VisitProc(ANode: TObject);
 var
   VisitName: string;
   VisitMethod: TMethod;
@@ -50,17 +54,21 @@ var
   SelfName: string ;
 begin
  // Build visitor name: e.g. VisitBinaryExpr from 'Visit' and TBinaryExpr
-  VisitName := 'Visit' + Copy(Node.ClassName, 2, 255);  // remove 'T'
-  SelfName := Self.ClassName;
-  VisitMethod.Data := Self;
-  VisitMethod.Code := Self.MethodAddress(VisitName);
-  if Assigned(VisitMethod.Code) then begin
-    doVisit := TVisitProc(VisitMethod);
-    doVisit(Node);
-  end
-  else
-    Raise
-      Exception.Create(Format('No %s.%s method found.', [SelfName, VisitName]));
+   if Assigned(ANode) then
+   begin
+     VisitName := 'Visit' + Copy(ANode.ClassName, 2, 255);  // remove 'T'
+     SelfName := Self.ClassName;
+     VisitMethod.Data := Self;
+     VisitMethod.Code := Self.MethodAddress(VisitName);
+     if Assigned(VisitMethod.Code) then
+     begin
+       doVisit := TVisitProc(VisitMethod);
+       doVisit(ANode);
+     end
+     else
+       Raise
+         Exception.Create(Format('No %s.%s method found.', [SelfName, VisitName]));
+   end;
 end;
 
 end.

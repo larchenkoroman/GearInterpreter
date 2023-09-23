@@ -27,7 +27,7 @@ type
     ttFalse, ttTrue, ttNull, ttNumber, ttString, ttChar,
 
     //Symbols and punctuation marks
-    ttComma, ttDot, ttDotDot, ttAssign, ttQuestion, ttArrow, ttColon,
+    ttComma, ttDot, ttDotDot, ttAssign, ttQuestion, ttArrow,
     ttOpenParen, ttCloseParen, ttOpenBrace, ttCloseBrace,
     ttOpenBrack, ttCloseBrack, ttComment, ttEOF, ttNone
   );
@@ -128,7 +128,6 @@ begin
     ttAssign:      Result := '=';
     ttQuestion:    Result := '?';
     ttArrow:       Result := '=>';
-    ttColon:       Result := ':';
     ttOpenParen:   Result := '(';
     ttCloseParen:  Result := ')';
     ttOpenBrace:   Result := '{';

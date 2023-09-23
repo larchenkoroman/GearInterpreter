@@ -7,7 +7,7 @@ uses
 
 const
   DeclStartSet: TTokenTypeSet = [ttConst, ttVar];
-  StmtStartSet: TTokenTypeSet = [ttPrint, ttIdentifier];
+  StmtStartSet: TTokenTypeSet = [ttIf, ttPrint, ttIdentifier];
   BlockEndSet: TTokenTypeSet  = [ttElse, ttUntil, ttEnd, ttCase, ttEOF];
   AssignSet: TTokenTypeSet    = [ttPlusIs, ttMinusIs, ttMulIs, ttDivIs, ttRemainderIs, ttAssign];
 
@@ -42,6 +42,7 @@ type
       function ParseStmt: TStmt;
       function ParsePrintStmt: TStmt;
       function ParseAssignStmt:TStmt;
+      function ParseIfStmt: TStmt;
       //Declarations
       function ParseDecl: TDecl;
       function ParseVarDecl(AIsConst: Boolean): TDecl;
@@ -259,6 +260,28 @@ begin
   Result := TIdentifier.Create(Token);
 end;
 
+function TParser.ParseIfStmt: TStmt;
+var
+  Token, VarToken: TToken;
+  Condition: TExpr;
+  ThenPart: TBlock;
+  ElsePart: TBlock;
+begin
+  ElsePart := nil;
+  Token := CurrentToken;
+  Next; // skip if
+  Condition := ParseExpr;
+  Expect(ttThen);
+  ThenPart := ParseBlock;
+  if CurrentToken.TokenType = ttElse then
+  begin
+    Next; // skip else
+    ElsePart := ParseBlock;
+  end;
+  Expect(ttEnd);
+  Result := TIfStmt.Create(Condition, ThenPart, ElsePart, Token);
+end;
+
 function TParser.ParseMulExpr: TExpr;
 var
   MulOp: TToken;
@@ -339,9 +362,11 @@ function TParser.ParseStmt: TStmt;
 begin
   Result := nil;
   case CurrentToken.TokenType of
+    ttIf: Result := ParseIfStmt;
     ttPrint: Result := ParsePrintStmt;
+    ttAssign: ParseAssignStmt;
   else
-    Result := ParseAssignStmt;
+    Result := nil;
   end;
 end;
 

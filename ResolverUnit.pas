@@ -60,6 +60,7 @@ type
       // Stmt
       procedure VisitPrintStmt(APrintStmt: TPrintStmt);
       procedure VisitAssignStmt(AAssignStmt: TAssignStmt);
+      procedure VisitIfStmt(AIfStmt: TIfStmt);
       // Decl
       procedure VisitVarDecl(AVarDecl: TVarDecl);
       procedure VisitVarDecls(AVarDecls: TVarDecls);
@@ -182,6 +183,15 @@ begin
   if not Assigned(Result) then
     Errors.Append(AIdentifier.Token.Line, AIdentifier.Token.Col,
                     Format(ErrUndeclaredVar, [AIdentifier.Text]));
+end;
+
+procedure TResolver.VisitIfStmt(AIfStmt: TIfStmt);
+begin
+  VisitProc(AIfStmt.Condition);
+  VisitProc(AIfStmt.ThenPart);
+
+  if Assigned(AIfStmt.ElsePart) then
+    VisitProc(AIfStmt.ElsePart);
 end;
 
 procedure TResolver.VisitAssignStmt(AAssignStmt: TAssignStmt);

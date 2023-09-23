@@ -243,7 +243,6 @@ begin
          else
            AddToken(ttRemainder);
 
-    ':': AddToken(ttColon);
     '^': AddToken(ttPow);
     '(': AddToken(ttOpenParen);
     ')': AddToken(ttCloseParen);
