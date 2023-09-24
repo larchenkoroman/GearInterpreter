@@ -22,7 +22,5 @@ uses
   ResolverUnit in 'ResolverUnit.pas';
 
 begin
-
   ProgrammUnit.DoRun;
-
 end.

@@ -7,7 +7,7 @@ uses
 
 const
   DeclStartSet: TTokenTypeSet = [ttConst, ttVar];
-  StmtStartSet: TTokenTypeSet = [ttIf, ttPrint, ttIdentifier];
+  StmtStartSet: TTokenTypeSet = [ttIf, ttWhile, ttPrint, ttIdentifier];
   BlockEndSet: TTokenTypeSet  = [ttElse, ttUntil, ttEnd, ttCase, ttEOF];
   AssignSet: TTokenTypeSet    = [ttPlusIs, ttMinusIs, ttMulIs, ttDivIs, ttRemainderIs, ttAssign];
 
@@ -43,6 +43,7 @@ type
       function ParsePrintStmt: TStmt;
       function ParseAssignStmt:TStmt;
       function ParseIfStmt: TStmt;
+      function ParseWhileStmt: TStmt;
       //Declarations
       function ParseDecl: TDecl;
       function ParseVarDecl(AIsConst: Boolean): TDecl;
@@ -360,13 +361,12 @@ end;
 
 function TParser.ParseStmt: TStmt;
 begin
-  Result := nil;
   case CurrentToken.TokenType of
-    ttIf: Result := ParseIfStmt;
-    ttPrint: Result := ParsePrintStmt;
-    ttAssign: ParseAssignStmt;
+    ttIf:     Result := ParseIfStmt;
+    ttWhile:  Result := ParseWhileStmt;
+    ttPrint:  Result := ParsePrintStmt;
   else
-    Result := nil;
+    Result := ParseAssignStmt;
   end;
 end;
 
@@ -409,6 +409,21 @@ begin
     VarDecls.List.Add(ParseVarDecl(AIsConst));
   end;
   Result := VarDecls;
+end;
+
+function TParser.ParseWhileStmt: TStmt;
+var
+  Token: TToken;
+  Condition: TExpr;
+  Block: TBlock;
+begin
+  Token := CurrentToken;
+  Next; // skip while
+  Condition := ParseExpr;
+  Expect(ttDo);
+  Block := ParseBlock;
+  Expect(ttEnd);
+  Result := TWhileStmt.Create(Condition, Block, Token);
 end;
 
 function TParser.Peek: TToken;

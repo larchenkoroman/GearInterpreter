@@ -61,6 +61,7 @@ type
       procedure VisitPrintStmt(APrintStmt: TPrintStmt);
       procedure VisitAssignStmt(AAssignStmt: TAssignStmt);
       procedure VisitIfStmt(AIfStmt: TIfStmt);
+      procedure VisitWhileStmt(AWhileStmt: TWhileStmt);
       // Decl
       procedure VisitVarDecl(AVarDecl: TVarDecl);
       procedure VisitVarDecls(AVarDecls: TVarDecls);
@@ -302,6 +303,12 @@ begin
 
     ResolveLocal(AVariable);
   end;
+end;
+
+procedure TResolver.VisitWhileStmt(AWhileStmt: TWhileStmt);
+begin
+  VisitProc(AWhileStmt.Condition);
+  VisitProc(AWhileStmt.Block);
 end;
 
 { TScopes }

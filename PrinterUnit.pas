@@ -27,6 +27,7 @@ type
       //statements
       procedure VisitAssignStmt(AAssignStmt: TAssignStmt);
       procedure VisitIfStmt(AIfStmt: TIfStmt);
+      procedure VisitWhileStmt(AWhileStmt: TWhileStmt);
       //declarattions
       procedure VisitIdentifier(AIdentifier: TIdentifier);
       procedure VisitVarDecl(AVarDecl: TVarDecl);
@@ -188,6 +189,18 @@ procedure TPrinter.VisitVariable(AVariable: TVariable);
 begin
   IncIndent;
   WriteLn(FIndent, 'Var: ', AVariable.Identifier.Text);
+  DecIndent;
+end;
+
+procedure TPrinter.VisitWhileStmt(AWhileStmt: TWhileStmt);
+begin
+  IncIndent;
+  VisitNode(AWhileStmt);
+  VisitProc(AWhileStmt.Condition);
+  IncIndent;
+  WriteLn(FIndent, 'Loop:');
+  VisitProc(AWhileStmt.Block);
+  DecIndent;
   DecIndent;
 end;
 

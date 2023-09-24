@@ -124,6 +124,17 @@ type
       destructor Destroy; override;
   end;
 
+  TWhileStmt = class(TStmt)
+    private
+      FCondition: TExpr;
+      FBlock: TBlock;
+    public
+      property Condition: TExpr read FCondition;
+      property Block: TBlock read FBlock;
+      constructor Create(ACondition: TExpr; ABlock: TBlock; AToken: TToken);
+      destructor Destroy; override;
+  end;
+
   //Base class for declarations
   TDecl = class(TNode)
     private
@@ -369,6 +380,25 @@ begin
 
   inherited Destroy;
 end;
+
+{ TWhileStmt }
+
+constructor TWhileStmt.Create(ACondition: TExpr; ABlock: TBlock; AToken: TToken);
+begin
+  inherited Create(AToken);
+  FCondition := ACondition;
+  FBlock := ABlock;
+end;
+
+destructor TWhileStmt.Destroy;
+begin
+  if Assigned(FCondition) then
+    FreeAndNil(FCondition);
+
+  if Assigned(FBlock) then
+    FreeAndNil(FBlock);
+
+  inherited Destroy;end;
 
 end.
 

@@ -29,6 +29,7 @@ type
       procedure VisitPrintStmt(APrintStmt: TPrintStmt);
       procedure VisitAssignStmt(AAssignStmt: TAssignStmt);
       procedure VisitIfStmt(AIfStmt: TIfStmt);
+      procedure VisitWhileStmt(AWhileStmt: TWhileStmt);
       //declarations
       procedure VisitIdentifier(AIdentifier: TIdentifier);
       procedure VisitVarDecl(AVarDecl: TVarDecl);
@@ -215,7 +216,7 @@ var
   SavedSpace: TMemorySpace;
 begin
   Condition := VisitFunc(AIfStmt.Condition);
-  if varIsType(Condition, varBoolean) then
+  if VarIsType(Condition, varBoolean) then
   begin
     if Condition then
       VisitProc(AIfStmt.ThenPart)
@@ -282,6 +283,23 @@ end;
 function TInterpreter.VisitVariable(AVariable: TVariable): Variant;
 begin
    Result := Lookup(AVariable);
+end;
+
+procedure TInterpreter.VisitWhileStmt(AWhileStmt: TWhileStmt);
+var
+  Condition: Variant;
+begin
+  Condition := VisitFunc(AWhileStmt.Condition);
+  if VarIsType(Condition, varBoolean) then
+  begin
+    while Condition do
+    begin
+      VisitProc(AWhileStmt.Block);
+      Condition := VisitFunc(AWhileStmt.Condition);
+    end;
+  end
+  else
+    Raise ERuntimeError.Create(AWhileStmt.Token, ErrConditionNotBoolean);
 end;
 
 end.
