@@ -135,6 +135,18 @@ type
       destructor Destroy; override;
   end;
 
+  TRepeatStmt = class(TStmt)
+    private
+      FCondition: TExpr;
+      FBlock: TBlock;
+    public
+      property Condition: TExpr read FCondition;
+      property Block: TBlock read FBlock;
+      constructor Create(ACondition: TExpr; ABlock: TBlock; AToken: TToken);
+      destructor Destroy; override;
+  end;
+
+
   //Base class for declarations
   TDecl = class(TNode)
     private
@@ -166,6 +178,22 @@ type
       constructor Create(AList: TDeclList; AToken: TToken);
       destructor Destroy; override;
   end;
+
+  TForStmt = class(TStmt)
+    private
+      FVarDecl: TVarDecl;
+      FCondition: TExpr;
+      FIterator: TStmt;
+      FBlock: TBlock;
+    public
+      property VarDecl: TVarDecl read FVarDecl;
+      property Condition: TExpr read FCondition;
+      property Block: TBlock read FBlock;
+      property Iterator: TStmt read FIterator;
+      constructor Create(AVarDecl: TVarDecl; ACondition: TExpr; AIterator: TStmt; ABlock: TBlock; AToken: TToken);
+      destructor Destroy; override;
+  end;
+
 
 
   TProduct = class(TBlock)
@@ -398,7 +426,58 @@ begin
   if Assigned(FBlock) then
     FreeAndNil(FBlock);
 
-  inherited Destroy;end;
+  inherited Destroy;
+end;
+
+{ TRepeatStmt }
+
+constructor TRepeatStmt.Create(ACondition: TExpr; ABlock: TBlock; AToken: TToken);
+begin
+  inherited Create(AToken);
+  FCondition := ACondition;
+  FBlock := ABlock;
+end;
+
+destructor TRepeatStmt.Destroy;
+begin
+  if Assigned(FCondition) then
+    FreeAndNil(FCondition);
+
+  if Assigned(FBlock) then
+    FreeAndNil(FBlock);
+
+  inherited Destroy;
+end;
+
+
+{ TForStmt }
+
+constructor TForStmt.Create(AVarDecl: TVarDecl; ACondition: TExpr; AIterator: TStmt; ABlock: TBlock; AToken: TToken);
+begin
+  inherited Create(AToken);
+
+  FVarDecl := AVarDecl;
+  FCondition := ACondition;
+  FIterator := AIterator;
+  FBlock := ABlock;
+end;
+
+destructor TForStmt.Destroy;
+begin
+  if Assigned(FVarDecl) then
+    FreeAndNil(FVarDecl);
+
+  if Assigned(FCondition) then
+    FreeAndNil(FCondition);
+
+  if Assigned(FIterator) then
+    FreeAndNil(FIterator);
+
+  if Assigned(FBlock) then
+    FreeAndNil(FBlock);
+
+  inherited;
+end;
 
 end.
 

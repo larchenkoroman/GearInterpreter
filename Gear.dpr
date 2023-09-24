@@ -23,4 +23,6 @@ uses
 
 begin
   ProgrammUnit.DoRun;
+//  Writeln('press enter...');
+//  Readln;
 end.

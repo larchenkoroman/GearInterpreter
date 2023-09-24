@@ -62,6 +62,8 @@ type
       procedure VisitAssignStmt(AAssignStmt: TAssignStmt);
       procedure VisitIfStmt(AIfStmt: TIfStmt);
       procedure VisitWhileStmt(AWhileStmt: TWhileStmt);
+      procedure VisitRepeatStmt(ARepeatStmt: TRepeatStmt);
+      procedure VisitForStmt(AForStmt: TForStmt);
       // Decl
       procedure VisitVarDecl(AVarDecl: TVarDecl);
       procedure VisitVarDecls(AVarDecls: TVarDecls);
@@ -236,6 +238,16 @@ begin
 //do nothing
 end;
 
+procedure TResolver.VisitForStmt(AForStmt: TForStmt);
+begin
+  BeginScope;
+  VisitProc(AForStmt.VarDecl);
+  VisitProc(AForStmt.Condition);
+  VisitProc(AForStmt.Iterator);
+  VisitProc(AForStmt.Block);
+  EndScope;
+end;
+
 procedure TResolver.VisitIdentifier(AIdentifier: TIdentifier);
 begin
 //do nothing
@@ -261,6 +273,11 @@ begin
   for Node in AProduct.Nodes do
     VisitProc(Node);
 end;
+
+procedure TResolver.VisitRepeatStmt(ARepeatStmt: TRepeatStmt);
+begin
+  VisitProc(ARepeatStmt.Condition);
+  VisitProc(ARepeatStmt.Block);end;
 
 procedure TResolver.VisitUnaryExpr(AUnaryExpr: TUnaryExpr);
 begin

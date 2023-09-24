@@ -28,6 +28,8 @@ type
       procedure VisitAssignStmt(AAssignStmt: TAssignStmt);
       procedure VisitIfStmt(AIfStmt: TIfStmt);
       procedure VisitWhileStmt(AWhileStmt: TWhileStmt);
+      procedure VisitRepeatStmt(RepeatStmt: TRepeatStmt);
+      procedure VisitForStmt(AForStmt: TForStmt);
       //declarattions
       procedure VisitIdentifier(AIdentifier: TIdentifier);
       procedure VisitVarDecl(AVarDecl: TVarDecl);
@@ -102,6 +104,21 @@ begin
   DecIndent;
 end;
 
+procedure TPrinter.VisitForStmt(AForStmt: TForStmt);
+begin
+  IncIndent;
+  VisitNode(AForStmt);
+  VisitProc(AForStmt.VarDecl);
+  Writeln(FIndent, 'Condition:');
+  VisitProc(AForStmt.Condition);
+  VisitProc(AForStmt.Iterator);
+  IncIndent;
+  WriteLn(FIndent, 'Loop:');
+  VisitProc(AForStmt.Block);
+  DecIndent;
+  DecIndent;
+end;
+
 procedure TPrinter.VisitIdentifier(AIdentifier: TIdentifier);
 begin
   IncIndent;
@@ -150,6 +167,18 @@ begin
   VisitNode(AProduct);
   for Node in AProduct.Nodes do
     VisitProc(Node);
+  DecIndent;
+end;
+
+procedure TPrinter.VisitRepeatStmt(RepeatStmt: TRepeatStmt);
+begin
+  IncIndent;
+  VisitNode(RepeatStmt);
+  VisitProc(RepeatStmt.Condition);
+  IncIndent;
+  WriteLn(FIndent, 'Loop:');
+  VisitProc(RepeatStmt.Block);
+  DecIndent;
   DecIndent;
 end;
 

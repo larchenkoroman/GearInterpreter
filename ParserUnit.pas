@@ -7,7 +7,7 @@ uses
 
 const
   DeclStartSet: TTokenTypeSet = [ttConst, ttVar];
-  StmtStartSet: TTokenTypeSet = [ttIf, ttWhile, ttPrint, ttIdentifier];
+  StmtStartSet: TTokenTypeSet = [ttIf, ttWhile, ttRepeat, ttFor, ttPrint, ttIdentifier];
   BlockEndSet: TTokenTypeSet  = [ttElse, ttUntil, ttEnd, ttCase, ttEOF];
   AssignSet: TTokenTypeSet    = [ttPlusIs, ttMinusIs, ttMulIs, ttDivIs, ttRemainderIs, ttAssign];
 
@@ -44,6 +44,8 @@ type
       function ParseAssignStmt:TStmt;
       function ParseIfStmt: TStmt;
       function ParseWhileStmt: TStmt;
+      function ParseRepeatStmt: TStmt;
+      function ParseForStmt: TStmt;
       //Declarations
       function ParseDecl: TDecl;
       function ParseVarDecl(AIsConst: Boolean): TDecl;
@@ -252,6 +254,28 @@ begin
   end;
 end;
 
+function TParser.ParseForStmt: TStmt;
+var
+  Token: TToken;
+   VarDecl: TVarDecl;
+  Condition: TExpr;
+  Iterator: TStmt;
+  Block: TBlock;
+begin
+  Token := CurrentToken;
+  Next; // skip for
+  Next; // skip var
+  VarDecl := ParseVarDecl(False) as TVarDecl;
+  Expect(ttComma);
+  Condition := ParseExpr;
+  Expect(ttComma);
+  Iterator := ParseAssignStmt;
+  Expect(ttDo);
+  Block := ParseBlock;
+  Expect(ttEnd);
+  Result := TForStmt.Create(VarDecl, Condition, Iterator, Block, Token);
+end;
+
 function TParser.ParseIdentifier: TIdentifier;
 var
   Token: TToken;
@@ -359,11 +383,27 @@ begin
   Result := TProduct.Create(ParseBlock.Nodes, Token);
 end;
 
+function TParser.ParseRepeatStmt: TStmt;
+var
+  Token: TToken;
+  Condition: TExpr;
+  Block: TBlock;
+begin
+  Token := CurrentToken;
+  Next; // skip repeat
+  Block := ParseBlock;
+  Expect(ttUntil);
+  Condition := ParseExpr;
+  Result := TRepeatStmt.Create(Condition, Block, Token);
+end;
+
 function TParser.ParseStmt: TStmt;
 begin
   case CurrentToken.TokenType of
     ttIf:     Result := ParseIfStmt;
     ttWhile:  Result := ParseWhileStmt;
+    ttRepeat: Result := ParseRepeatStmt;
+    ttFor:    Result := ParseForStmt;
     ttPrint:  Result := ParsePrintStmt;
   else
     Result := ParseAssignStmt;

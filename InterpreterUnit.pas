@@ -30,6 +30,8 @@ type
       procedure VisitAssignStmt(AAssignStmt: TAssignStmt);
       procedure VisitIfStmt(AIfStmt: TIfStmt);
       procedure VisitWhileStmt(AWhileStmt: TWhileStmt);
+      procedure VisitRepeatStmt(ARepeatStmt: TRepeatStmt);
+      procedure VisitForStmt(AForStmt: TForStmt);
       //declarations
       procedure VisitIdentifier(AIdentifier: TIdentifier);
       procedure VisitVarDecl(AVarDecl: TVarDecl);
@@ -205,6 +207,33 @@ begin
   Result := AConstExpr.Value;
 end;
 
+procedure TInterpreter.VisitForStmt(AForStmt: TForStmt);
+var
+  Condition: Variant;
+  SavedSpace: TMemorySpace;
+begin
+  SavedSpace := FCurrentSpace;
+  try
+    FCurrentSpace := TMemorySpace.Create(SavedSpace);
+    VisitProc(AForStmt.VarDecl);
+    Condition := VisitFunc(AForStmt.Condition);
+    if VarIsType(Condition, varBoolean) then
+    begin
+      while Condition do
+      begin
+        VisitProc(AForStmt.Block);
+        VisitProc(AForStmt.Iterator);
+        Condition := VisitFunc(AForStmt.Condition);
+      end;
+    end
+    else
+      Raise ERuntimeError.Create(AForStmt.Token, ErrConditionNotBoolean);
+  finally
+    FreeAndNil(FCurrentSpace);
+    FCurrentSpace := SavedSpace;
+  end;
+end;
+
 procedure TInterpreter.VisitIdentifier(AIdentifier: TIdentifier);
 begin
 
@@ -249,6 +278,22 @@ var
 begin
   for Node in AProduct.Nodes do
     VisitProc(Node);
+end;
+
+procedure TInterpreter.VisitRepeatStmt(ARepeatStmt: TRepeatStmt);
+var
+  Condition: Variant;
+begin
+  Condition := VisitFunc(ARepeatStmt.Condition);
+  if VarIsType(Condition, varBoolean) then
+  begin
+    repeat
+      VisitProc(ARepeatStmt.Block);
+      Condition := VisitFunc(ARepeatStmt.Condition);
+    until Condition;
+  end
+  else
+    Raise ERuntimeError.Create(ARepeatStmt.Token, ErrConditionNotBoolean);
 end;
 
 function TInterpreter.VisitUnaryExpr(AUnaryExpr: TUnaryExpr): Variant;
