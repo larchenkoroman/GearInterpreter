@@ -240,20 +240,32 @@ begin
 end;
 
 procedure TInterpreter.VisitIfStmt(AIfStmt: TIfStmt);
+
+  function isBooleanAndTrue(Condition: TExpr): Boolean;
+  var
+    Value: Variant;
+  begin
+    Value := VisitFunc(Condition);
+    if VarIsType(Value, varBoolean) then
+      Result := Boolean(Value)
+    else
+      Raise ERuntimeError.Create(AIfStmt.Token, ErrConditionNotBoolean);
+  end;
+
 var
   Condition: Variant;
-  SavedSpace: TMemorySpace;
 begin
-  Condition := VisitFunc(AIfStmt.Condition);
-  if VarIsType(Condition, varBoolean) then
+  if isBooleanAndTrue(AIfStmt.Condition) then
+    VisitProc(AIfStmt.ThenPart)
+  else if Assigned(AIfStmt.ElseIfPart) then
   begin
-    if Condition then
-      VisitProc(AIfStmt.ThenPart)
+    if isBooleanAndTrue(AIfStmt.ElseIfExpr) then
+      VisitProc(AIfStmt.ElseIfPart)
     else if Assigned(AIfStmt.ElsePart) then
-      VisitProc(AIfStmt.ElsePart)
+      VisitProc(AIfStmt.ElsePart);
   end
-  else
-    Raise ERuntimeError.Create(AIfStmt.Token, ErrConditionNotBoolean);
+  else if Assigned(AIfStmt.ElsePart) then
+    VisitProc(AIfStmt.ElsePart);
 end;
 
 procedure TInterpreter.VisitPrintStmt(APrintStmt: TPrintStmt);

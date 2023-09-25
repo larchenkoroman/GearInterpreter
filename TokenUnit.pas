@@ -15,11 +15,11 @@ type
 
     //Keywords declarations
     ttArray, ttClass, ttDictionary, ttEach, ttEnum, ttExtension, ttFunc,
-    ttInit, ttConst, ttVal, ttVar, ttTrait,
+    ttInit, ttConst, ttVal, ttVar,
 
     //Keywords statements and expressions
-    ttIf, ttThen, ttElse, ttWhile, ttDo, ttRepeat, ttUntil,
-    ttFor, ttIn, ttIs, ttReturn, ttEnd, ttMatch, ttWhere, ttSwitch, ttCase,
+    ttIf, ttThen, ttElse, ttElseIf, ttWhile, ttDo, ttRepeat, ttUntil,
+    ttFor, ttIn, ttIs, ttReturn, ttEnd, ttMatch,  ttSwitch, ttCase,
     ttEnsure, ttPrint, ttInherited, ttSelf, ttUse, ttBreak, ttOn,
     ttIdentifier,
 
@@ -190,17 +190,17 @@ initialization
   Keywords.Add('self', ttSelf);
   Keywords.Add('switch', ttSwitch);
   Keywords.Add('then', ttThen);
-  Keywords.Add('trait', ttTrait);
   Keywords.Add('until', ttUntil);
   Keywords.Add('use', ttUse);
   Keywords.Add('val', ttVal);
   Keywords.Add('var', ttVar);
-  Keywords.Add('where', ttWhere);
   Keywords.Add('while', ttWhile);
   Keywords.Add('or', ttOr);
   Keywords.Add('and', ttAnd);
   Keywords.Add('not', ttNot);
   Keywords.Add('xor', ttXor);
+  Keywords.Add('elseif', ttElseIf);
+
 
 finalization
   FreeAndNil(Keywords);

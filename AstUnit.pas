@@ -111,19 +111,6 @@ type
       destructor Destroy; override;
   end;
 
-  TIfStmt = class(TStmt)
-    private
-      FCondition: TExpr;
-      FThenPart: TBlock;
-      FElsePart: TBlock;
-    public
-      property Condition: TExpr read FCondition;
-      property ThenPart: TBlock read FThenPart;
-      property ElsePart: TBlock read FElsePart;
-      constructor Create(ACondition: TExpr; AThenPart, AElsePart: TBlock; AToken: TToken);
-      destructor Destroy; override;
-  end;
-
   TWhileStmt = class(TStmt)
     private
       FCondition: TExpr;
@@ -194,6 +181,24 @@ type
       destructor Destroy; override;
   end;
 
+  TIfStmt = class(TStmt)
+    private
+      FCondition: TExpr;
+      FThenPart: TBlock;
+      FElsePart: TBlock;
+      FElseIfExpr: TExpr;
+      FElseIfPart: TBlock;
+    public
+      property Condition: TExpr read FCondition;
+      property ThenPart: TBlock read FThenPart;
+      property ElsePart: TBlock read FElsePart;
+      property ElseIfExpr: TExpr read FElseIfExpr;
+      property ElseIfPart: TBlock read FElseIfPart;
+      constructor Create(ACondition, AElseIfExpr: TExpr;
+                         AThenPart, AElseIfPart, AElsePart: TBlock;
+                         AToken: TToken);
+      destructor Destroy; override;
+  end;
 
 
   TProduct = class(TBlock)
@@ -387,12 +392,16 @@ end;
 
 { TIfStmt }
 
-constructor TIfStmt.Create(ACondition: TExpr; AThenPart, AElsePart: TBlock; AToken: TToken);
+constructor TIfStmt.Create(ACondition, AElseIfExpr: TExpr;
+                           AThenPart, AElseIfPart, AElsePart: TBlock;
+                           AToken: TToken);
 begin
   inherited Create(AToken);
   FCondition := ACondition;
   FThenPart := AThenPart;
   FElsePart := AElsePart;
+  FElseIfExpr := AElseIfExpr;
+  FElseIfPart:= AElseIfPart;
 end;
 
 destructor TIfStmt.Destroy;
@@ -406,6 +415,10 @@ begin
   if Assigned(FElsePart) then
     FreeAndNil(FElsePart);
 
+  if Assigned(FElseIfExpr) then
+    FreeAndNil(FElseIfExpr);
+
+  if Assigned(FElseIfPart) then    FreeAndNil(FElseIfPart);
   inherited Destroy;
 end;
 

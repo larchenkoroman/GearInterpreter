@@ -134,6 +134,12 @@ begin
   IncIndent;
   WriteLn(FIndent, 'ThenPart:');
   VisitProc(AIfStmt.ThenPart);
+  if Assigned(AIfStmt.ElseIfPart) then
+  begin
+    WriteLn(FIndent, 'ElseIfPart:');
+    VisitProc(AIfStmt.ElseIfExpr);
+    VisitProc(AIfStmt.ElseIfPart);
+  end;
   if Assigned(AIfStmt.ElsePart) then
   begin
     WriteLn(FIndent, 'ElsePart:');

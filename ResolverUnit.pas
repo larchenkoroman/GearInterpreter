@@ -193,7 +193,11 @@ begin
   VisitProc(AIfStmt.Condition);
   VisitProc(AIfStmt.ThenPart);
 
-  if Assigned(AIfStmt.ElsePart) then
+  if Assigned(AIfStmt.ElseIfPart) then
+  begin
+    VisitProc(AIfStmt.ElseIfExpr);
+    VisitProc(AIfStmt.ElseIfPart);
+  end;  if Assigned(AIfStmt.ElsePart) then
     VisitProc(AIfStmt.ElsePart);
 end;
 

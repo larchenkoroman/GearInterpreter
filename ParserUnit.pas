@@ -8,7 +8,7 @@ uses
 const
   DeclStartSet: TTokenTypeSet = [ttConst, ttVar];
   StmtStartSet: TTokenTypeSet = [ttIf, ttWhile, ttRepeat, ttFor, ttPrint, ttIdentifier];
-  BlockEndSet: TTokenTypeSet  = [ttElse, ttUntil, ttEnd, ttCase, ttEOF];
+  BlockEndSet: TTokenTypeSet  = [ttElse, ttElseIf, ttUntil, ttEnd, ttCase, ttEOF];
   AssignSet: TTokenTypeSet    = [ttPlusIs, ttMinusIs, ttMulIs, ttDivIs, ttRemainderIs, ttAssign];
 
 type
@@ -291,20 +291,34 @@ var
   Condition: TExpr;
   ThenPart: TBlock;
   ElsePart: TBlock;
+  ElseIfExpr: TExpr;
+  ElseIfPart: TBlock;
 begin
   ElsePart := nil;
+  ElseIfExpr := nil;
+  ElseIfPart := nil;
+
   Token := CurrentToken;
   Next; // skip if
   Condition := ParseExpr;
   Expect(ttThen);
   ThenPart := ParseBlock;
+
+  if CurrentToken.TokenType = ttElseif then
+  begin
+    Next;  // skip elseif
+    ElseIfExpr := ParseExpr;
+    Expect(ttThen);
+    ElseIfPart := ParseBlock;
+  end;
+
   if CurrentToken.TokenType = ttElse then
   begin
     Next; // skip else
     ElsePart := ParseBlock;
   end;
   Expect(ttEnd);
-  Result := TIfStmt.Create(Condition, ThenPart, ElsePart, Token);
+  Result := TIfStmt.Create(Condition, ElseIfExpr, ThenPart, ElseIfPart, ElsePart, Token);
 end;
 
 function TParser.ParseMulExpr: TExpr;
