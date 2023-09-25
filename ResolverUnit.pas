@@ -277,11 +277,12 @@ end;
 procedure TResolver.VisitRepeatStmt(ARepeatStmt: TRepeatStmt);
 begin
   VisitProc(ARepeatStmt.Condition);
-  VisitProc(ARepeatStmt.Block);end;
+  VisitProc(ARepeatStmt.Block);
+end;
 
 procedure TResolver.VisitUnaryExpr(AUnaryExpr: TUnaryExpr);
 begin
-  VisitProc(AUnaryExpr);
+  VisitProc(AUnaryExpr.Expr);
 end;
 
 procedure TResolver.VisitVarDecl(AVarDecl: TVarDecl);
