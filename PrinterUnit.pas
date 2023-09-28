@@ -30,6 +30,7 @@ type
       procedure VisitWhileStmt(AWhileStmt: TWhileStmt);
       procedure VisitRepeatStmt(RepeatStmt: TRepeatStmt);
       procedure VisitForStmt(AForStmt: TForStmt);
+      procedure VisitBreakStmt(ABreakStmt: TBreakStmt);
       //declarattions
       procedure VisitIdentifier(AIdentifier: TIdentifier);
       procedure VisitVarDecl(AVarDecl: TVarDecl);
@@ -97,6 +98,15 @@ begin
   DecIndent;
 end;
 
+procedure TPrinter.VisitBreakStmt(ABreakStmt: TBreakStmt);
+begin
+  IncIndent;
+  VisitNode(ABreakStmt);
+  if Assigned(ABreakStmt.Condition) then
+    VisitProc(ABreakStmt.Condition);
+  DecIndent;
+end;
+
 procedure TPrinter.VisitConstExpr(AConstExpr: TConstExpr);
 begin
   IncIndent;
@@ -127,6 +137,8 @@ begin
 end;
 
 procedure TPrinter.VisitIfStmt(AIfStmt: TIfStmt);
+var
+  i: Integer;
 begin
   IncIndent;
   VisitNode(AIfStmt);
@@ -134,11 +146,14 @@ begin
   IncIndent;
   WriteLn(FIndent, 'ThenPart:');
   VisitProc(AIfStmt.ThenPart);
-  if Assigned(AIfStmt.ElseIfPart) then
+  if Assigned(AIfStmt.ElseIfs) then
   begin
-    WriteLn(FIndent, 'ElseIfPart:');
-    VisitProc(AIfStmt.ElseIfExpr);
-    VisitProc(AIfStmt.ElseIfPart);
+    WriteLn(FIndent, 'IfElseParts:');
+    for i := 0 to AIfStmt.ElseIfs.Count-1 do
+    begin
+      VisitProc(AIfStmt.ElseIfs[i]);
+      VisitProc(AIfStmt.ElseIfParts[i]);
+    end;
   end;
   if Assigned(AIfStmt.ElsePart) then
   begin

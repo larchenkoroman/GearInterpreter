@@ -24,6 +24,8 @@ type
       destructor Destroy; override;
   end;
 
+  TBlocks = TObjectList<TBlock>;
+
   TExpr = class(TNode)
     // Base node for expression
   end;
@@ -133,6 +135,14 @@ type
       destructor Destroy; override;
   end;
 
+  TBreakStmt = class(TStmt)
+    private
+      FCondition: TExpr;
+    public
+      property Condition: TExpr read FCondition;
+      constructor Create(ACondition: TExpr; AToken: TToken);
+      destructor Destroy; override;
+  end;
 
   //Base class for declarations
   TDecl = class(TNode)
@@ -186,17 +196,16 @@ type
       FCondition: TExpr;
       FThenPart: TBlock;
       FElsePart: TBlock;
-      FElseIfExpr: TExpr;
-      FElseIfPart: TBlock;
+      FElseIfs: TExprList;
+      FElseIfParts: TBlocks;
     public
       property Condition: TExpr read FCondition;
       property ThenPart: TBlock read FThenPart;
       property ElsePart: TBlock read FElsePart;
-      property ElseIfExpr: TExpr read FElseIfExpr;
-      property ElseIfPart: TBlock read FElseIfPart;
-      constructor Create(ACondition, AElseIfExpr: TExpr;
-                         AThenPart, AElseIfPart, AElsePart: TBlock;
-                         AToken: TToken);
+      property ElseIfs: TExprList read FElseIfs;
+      property ElseIfParts: TBlocks read FElseIfParts;
+      constructor Create(ACondition: TExpr; AElseIfs: TExprList; AElseIfParts: TBlocks;
+                         AThenPart, AElsePart: TBlock; AToken: TToken);
       destructor Destroy; override;
   end;
 
@@ -392,16 +401,15 @@ end;
 
 { TIfStmt }
 
-constructor TIfStmt.Create(ACondition, AElseIfExpr: TExpr;
-                           AThenPart, AElseIfPart, AElsePart: TBlock;
-                           AToken: TToken);
+constructor TIfStmt.Create(ACondition: TExpr; AElseIfs: TExprList; AElseIfParts: TBlocks;
+                         AThenPart, AElsePart: TBlock; AToken: TToken);
 begin
   inherited Create(AToken);
   FCondition := ACondition;
   FThenPart := AThenPart;
   FElsePart := AElsePart;
-  FElseIfExpr := AElseIfExpr;
-  FElseIfPart:= AElseIfPart;
+  FElseIfs := AElseIfs;
+  FElseIfParts:= AElseIfParts;
 end;
 
 destructor TIfStmt.Destroy;
@@ -415,10 +423,12 @@ begin
   if Assigned(FElsePart) then
     FreeAndNil(FElsePart);
 
-  if Assigned(FElseIfExpr) then
-    FreeAndNil(FElseIfExpr);
+  if Assigned(FElseIfs) then
+    FreeAndNil(FElseIfs);
 
-  if Assigned(FElseIfPart) then    FreeAndNil(FElseIfPart);
+  if Assigned(FElseIfParts) then
+    FreeAndNil(FElseIfParts);
+
   inherited Destroy;
 end;
 
@@ -490,6 +500,22 @@ begin
     FreeAndNil(FBlock);
 
   inherited;
+end;
+
+{ TBreakStmt }
+
+constructor TBreakStmt.Create(ACondition: TExpr; AToken: TToken);
+begin
+  inherited Create(AToken);
+  FCondition := ACondition;
+end;
+
+destructor TBreakStmt.Destroy;
+begin
+  if Assigned(FCondition) then
+    FreeandNil(FCondition);
+
+  inherited Destroy;
 end;
 
 end.

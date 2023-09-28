@@ -251,6 +251,7 @@ begin
     '[': AddToken(ttOpenBrack);
     ']': AddToken(ttCloseBrack);
     ',': AddToken(ttComma);
+    ';': AddToken(ttSemiColon);
 
     '.': if FReader.PeekChar = '.' then
          begin

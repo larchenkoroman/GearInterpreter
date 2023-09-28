@@ -64,6 +64,7 @@ type
       procedure VisitWhileStmt(AWhileStmt: TWhileStmt);
       procedure VisitRepeatStmt(ARepeatStmt: TRepeatStmt);
       procedure VisitForStmt(AForStmt: TForStmt);
+      procedure VisitBreakStmt(ABreakStmt: TBreakStmt);
       // Decl
       procedure VisitVarDecl(AVarDecl: TVarDecl);
       procedure VisitVarDecls(AVarDecls: TVarDecls);
@@ -189,15 +190,22 @@ begin
 end;
 
 procedure TResolver.VisitIfStmt(AIfStmt: TIfStmt);
+var
+  i: Integer;
 begin
   VisitProc(AIfStmt.Condition);
   VisitProc(AIfStmt.ThenPart);
 
-  if Assigned(AIfStmt.ElseIfPart) then
+  if Assigned(AIfStmt.ElseIfs) then
   begin
-    VisitProc(AIfStmt.ElseIfExpr);
-    VisitProc(AIfStmt.ElseIfPart);
-  end;  if Assigned(AIfStmt.ElsePart) then
+    for i := 0 to AIfStmt.ElseIfs.Count-1 do
+    begin
+      VisitProc(AIfStmt.ElseIfs[i]);
+      VisitProc(AIfStmt.ElseIfParts[i]);
+    end;
+  end;
+
+  if Assigned(AIfStmt.ElsePart) then
     VisitProc(AIfStmt.ElsePart);
 end;
 
@@ -235,6 +243,12 @@ begin
     VisitProc(Node);
 
   EndScope
+end;
+
+procedure TResolver.VisitBreakStmt(ABreakStmt: TBreakStmt);
+begin
+  if Assigned(ABreakStmt.Condition) then
+    VisitProc(ABreakStmt.Condition);
 end;
 
 procedure TResolver.VisitConstExpr(AConstExpr: TConstExpr);

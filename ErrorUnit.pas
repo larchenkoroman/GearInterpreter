@@ -21,6 +21,7 @@ type
   end;
 
   EParseError = class(Exception);
+  EBreakException = class(Exception);
 
   ERunTimeError = class(Exception)
     Token: TToken;

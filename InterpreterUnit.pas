@@ -32,6 +32,7 @@ type
       procedure VisitWhileStmt(AWhileStmt: TWhileStmt);
       procedure VisitRepeatStmt(ARepeatStmt: TRepeatStmt);
       procedure VisitForStmt(AForStmt: TForStmt);
+      procedure VisitBreakStmt(ABreakStmt: TBreakStmt);
       //declarations
       procedure VisitIdentifier(AIdentifier: TIdentifier);
       procedure VisitVarDecl(AVarDecl: TVarDecl);
@@ -202,6 +203,21 @@ begin
   end;
 end;
 
+procedure TInterpreter.VisitBreakStmt(ABreakStmt: TBreakStmt);
+var
+  Condition: Variant;
+begin
+  Condition := True;
+  if Assigned(ABreakStmt.Condition) then
+    Condition := VisitFunc(ABreakStmt.Condition);
+
+  if not VarIsType(Condition, varBoolean) then
+    Raise ERuntimeError.Create(ABreakStmt.Token, ErrConditionNotBoolean);
+
+  if Condition then
+    raise EBreakException.Create('');
+end;
+
 function TInterpreter.VisitConstExpr(AConstExpr: TConstExpr): Variant;
 begin
   Result := AConstExpr.Value;
@@ -217,17 +233,20 @@ begin
     FCurrentSpace := TMemorySpace.Create(SavedSpace);
     VisitProc(AForStmt.VarDecl);
     Condition := VisitFunc(AForStmt.Condition);
-    if VarIsType(Condition, varBoolean) then
-    begin
-      while Condition do
+    try
+      if VarIsType(Condition, varBoolean) then
       begin
-        VisitProc(AForStmt.Block);
-        VisitProc(AForStmt.Iterator);
-        Condition := VisitFunc(AForStmt.Condition);
-      end;
-    end
-    else
-      Raise ERuntimeError.Create(AForStmt.Token, ErrConditionNotBoolean);
+        while Condition do
+        begin
+          VisitProc(AForStmt.Block);
+          VisitProc(AForStmt.Iterator);
+          Condition := VisitFunc(AForStmt.Condition);
+        end;
+      end
+      else
+        Raise ERuntimeError.Create(AForStmt.Token, ErrConditionNotBoolean);
+    except on E: EBreakException do;
+    end;
   finally
     FreeAndNil(FCurrentSpace);
     FCurrentSpace := SavedSpace;
@@ -254,15 +273,26 @@ procedure TInterpreter.VisitIfStmt(AIfStmt: TIfStmt);
 
 var
   Condition: Variant;
+  i: Integer;
+  ElseIfExecuted: Boolean;
 begin
+  ElseIfExecuted := False;
   if isBooleanAndTrue(AIfStmt.Condition) then
     VisitProc(AIfStmt.ThenPart)
-  else if Assigned(AIfStmt.ElseIfPart) then
+  else if Assigned(AIfStmt.ElseIfs) then
   begin
-    if isBooleanAndTrue(AIfStmt.ElseIfExpr) then
-      VisitProc(AIfStmt.ElseIfPart)
-    else if Assigned(AIfStmt.ElsePart) then
-      VisitProc(AIfStmt.ElsePart);
+    for i := 0 to AIfStmt.ElseIfs.Count-1 do
+    begin
+      if isBooleanAndTrue(AIfStmt.ElseIfs[i]) then
+      begin
+        VisitProc(AIfStmt.ElseIfParts[i]);
+        ElseIfExecuted := True;
+        Break;
+      end;
+    end;
+    if not ElseIfExecuted then
+      if Assigned(AIfStmt.ElsePart) then
+        VisitProc(AIfStmt.ElsePart);
   end
   else if Assigned(AIfStmt.ElsePart) then
     VisitProc(AIfStmt.ElsePart);
@@ -296,16 +326,19 @@ procedure TInterpreter.VisitRepeatStmt(ARepeatStmt: TRepeatStmt);
 var
   Condition: Variant;
 begin
-  Condition := VisitFunc(ARepeatStmt.Condition);
-  if VarIsType(Condition, varBoolean) then
-  begin
-    repeat
-      VisitProc(ARepeatStmt.Block);
-      Condition := VisitFunc(ARepeatStmt.Condition);
-    until Condition;
-  end
-  else
-    Raise ERuntimeError.Create(ARepeatStmt.Token, ErrConditionNotBoolean);
+  try
+    Condition := VisitFunc(ARepeatStmt.Condition);
+    if VarIsType(Condition, varBoolean) then
+    begin
+      repeat
+        VisitProc(ARepeatStmt.Block);
+        Condition := VisitFunc(ARepeatStmt.Condition);
+      until Condition;
+    end
+    else
+      Raise ERuntimeError.Create(ARepeatStmt.Token, ErrConditionNotBoolean);
+  except on E: EBreakException do;
+  end;
 end;
 
 function TInterpreter.VisitUnaryExpr(AUnaryExpr: TUnaryExpr): Variant;
@@ -346,17 +379,20 @@ procedure TInterpreter.VisitWhileStmt(AWhileStmt: TWhileStmt);
 var
   Condition: Variant;
 begin
-  Condition := VisitFunc(AWhileStmt.Condition);
-  if VarIsType(Condition, varBoolean) then
-  begin
-    while Condition do
+  try
+    Condition := VisitFunc(AWhileStmt.Condition);
+    if VarIsType(Condition, varBoolean) then
     begin
-      VisitProc(AWhileStmt.Block);
-      Condition := VisitFunc(AWhileStmt.Condition);
-    end;
-  end
-  else
-    Raise ERuntimeError.Create(AWhileStmt.Token, ErrConditionNotBoolean);
+      while Condition do
+      begin
+        VisitProc(AWhileStmt.Block);
+        Condition := VisitFunc(AWhileStmt.Condition);
+      end;
+    end
+    else
+      Raise ERuntimeError.Create(AWhileStmt.Token, ErrConditionNotBoolean);
+  except on E: EBreakException do;
+  end;
 end;
 
 end.

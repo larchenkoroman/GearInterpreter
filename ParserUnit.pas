@@ -7,7 +7,7 @@ uses
 
 const
   DeclStartSet: TTokenTypeSet = [ttConst, ttVar];
-  StmtStartSet: TTokenTypeSet = [ttIf, ttWhile, ttRepeat, ttFor, ttPrint, ttIdentifier];
+  StmtStartSet: TTokenTypeSet = [ttIf, ttWhile, ttRepeat, ttFor, ttPrint, ttIdentifier, ttBreak];
   BlockEndSet: TTokenTypeSet  = [ttElse, ttElseIf, ttUntil, ttEnd, ttCase, ttEOF];
   AssignSet: TTokenTypeSet    = [ttPlusIs, ttMinusIs, ttMulIs, ttDivIs, ttRemainderIs, ttAssign];
 
@@ -16,6 +16,7 @@ type
     private
       FTokens: TTokens;
       FCurrent: Integer;
+      FLoopDepth: Integer;
 
       function CurrentToken: TToken;
       function Peek: TToken;
@@ -46,6 +47,7 @@ type
       function ParseWhileStmt: TStmt;
       function ParseRepeatStmt: TStmt;
       function ParseForStmt: TStmt;
+      function ParseBreakStmt: TStmt;
       //Declarations
       function ParseDecl: TDecl;
       function ParseVarDecl(AIsConst: Boolean): TDecl;
@@ -89,6 +91,7 @@ constructor TParser.Create(ALexer: TLexer);
 begin
   FTokens := ALexer.Tokens;
   FCurrent := 0;
+  FLoopDepth := 0;
 end;
 
 function TParser.CurrentToken: TToken;
@@ -192,6 +195,24 @@ begin
     Result.Nodes.Add(ParseNode);
 end;
 
+function TParser.ParseBreakStmt: TStmt;
+var
+  Token: TToken;
+  Condition: TExpr;
+begin
+  Condition := nil;
+  if FLoopDepth = 0 then
+    Error(CurrentToken, ErrBreakInLoop);
+  Token := CurrentToken;
+  Next; // skip Break
+  if CurrentToken.TokenType = ttOn then
+  begin
+    Next; // skip On
+    Condition := ParseExpr;
+  end;
+  Result := TBreakStmt.Create(Condition, Token);
+end;
+
 function TParser.ParseDecl: TDecl;
 begin
   Result := nil;
@@ -257,23 +278,28 @@ end;
 function TParser.ParseForStmt: TStmt;
 var
   Token: TToken;
-   VarDecl: TVarDecl;
+  VarDecl: TVarDecl;
   Condition: TExpr;
   Iterator: TStmt;
   Block: TBlock;
 begin
-  Token := CurrentToken;
-  Next; // skip for
-  Next; // skip var
-  VarDecl := ParseVarDecl(False) as TVarDecl;
-  Expect(ttComma);
-  Condition := ParseExpr;
-  Expect(ttComma);
-  Iterator := ParseAssignStmt;
-  Expect(ttDo);
-  Block := ParseBlock;
-  Expect(ttEnd);
-  Result := TForStmt.Create(VarDecl, Condition, Iterator, Block, Token);
+  try
+    Inc(FLoopDepth);
+    Token := CurrentToken;
+    Next; // skip for
+    Next; // skip var
+    VarDecl := ParseVarDecl(False) as TVarDecl;
+    Expect(ttSemiColon);
+    Condition := ParseExpr;
+    Expect(ttSemiColon);
+    Iterator := ParseAssignStmt;
+    Expect(ttDo);
+    Block := ParseBlock;
+    Expect(ttEnd);
+    Result := TForStmt.Create(VarDecl, Condition, Iterator, Block, Token);
+  finally
+    Dec(FLoopDepth);
+  end;
 end;
 
 function TParser.ParseIdentifier: TIdentifier;
@@ -291,12 +317,12 @@ var
   Condition: TExpr;
   ThenPart: TBlock;
   ElsePart: TBlock;
-  ElseIfExpr: TExpr;
-  ElseIfPart: TBlock;
+  ElseIfs: TExprList;
+  ElseIfParts: TBlocks;
 begin
   ElsePart := nil;
-  ElseIfExpr := nil;
-  ElseIfPart := nil;
+  ElseIfs := nil;
+  ElseIfParts := nil;
 
   Token := CurrentToken;
   Next; // skip if
@@ -306,10 +332,14 @@ begin
 
   if CurrentToken.TokenType = ttElseif then
   begin
-    Next;  // skip elseif
-    ElseIfExpr := ParseExpr;
-    Expect(ttThen);
-    ElseIfPart := ParseBlock;
+    ElseIfs := TExprList.Create();
+    ElseIfParts := TBlocks.Create();
+    repeat
+      Next;  // skip elseif
+      ElseIfs.Add(ParseExpr);
+      Expect(ttThen);
+      ElseIfParts.Add(ParseBlock);
+    until CurrentToken.TokenType <> ttElseIf;
   end;
 
   if CurrentToken.TokenType = ttElse then
@@ -318,7 +348,7 @@ begin
     ElsePart := ParseBlock;
   end;
   Expect(ttEnd);
-  Result := TIfStmt.Create(Condition, ElseIfExpr, ThenPart, ElseIfPart, ElsePart, Token);
+  Result := TIfStmt.Create(Condition, ElseIfs, ElseIfParts, ThenPart,  ElsePart, Token);
 end;
 
 function TParser.ParseMulExpr: TExpr;
@@ -403,12 +433,17 @@ var
   Condition: TExpr;
   Block: TBlock;
 begin
-  Token := CurrentToken;
-  Next; // skip repeat
-  Block := ParseBlock;
-  Expect(ttUntil);
-  Condition := ParseExpr;
-  Result := TRepeatStmt.Create(Condition, Block, Token);
+  try
+    Inc(FLoopDepth);
+    Token := CurrentToken;
+    Next; // skip repeat
+    Block := ParseBlock;
+    Expect(ttUntil);
+    Condition := ParseExpr;
+    Result := TRepeatStmt.Create(Condition, Block, Token);
+  finally
+    Dec(FLoopDepth);
+  end;
 end;
 
 function TParser.ParseStmt: TStmt;
@@ -419,6 +454,7 @@ begin
     ttRepeat: Result := ParseRepeatStmt;
     ttFor:    Result := ParseForStmt;
     ttPrint:  Result := ParsePrintStmt;
+    ttBreak:  Result := ParseBreakStmt;
   else
     Result := ParseAssignStmt;
   end;
@@ -471,13 +507,18 @@ var
   Condition: TExpr;
   Block: TBlock;
 begin
-  Token := CurrentToken;
-  Next; // skip while
-  Condition := ParseExpr;
-  Expect(ttDo);
-  Block := ParseBlock;
-  Expect(ttEnd);
-  Result := TWhileStmt.Create(Condition, Block, Token);
+  try
+    Inc(FLoopDepth);
+    Token := CurrentToken;
+    Next; // skip while
+    Condition := ParseExpr;
+    Expect(ttDo);
+    Block := ParseBlock;
+    Expect(ttEnd);
+    Result := TWhileStmt.Create(Condition, Block, Token);
+  finally
+    Dec(FLoopDepth);
+  end;
 end;
 
 function TParser.Peek: TToken;

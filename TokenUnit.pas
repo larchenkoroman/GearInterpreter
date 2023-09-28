@@ -10,7 +10,7 @@ type
     ttPlus, ttMinus, ttMul, ttDiv, ttRemainder,
     ttPlusIs, ttMinusIs, ttMulIs, ttDivIs, ttRemainderIs,
     ttOr, ttAnd, ttNot, ttXor,
-    {ttShl, ttShr,} ttPow,
+    ttPow,
     ttEQ, ttNEQ, ttGT, ttGE, ttLT, ttLE,
 
     //Keywords declarations
@@ -27,7 +27,7 @@ type
     ttFalse, ttTrue, ttNull, ttNumber, ttString, ttChar,
 
     //Symbols and punctuation marks
-    ttComma, ttDot, ttDotDot, ttAssign, ttQuestion, ttArrow,
+    ttComma, ttSemiColon, ttDot, ttDotDot, ttAssign, ttQuestion, ttArrow,
     ttOpenParen, ttCloseParen, ttOpenBrace, ttCloseBrace,
     ttOpenBrack, ttCloseBrack, ttComment, ttEOF, ttNone
   );
@@ -123,6 +123,7 @@ begin
     ttLT:          Result := '<';
     ttLE:          Result := '<=';
     ttComma:       Result := ',';
+    ttSemiColon:   Result := ';';
     ttDot:         Result := '.';
     ttDotDot:      Result := '..';
     ttAssign:      Result := '=';
