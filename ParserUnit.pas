@@ -7,7 +7,7 @@ uses
 
 const
   DeclStartSet: TTokenTypeSet = [ttConst, ttVar];
-  StmtStartSet: TTokenTypeSet = [ttIf, ttWhile, ttRepeat, ttFor, ttPrint, ttIdentifier, ttBreak];
+  StmtStartSet: TTokenTypeSet = [ttIf, ttWhile, ttRepeat, ttFor, ttPrint, ttIdentifier, ttBreak, ttContinue];
   BlockEndSet: TTokenTypeSet  = [ttElse, ttElseIf, ttUntil, ttEnd, ttCase, ttEOF];
   AssignSet: TTokenTypeSet    = [ttPlusIs, ttMinusIs, ttMulIs, ttDivIs, ttRemainderIs, ttAssign];
 
@@ -48,6 +48,7 @@ type
       function ParseRepeatStmt: TStmt;
       function ParseForStmt: TStmt;
       function ParseBreakStmt: TStmt;
+      function ParseContinueStmt: TStmt;
       //Declarations
       function ParseDecl: TDecl;
       function ParseVarDecl(AIsConst: Boolean): TDecl;
@@ -211,6 +212,12 @@ begin
     Condition := ParseExpr;
   end;
   Result := TBreakStmt.Create(Condition, Token);
+end;
+
+function TParser.ParseContinueStmt: TStmt;
+begin
+  Result := TContinueStmt.Create(CurrentToken);
+  Next; // skip continue
 end;
 
 function TParser.ParseDecl: TDecl;
@@ -455,6 +462,7 @@ begin
     ttFor:    Result := ParseForStmt;
     ttPrint:  Result := ParsePrintStmt;
     ttBreak:  Result := ParseBreakStmt;
+    ttContinue:  Result := ParseContinueStmt;
   else
     Result := ParseAssignStmt;
   end;

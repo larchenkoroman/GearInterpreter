@@ -65,6 +65,7 @@ type
       procedure VisitRepeatStmt(ARepeatStmt: TRepeatStmt);
       procedure VisitForStmt(AForStmt: TForStmt);
       procedure VisitBreakStmt(ABreakStmt: TBreakStmt);
+      procedure VisitContinueStmt(AContinueStmt: TContinueStmt);
       // Decl
       procedure VisitVarDecl(AVarDecl: TVarDecl);
       procedure VisitVarDecls(AVarDecls: TVarDecls);
@@ -254,6 +255,11 @@ end;
 procedure TResolver.VisitConstExpr(AConstExpr: TConstExpr);
 begin
 //do nothing
+end;
+
+procedure TResolver.VisitContinueStmt(AContinueStmt: TContinueStmt);
+begin
+  //nothing
 end;
 
 procedure TResolver.VisitForStmt(AForStmt: TForStmt);

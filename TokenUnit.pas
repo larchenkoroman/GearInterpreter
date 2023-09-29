@@ -20,7 +20,7 @@ type
     //Keywords statements and expressions
     ttIf, ttThen, ttElse, ttElseIf, ttWhile, ttDo, ttRepeat, ttUntil,
     ttFor, ttIn, ttIs, ttReturn, ttEnd, ttMatch,  ttSwitch, ttCase,
-    ttEnsure, ttPrint, ttInherited, ttSelf, ttUse, ttBreak, ttOn,
+    ttEnsure, ttPrint, ttInherited, ttSelf, ttUse, ttBreak, ttContinue, ttOn,
     ttIdentifier,
 
     //Constant values
@@ -165,6 +165,7 @@ initialization
   // the keywords
   Keywords.Add('array', ttArray);
   Keywords.Add('break', ttBreak);
+  Keywords.Add('continue', ttcontinue);
   Keywords.Add('case', ttCase);
   Keywords.Add('class', ttClass);
   Keywords.Add('dictionary', ttDictionary);

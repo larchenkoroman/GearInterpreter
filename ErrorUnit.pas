@@ -22,6 +22,7 @@ type
 
   EParseError = class(Exception);
   EBreakException = class(Exception);
+  EContinueException = class(Exception);
 
   ERunTimeError = class(Exception)
     Token: TToken;

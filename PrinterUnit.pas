@@ -31,6 +31,7 @@ type
       procedure VisitRepeatStmt(RepeatStmt: TRepeatStmt);
       procedure VisitForStmt(AForStmt: TForStmt);
       procedure VisitBreakStmt(ABreakStmt: TBreakStmt);
+      procedure VisitContinueStmt(AContinueStmt: TContinueStmt);
       //declarattions
       procedure VisitIdentifier(AIdentifier: TIdentifier);
       procedure VisitVarDecl(AVarDecl: TVarDecl);
@@ -111,6 +112,13 @@ procedure TPrinter.VisitConstExpr(AConstExpr: TConstExpr);
 begin
   IncIndent;
   Writeln(FIndent, VarToStrDef(AConstExpr.Value, 'Null'));
+  DecIndent;
+end;
+
+procedure TPrinter.VisitContinueStmt(AContinueStmt: TContinueStmt);
+begin
+  IncIndent;
+  VisitNode(AContinueStmt);
   DecIndent;
 end;
 

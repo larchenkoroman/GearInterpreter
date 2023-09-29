@@ -33,6 +33,7 @@ type
       procedure VisitRepeatStmt(ARepeatStmt: TRepeatStmt);
       procedure VisitForStmt(AForStmt: TForStmt);
       procedure VisitBreakStmt(ABreakStmt: TBreakStmt);
+      procedure VisitContinueStmt(AContinueStmt: TContinueStmt);
       //declarations
       procedure VisitIdentifier(AIdentifier: TIdentifier);
       procedure VisitVarDecl(AVarDecl: TVarDecl);
@@ -223,6 +224,11 @@ begin
   Result := AConstExpr.Value;
 end;
 
+procedure TInterpreter.VisitContinueStmt(AContinueStmt: TContinueStmt);
+begin
+  raise EContinueException.Create('');
+end;
+
 procedure TInterpreter.VisitForStmt(AForStmt: TForStmt);
 var
   Condition: Variant;
@@ -238,7 +244,10 @@ begin
       begin
         while Condition do
         begin
-          VisitProc(AForStmt.Block);
+          try
+            VisitProc(AForStmt.Block);
+          except on E: EContinueException do;
+          end;
           VisitProc(AForStmt.Iterator);
           Condition := VisitFunc(AForStmt.Condition);
         end;
@@ -331,7 +340,10 @@ begin
     if VarIsType(Condition, varBoolean) then
     begin
       repeat
-        VisitProc(ARepeatStmt.Block);
+        try
+          VisitProc(ARepeatStmt.Block);
+        except on E: EContinueException do;
+        end;
         Condition := VisitFunc(ARepeatStmt.Condition);
       until Condition;
     end
@@ -385,7 +397,10 @@ begin
     begin
       while Condition do
       begin
-        VisitProc(AWhileStmt.Block);
+        try
+          VisitProc(AWhileStmt.Block);
+        except on E: EContinueException do;
+        end;
         Condition := VisitFunc(AWhileStmt.Condition);
       end;
     end

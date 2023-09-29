@@ -144,6 +144,10 @@ type
       destructor Destroy; override;
   end;
 
+  TContinueStmt = class(TStmt)
+    //nothing here
+  end;
+
   //Base class for declarations
   TDecl = class(TNode)
     private
