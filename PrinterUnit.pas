@@ -24,6 +24,7 @@ type
       procedure VisitBinaryExpr(ABinaryExpr: TBinaryExpr);
       procedure VisitConstExpr(AConstExpr: TConstExpr);
       procedure VisitUnaryExpr(AUnaryExpr: TUnaryExpr);
+      procedure VisitCallExpr(ACallExpr: TCallExpr);
       //statements
       procedure VisitAssignStmt(AAssignStmt: TAssignStmt);
       procedure VisitIfStmt(AIfStmt: TIfStmt);
@@ -37,6 +38,7 @@ type
       procedure VisitVarDecl(AVarDecl: TVarDecl);
       procedure VisitVarDecls(AVarDecls: TVarDecls);
       procedure VisitVariable(AVariable: TVariable);
+      procedure VisitFuncDecl(AFuncDecl: TFuncDecl);
       //blocks
       procedure VisitBlock(ABlock: TBlock);
       procedure VisitPrintStmt(ANode: TPrintStmt);
@@ -108,6 +110,21 @@ begin
   DecIndent;
 end;
 
+procedure TPrinter.VisitCallExpr(ACallExpr: TCallExpr);
+var
+  i: Integer;
+begin
+  IncIndent;
+  VisitNode(ACallExpr);
+  VisitProc(ACallExpr.Callee);
+  IncIndent;
+  Writeln(FIndent, 'Arguments:');
+  for i := 0 to ACallExpr.Args.Count - 1 do
+    VisitProc(ACallExpr.Args[i].Expr);
+  DecIndent;
+  DecIndent;
+end;
+
 procedure TPrinter.VisitConstExpr(AConstExpr: TConstExpr);
 begin
   IncIndent;
@@ -134,6 +151,25 @@ begin
   WriteLn(FIndent, 'Loop:');
   VisitProc(AForStmt.Block);
   DecIndent;
+  DecIndent;
+end;
+
+procedure TPrinter.VisitFuncDecl(AFuncDecl: TFuncDecl);
+var
+  i: Integer;
+begin
+  IncIndent;
+  VisitNode(AFuncDecl);  // Print FuncDecl
+  if Assigned(AFuncDecl.Identifier) then
+    VisitProc(AFuncDecl.Identifier);
+  IncIndent;
+  WriteLn(FIndent, 'Parameters:');
+  for i := 0 to AFuncDecl.Params.Count-1 do
+  begin
+    VisitProc(AFuncDecl.Params[i].FIdentifier);
+  end;
+  DecIndent;
+  VisitProc(AFuncDecl.Body);
   DecIndent;
 end;
 

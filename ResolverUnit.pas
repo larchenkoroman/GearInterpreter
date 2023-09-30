@@ -34,14 +34,18 @@ type
       function Top: TScope;
   end;
 
+  TFuncKind = (fkNone, fkFunc);
+
   TResolver = class(TVisitor)
     private
       FGlobalScope: TScope;
       FCurrentScope: TScope;
+      FCurrentFuncKind: TFuncKind;
       FScopes: TScopes;
       procedure BeginScope;
       procedure EndScope;
       procedure ResolveLocal(AVariable: TVariable);
+      procedure ResolveFunction(AFunc: TFuncDecl; AFuncKind: TFuncKind);
       procedure Declare(AIdentifier: TIdentifier; const AIsConst: Boolean = False);
       procedure Enable(AIdentifier: TIdentifier);
       function Retrieve(AIdentifier: TIdentifier): TSymbol;
@@ -57,6 +61,7 @@ type
       procedure VisitConstExpr(AConstExpr: TConstExpr);
       procedure VisitUnaryExpr(AUnaryExpr: TUnaryExpr);
       procedure VisitVariable(AVariable: TVariable);
+      procedure VisitCallExpr(ACallExpr: TCallExpr);
       // Stmt
       procedure VisitPrintStmt(APrintStmt: TPrintStmt);
       procedure VisitAssignStmt(AAssignStmt: TAssignStmt);
@@ -71,6 +76,7 @@ type
       procedure VisitVarDecls(AVarDecls: TVarDecls);
       procedure VisitBlock(ABlock: TBlock);
       procedure VisitProduct(AProduct: TProduct);
+      procedure VisitFuncDecl(AFuncDecl: TFuncDecl);
   end;
 
 implementation
@@ -128,6 +134,7 @@ begin
   FGlobalScope := TScope.Create;
   FCurrentScope := FGlobalScope;
   FScopes := TScopes.Create(True);
+  FCurrentFuncKind := fkNone;
 end;
 
 procedure TResolver.Declare(AIdentifier: TIdentifier; const AIsConst: Boolean);
@@ -166,6 +173,24 @@ end;
 procedure TResolver.Resolve(ATree: TProduct);
 begin
   VisitProc(ATree);
+end;
+
+procedure TResolver.ResolveFunction(AFunc: TFuncDecl; AFuncKind: TFuncKind);
+var
+  EnclosingFuncKind: TFuncKind;
+  i: Integer;
+begin
+  EnclosingFuncKind := FCurrentFuncKind;
+  FCurrentFuncKind := AFuncKind;
+  BeginScope;
+  for i := 0 to AFunc.Params.Count-1 do
+  begin
+    Declare(AFunc.Params[i].FIdentifier);
+    Enable(AFunc.Params[i].FIdentifier);
+  end;
+  VisitProc(AFunc.Body);
+  EndScope;
+  FCurrentFuncKind := EnclosingFuncKind;
 end;
 
 procedure TResolver.ResolveLocal(AVariable: TVariable);
@@ -252,6 +277,15 @@ begin
     VisitProc(ABreakStmt.Condition);
 end;
 
+procedure TResolver.VisitCallExpr(ACallExpr: TCallExpr);
+var
+  i: Integer;
+begin
+  VisitProc(ACallExpr.Callee);
+  for i := 0 to ACallExpr.Args.Count - 1 do
+    VisitProc(ACallExpr.Args[i].Expr);
+end;
+
 procedure TResolver.VisitConstExpr(AConstExpr: TConstExpr);
 begin
 //do nothing
@@ -270,6 +304,13 @@ begin
   VisitProc(AForStmt.Iterator);
   VisitProc(AForStmt.Block);
   EndScope;
+end;
+
+procedure TResolver.VisitFuncDecl(AFuncDecl: TFuncDecl);
+begin
+  Declare(AFuncDecl.Identifier);
+  Enable(AFuncDecl.Identifier);
+  ResolveFunction(AFuncDecl, fkFunc);
 end;
 
 procedure TResolver.VisitIdentifier(AIdentifier: TIdentifier);

@@ -18,13 +18,15 @@ type
     public
       constructor Create;
       destructor Destroy; override;
-      procedure Execute(Tree: TProduct);
+      procedure Execute(Tree: TProduct); overload;
+      procedure Execute(ABlock: TBlock; AMemorySpace: TMemorySpace); overload;
       property Globals: TMemorySpace read FGlobals;
     published
       //expressions
       function VisitBinaryExpr(ABinaryExpr: TBinaryExpr): Variant;
       function VisitConstExpr(AConstExpr: TConstExpr): Variant;
       function VisitUnaryExpr(AUnaryExpr: TUnaryExpr): Variant;
+      function VisitCallExpr(ACallExpr: TCallExpr): Variant;
       //statements
       procedure VisitPrintStmt(APrintStmt: TPrintStmt);
       procedure VisitAssignStmt(AAssignStmt: TAssignStmt);
@@ -39,6 +41,8 @@ type
       procedure VisitVarDecl(AVarDecl: TVarDecl);
       procedure VisitVarDecls(AVarDecls: TVarDecls);
       function VisitVariable(AVariable: TVariable): Variant;
+      procedure VisitFuncDecl(AFuncDecl: TFuncDecl);
+
       //blocks
       procedure VisitBlock(ABlock: TBlock);
       procedure VisitProduct(AProduct: TProduct);
@@ -46,12 +50,16 @@ type
 
 implementation
 
+uses
+  FuncUnit, CallableUnit;
+
 { TInterpreter }
 
 const
   ErrDuplicateID = 'Duplicate identifier: %s "%s" is already declared.';
   ErrIncompatibleTypes = 'Incompatible types in assignment: %s vs. %s.';
   ErrConditionNotBoolean = 'Condition is not Boolean.';
+  ErrNotAFunction = '"%s" is not defined as function.';
 
 procedure TInterpreter.Assign(AVariable: TVariable; AValue: Variant);
 begin
@@ -79,6 +87,19 @@ begin
     FreeAndNil(FCurrentSpace);
 
   inherited;
+end;
+
+procedure TInterpreter.Execute(ABlock: TBlock; AMemorySpace: TMemorySpace);
+var
+  SavedSpace: TMemorySpace;
+begin
+  SavedSpace := FCurrentSpace;
+  try
+    FCurrentSpace := AMemorySpace;
+    VisitProc(ABlock);
+  finally
+    FCurrentSpace := SavedSpace;
+  end;
 end;
 
 procedure TInterpreter.Execute(Tree: TProduct);
@@ -219,6 +240,33 @@ begin
     raise EBreakException.Create('');
 end;
 
+function TInterpreter.VisitCallExpr(ACallExpr: TCallExpr): Variant;
+var
+  Callee: Variant;
+  Args: TArgList;
+  i: Integer;
+  Func: ICallable;
+  Msg: String;
+  CallArg: TCallArg;
+  Token: TToken;
+ begin
+  Callee := VisitFunc(ACallExpr.Callee);
+  if VarSupports(Callee, ICallable) then
+    Func := ICallable(TVarData(Callee).VPointer)
+  else
+  begin
+    Msg := Format(ErrNotAFunction, [ACallExpr.Callee.Token.Lexeme]);
+    Raise ERuntimeError.Create(ACallExpr.Token, Msg);
+  end;
+  Args := TArgList.Create();
+  for i := 0 to ACallExpr.Args.Count-1 do
+  begin
+    CallArg := TCallArg.Create(VisitFunc(ACallExpr.Args[i].Expr));
+    Args.Add(CallArg);
+  end;
+  Result := Func.Call(ACallExpr.Token, Self, Args);
+end;
+
 function TInterpreter.VisitConstExpr(AConstExpr: TConstExpr): Variant;
 begin
   Result := AConstExpr.Value;
@@ -260,6 +308,15 @@ begin
     FreeAndNil(FCurrentSpace);
     FCurrentSpace := SavedSpace;
   end;
+end;
+
+procedure TInterpreter.VisitFuncDecl(AFuncDecl: TFuncDecl);
+var
+  Func: TFunc;
+begin
+  CheckDuplicate(AFuncDecl.Identifier, 'Func');
+  Func := TFunc.Create(AFuncDecl);
+  FCurrentSpace.Store(AFuncDecl.Identifier, ICallable(Func));
 end;
 
 procedure TInterpreter.VisitIdentifier(AIdentifier: TIdentifier);

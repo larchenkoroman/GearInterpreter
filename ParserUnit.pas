@@ -6,13 +6,16 @@ uses
   System.Classes, System.SysUtils, Variants, LexerUnit, TokenUnit, AstUnit, ErrorUnit;
 
 const
-  DeclStartSet: TTokenTypeSet = [ttConst, ttVar];
+  DeclStartSet: TTokenTypeSet = [ttConst, ttVar, ttFunc];
   StmtStartSet: TTokenTypeSet = [ttIf, ttWhile, ttRepeat, ttFor, ttPrint, ttIdentifier, ttBreak, ttContinue];
   BlockEndSet: TTokenTypeSet  = [ttElse, ttElseIf, ttUntil, ttEnd, ttCase, ttEOF];
   AssignSet: TTokenTypeSet    = [ttPlusIs, ttMinusIs, ttMulIs, ttDivIs, ttRemainderIs, ttAssign];
 
 type
   TParser = class
+    private
+      type
+        TFuncForm = (ffFunction);
     private
       FTokens: TTokens;
       FCurrent: Integer;
@@ -39,6 +42,9 @@ type
 
       function ParseUnaryExpr: TExpr;
       function ParseFactor: TExpr;
+      function ParseCallExpr: TExpr;
+      function ParseCallArgs(ACallee: TExpr): TExpr;
+
       //Statements
       function ParseStmt: TStmt;
       function ParsePrintStmt: TStmt;
@@ -54,6 +60,7 @@ type
       function ParseVarDecl(AIsConst: Boolean): TDecl;
       function ParseVarDecls(AIsConst: Boolean): TDecl;
       function ParseIdentifier: TIdentifier;
+      function ParseFuncDecl(AFuncForm: TFuncForm): TDecl;
       //Blocks
       function ParseNode: TNode;
       function ParseBlock: TBlock;
@@ -84,7 +91,7 @@ const
   ErrDuplicateEnum = 'Duplicate enum name "%s".';
   ErrNotAllowedInEnum = 'Constant value "%s" not allowed in enum declaration.';
   ErrDuplicateSetName = 'Duplicate enum set name "%s".';
-
+  ErrNotAFunction = '"%s" is not defined as function.';
 
 { TParser }
 
@@ -214,6 +221,43 @@ begin
   Result := TBreakStmt.Create(Condition, Token);
 end;
 
+function TParser.ParseCallArgs(ACallee: TExpr): TExpr;
+var
+  CallExpr: TCallExpr;
+  Token: TToken;
+
+  procedure ParseArg;
+  var
+    Expr: TExpr;
+  begin
+    Expr := ParseExpr;
+    CallExpr.AddArgument(Expr);
+  end;
+
+begin
+  Token := CurrentToken;
+  Next;  // skip (
+  CallExpr := TCallExpr.Create(ACallee, Token);
+  if CurrentToken.TokenType <> ttCloseParen then
+  begin
+    ParseArg;
+    while CurrentToken.TokenType = ttComma do
+    begin
+      Next;  // skip ,
+      ParseArg;
+    end;
+  end;
+  Expect(ttCloseParen);
+  Result := CallExpr;
+end;
+
+function TParser.ParseCallExpr: TExpr;
+begin
+  Result := ParseFactor;
+  if CurrentToken.TokenType = ttOpenParen then
+    Result := ParseCallArgs(Result);
+end;
+
 function TParser.ParseContinueStmt: TStmt;
 begin
   Result := TContinueStmt.Create(CurrentToken);
@@ -225,6 +269,7 @@ begin
   Result := nil;
   case CurrentToken.TokenType of
     ttVar, ttConst: Result := ParseVarDecls(CurrentToken.TokenType = ttConst);
+    ttFunc:         Result := ParseFuncDecl(ffFunction);
   end;
 end;
 
@@ -307,6 +352,48 @@ begin
   finally
     Dec(FLoopDepth);
   end;
+end;
+
+function TParser.ParseFuncDecl(AFuncForm: TFuncForm): TDecl;
+var
+  FuncDecl: TFuncDecl;
+  Token: TToken;
+  Name: TIdentifier;
+
+  procedure ParseParameters;
+    procedure ParseParam;
+    begin
+      FuncDecl.AddParam(ParseIdentifier);
+    end;
+
+  begin
+    if CurrentToken.TokenType <> ttCloseParen then
+    begin
+      ParseParam;
+      while CurrentToken.TokenType = ttComma do
+      begin
+        Next; // skip comma
+        ParseParam;
+      end;
+    end;
+  end;
+
+begin
+  Name := nil;
+  Token := CurrentToken;
+  case AFuncForm of
+    ffFunction: begin
+                  Next; //skip func
+                  Name := ParseIdentifier;
+                end;
+  end;
+  FuncDecl := TFuncDecl.Create(Name, Token);
+  Expect(ttOpenParen);
+  ParseParameters;
+  Expect(ttCloseParen);
+  FuncDecl.Body := ParseBlock;
+  Expect(ttEnd);
+  Result := FuncDecl;
 end;
 
 function TParser.ParseIdentifier: TIdentifier;
@@ -479,7 +566,7 @@ begin
     Result := TUnaryExpr.Create(Op, ParseUnaryExpr);
   end
   else
-    Result := ParseFactor;
+    Result := ParseCallExpr;
 end;
 
 function TParser.ParseVarDecl(AIsConst: Boolean): TDecl;

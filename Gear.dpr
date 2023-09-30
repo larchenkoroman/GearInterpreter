@@ -19,7 +19,9 @@ uses
   LanguageUnit in 'LanguageUnit.pas',
   ProgrammUnit in 'ProgrammUnit.pas',
   MemoryUnit in 'MemoryUnit.pas',
-  ResolverUnit in 'ResolverUnit.pas';
+  ResolverUnit in 'ResolverUnit.pas',
+  CallableUnit in 'CallableUnit.pas',
+  FuncUnit in 'FuncUnit.pas';
 
 begin
   ProgrammUnit.DoRun;

@@ -67,6 +67,27 @@ type
       constructor Create(Constant: Variant; AToken: TToken);
   end;
 
+  TCallExpr = class(TExpr)
+    private
+      type
+        TArg = class
+          Expr: TExpr;
+          constructor Create(AExpr: TExpr);
+          destructor Destroy; override;
+        end;
+        TArgs = TObjectList<TArg>;
+    private
+      FCallee: TExpr;
+      FArgs: TArgs;
+    public
+      property Callee: TExpr read FCallee;
+      property Args: TArgs read FArgs;
+      constructor Create(ACallee: TExpr; AToken: TToken);
+      destructor Destroy; override;
+      procedure AddArgument(AExpr: TExpr);
+  end;
+
+
   TIdentifier = class(TNode)
     private
       FText: string;
@@ -213,6 +234,25 @@ type
       destructor Destroy; override;
   end;
 
+  TFuncDecl = class(TDecl)
+    private
+      type
+        TParam = class
+          FIdentifier: TIdentifier;
+          constructor Create(AIdentifier: TIdentifier);
+          destructor Destroy; override;
+        end;
+        TParams = TObjectList<TParam>;
+      var
+        FParams: TParams;
+        FBody: TBlock;
+    public
+      property Params: TParams read FParams;
+      property Body: TBlock read FBody write FBody;
+      constructor Create(AIdentifier: TIdentifier; AToken: TToken);
+      destructor Destroy; override;
+      procedure AddParam(AIdentifier: TIdentifier);
+  end;
 
   TProduct = class(TBlock)
   end;
@@ -520,6 +560,83 @@ begin
     FreeandNil(FCondition);
 
   inherited Destroy;
+end;
+
+{ TFuncDecl.TParam }
+
+constructor TFuncDecl.TParam.Create(AIdentifier: TIdentifier);
+begin
+  FIdentifier := AIdentifier;
+end;
+
+destructor TFuncDecl.TParam.Destroy;
+begin
+  if Assigned(FIdentifier) then
+    FreeAndNil(FIdentifier);
+
+  inherited;
+end;
+
+{ TFuncDecl }
+
+procedure TFuncDecl.AddParam(AIdentifier: TIdentifier);
+begin
+  FParams.Add(TParam.Create(AIdentifier));
+end;
+
+constructor TFuncDecl.Create(AIdentifier: TIdentifier; AToken: TToken);
+begin
+  Inherited Create(AIdentifier, AToken);
+  FBody := nil;
+  FParams := TParams.Create(True);
+end;
+
+destructor TFuncDecl.Destroy;
+begin
+  FreeAndNil(FParams);
+
+  if Assigned(FBody) then
+    FreeAndNil(FBody);
+
+  inherited;
+end;
+
+{ TCallExpr.TArg }
+
+constructor TCallExpr.TArg.Create(AExpr: TExpr);
+begin
+  Expr := AExpr;
+end;
+
+destructor TCallExpr.TArg.Destroy;
+begin
+  if Assigned(Expr) then
+    FreeAndNil(Expr);
+
+  inherited;
+end;
+
+{ TCallExpr }
+
+procedure TCallExpr.AddArgument(AExpr: TExpr);
+begin
+  FArgs.Add(TArg.Create(AExpr));
+end;
+
+constructor TCallExpr.Create(ACallee: TExpr; AToken: TToken);
+begin
+  inherited Create(AToken);
+  FCallee := ACallee;
+  FArgs := TArgs.Create(True);
+end;
+
+destructor TCallExpr.Destroy;
+begin
+  FreeAndNil(FArgs);
+  if Assigned(FCallee) then
+    FreeAndNil(FCallee);
+
+  inherited;
 end;
 
 end.

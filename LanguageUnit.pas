@@ -42,18 +42,25 @@ begin
     Resolver := TResolver.Create;
     Resolver.Resolve(Tree);
 
-    if not Errors.IsEmpty then
-      Writeln(Errors.ToString)
+    if Errors.IsEmpty then
+      Interpreter.Execute(Tree)
     else
-      Interpreter.Execute(Tree);
+      Writeln(Errors.ToString);
   finally
     If Assigned(Tree) then
       FreeAndNil(Tree);
 
-    FreeAndNil(Reader);
-    FreeAndNil(Lexer);
-    FreeAndNil(Parser);
-    FreeAndNil(Resolver);
+    if Assigned(Reader) then
+      FreeAndNil(Reader);
+
+    if Assigned(Lexer) then
+      FreeAndNil(Lexer);
+
+    if Assigned(Parser) then
+      FreeAndNil(Parser);
+
+    if assigned(Resolver) then
+      FreeAndNil(Resolver);
   end;
 end;
 
