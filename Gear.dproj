@@ -105,6 +105,7 @@
         <DCCReference Include="ResolverUnit.pas"/>
         <DCCReference Include="CallableUnit.pas"/>
         <DCCReference Include="FuncUnit.pas"/>
+        <DCCReference Include="StandardFunctionsUnit.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

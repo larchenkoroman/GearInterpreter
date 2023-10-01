@@ -10,6 +10,7 @@ type
     private
       FCurrentSpace: TMemorySpace;
       FGlobals: TMemorySpace;
+      procedure StoreStandardFunctions(AGlobalSpace: TMemorySpace);
       function Lookup(AVariable: TVariable): Variant;
       procedure CheckDuplicate(AIdentifier: TIdentifier; const ATypeName: String);
       function TypeOf(AValue: Variant): String;
@@ -53,7 +54,7 @@ type
 implementation
 
 uses
-  FuncUnit, CallableUnit;
+  FuncUnit, CallableUnit, StandardFunctionsUnit;
 
 { TInterpreter }
 
@@ -79,8 +80,9 @@ end;
 
 constructor TInterpreter.Create;
 begin
-  FGlobals := TMemorySpace.Create;
-  FCurrentSpace := FGlobals;
+  FGlobals := TMemorySpace.Create();
+  StoreStandardFunctions(FGlobals);
+  FCurrentSpace:= FGlobals;
 end;
 
 destructor TInterpreter.Destroy;
@@ -156,6 +158,15 @@ begin
     Result := FCurrentSpace.LoadAt(AVariable.Distance, AVariable.Identifier.Text)
   else
     Result := Globals.Load(AVariable.Identifier);
+end;
+
+procedure TInterpreter.StoreStandardFunctions(AGlobalSpace: TMemorySpace);
+var
+  Token: TToken;
+begin
+  Token := TToken.Create(ttIdentifier, '', Null, 0, 0);
+  AGlobalSpace.Store('pi', ICallable(TPi.Create), Token);
+  AGlobalSpace.Store('writeln', ICallable(TWriteln.Create), Token);
 end;
 
 function TInterpreter.TypeOf(AValue: Variant): String;

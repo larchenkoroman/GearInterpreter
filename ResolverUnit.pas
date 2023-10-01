@@ -42,6 +42,7 @@ type
       FCurrentScope: TScope;
       FCurrentFuncKind: TFuncKind;
       FScopes: TScopes;
+      procedure EnableStandardFunctions;
       procedure BeginScope;
       procedure EndScope;
       procedure ResolveLocal(AVariable: TVariable);
@@ -134,6 +135,7 @@ end;
 constructor TResolver.Create;
 begin
   FGlobalScope := TScope.Create;
+  EnableStandardFunctions;
   FCurrentScope := FGlobalScope;
   FScopes := TScopes.Create(True);
   FCurrentFuncKind := fkNone;
@@ -215,6 +217,12 @@ begin
   if not Assigned(Result) then
     Errors.Append(AIdentifier.Token.Line, AIdentifier.Token.Col,
                     Format(ErrUndeclaredVar, [AIdentifier.Text]));
+end;
+
+procedure TResolver.EnableStandardFunctions;
+begin
+  FGlobalScope.AddSymbol(TSymbol.Create('pi', sEnabled, True));
+  FGlobalScope.AddSymbol(TSymbol.Create('writeln', sEnabled, True));
 end;
 
 procedure TResolver.VisitIfStmt(AIfStmt: TIfStmt);

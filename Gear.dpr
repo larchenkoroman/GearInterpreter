@@ -21,7 +21,8 @@ uses
   MemoryUnit in 'MemoryUnit.pas',
   ResolverUnit in 'ResolverUnit.pas',
   CallableUnit in 'CallableUnit.pas',
-  FuncUnit in 'FuncUnit.pas';
+  FuncUnit in 'FuncUnit.pas',
+  StandardFunctionsUnit in 'StandardFunctionsUnit.pas';
 
 begin
   ProgrammUnit.DoRun;
