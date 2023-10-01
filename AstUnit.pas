@@ -169,6 +169,16 @@ type
     //nothing here
   end;
 
+  TCallExprStmt = class(TStmt)
+    private
+      FCallExpr: TCallExpr;
+    public
+      property CallExpr: TCallExpr read FCallExpr;
+      constructor Create(ACallExpr: TCallExpr; AToken: TToken);
+      destructor Destroy; override;
+  end;
+
+
   //Base class for declarations
   TDecl = class(TNode)
     private
@@ -252,6 +262,15 @@ type
       constructor Create(AIdentifier: TIdentifier; AToken: TToken);
       destructor Destroy; override;
       procedure AddParam(AIdentifier: TIdentifier);
+  end;
+
+  TReturnStmt = class(TStmt)
+    private
+      FExpr: TExpr;
+    public
+      property Expr: TExpr read FExpr;
+      constructor Create(AExpr: TExpr; AToken: TToken);
+      destructor Destroy; override;
   end;
 
   TProduct = class(TBlock)
@@ -637,6 +656,38 @@ begin
     FreeAndNil(FCallee);
 
   inherited;
+end;
+
+{ TReturnStmt }
+
+constructor TReturnStmt.Create(AExpr: TExpr; AToken: TToken);
+begin
+  inherited Create(AToken);
+  FExpr := AExpr;
+end;
+
+destructor TReturnStmt.Destroy;
+begin
+  if Assigned(FExpr) then
+    FreeandNil(FExpr);
+
+  inherited Destroy;
+end;
+
+{ TCallExprStmt }
+
+constructor TCallExprStmt.Create(ACallExpr: TCallExpr; AToken: TToken);
+begin
+  inherited Create(AToken);
+  FCallExpr := ACallExpr;
+end;
+
+destructor TCallExprStmt.Destroy;
+begin
+  if Assigned(FCallExpr) then
+    FreeandNil(FCallExpr);
+
+  inherited Destroy;
 end;
 
 end.

@@ -71,6 +71,8 @@ type
       procedure VisitForStmt(AForStmt: TForStmt);
       procedure VisitBreakStmt(ABreakStmt: TBreakStmt);
       procedure VisitContinueStmt(AContinueStmt: TContinueStmt);
+      procedure VisitReturnStmt(AReturnStmt: TReturnStmt);
+      procedure VisitCallExprStmt(ACallExprStmt: TCallExprStmt);
       // Decl
       procedure VisitVarDecl(AVarDecl: TVarDecl);
       procedure VisitVarDecls(AVarDecls: TVarDecls);
@@ -86,7 +88,7 @@ const
   ErrCannotAssignToConstant = 'Cannot assign value to constant "%s".';
   ErrDuplicateIdInScope = 'Duplicate identifier "%s" in this scope.';
   ErrUndeclaredVar = 'Undeclared variable "%s".';
-
+  ErrReturnFromFunc = 'Return can only be used from a function.';
 
 { TSymbol }
 
@@ -286,6 +288,11 @@ begin
     VisitProc(ACallExpr.Args[i].Expr);
 end;
 
+procedure TResolver.VisitCallExprStmt(ACallExprStmt: TCallExprStmt);
+begin
+  VisitProc(ACallExprStmt.CallExpr);
+end;
+
 procedure TResolver.VisitConstExpr(AConstExpr: TConstExpr);
 begin
 //do nothing
@@ -343,6 +350,14 @@ procedure TResolver.VisitRepeatStmt(ARepeatStmt: TRepeatStmt);
 begin
   VisitProc(ARepeatStmt.Condition);
   VisitProc(ARepeatStmt.Block);
+end;
+
+procedure TResolver.VisitReturnStmt(AReturnStmt: TReturnStmt);
+begin
+  if FCurrentFuncKind = fkNone then
+    Errors.Append(AReturnStmt.Token.Line, AReturnStmt.Token.Col, ErrReturnFromFunc);
+
+  VisitProc(AReturnStmt.Expr);
 end;
 
 procedure TResolver.VisitUnaryExpr(AUnaryExpr: TUnaryExpr);

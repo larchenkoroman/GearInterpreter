@@ -10,9 +10,10 @@ type
   TFunc = class(TInterfacedObject, ICallable)
     private
       FFuncDecl: TFuncDecl;
+      FClosure: TMemorySpace;
     public
       property FuncDecl: TFuncDecl read FFuncDecl;
-      constructor Create(AFuncDecl: TFuncDecl);
+      constructor Create(AFuncDecl: TFuncDecl; AClosure: TMemorySpace);
       function Call(AToken: TToken; AInterpreter: TInterpreter; AArgList: TArgList): Variant;
       function ToString: String; override;
       class procedure CheckArity(AToken: TToken; ANumArgs, ANumParams: Integer); static;
@@ -28,13 +29,15 @@ var
   i: Integer;
 begin
   CheckArity(AToken, AArgList.Count, FFuncDecl.Params.Count);
-  Result := Null;
-  FuncSpace := TMemorySpace.Create(AInterpreter.Globals);
+  FuncSpace := TMemorySpace.Create(FClosure);
 
   for i := 0 to FFuncDecl.Params.Count-1 do
     FuncSpace.Store(FFuncDecl.Params[i].FIdentifier, AArgList[i].Value);
-
-  AInterpreter.Execute(FFuncDecl.Body, FuncSpace);
+  try
+    AInterpreter.Execute(FFuncDecl.Body, FuncSpace);
+  except on E: EReturnFromFunc do
+    Result := E.Value;
+  end;
 end;
 
 class procedure TFunc.CheckArity(AToken: TToken; ANumArgs, ANumParams: Integer);
@@ -45,9 +48,10 @@ begin
                               );
 end;
 
-constructor TFunc.Create(AFuncDecl: TFuncDecl);
+constructor TFunc.Create(AFuncDecl: TFuncDecl; AClosure: TMemorySpace);
 begin
   FFuncDecl := AFuncDecl;
+  FClosure := AClosure;
 end;
 
 function TFunc.ToString: String;

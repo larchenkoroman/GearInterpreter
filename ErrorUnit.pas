@@ -24,6 +24,11 @@ type
   EBreakException = class(Exception);
   EContinueException = class(Exception);
 
+  EReturnFromFunc = class(Exception)
+    Value: Variant;
+    constructor Create(AValue: Variant);
+  end;
+
   ERunTimeError = class(Exception)
     Token: TToken;
     constructor Create(AToken: TToken; AMessage: string);
@@ -103,6 +108,14 @@ constructor ERunTimeError.Create(AToken: TToken; AMessage: string);
 begin
   Token := AToken;
   inherited Create(AMessage);
+end;
+
+{ EReturnFromFunc }
+
+constructor EReturnFromFunc.Create(AValue: Variant);
+begin
+  Value := AValue;
+  inherited Create('return');
 end;
 
 initialization

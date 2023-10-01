@@ -36,6 +36,8 @@ type
       procedure VisitForStmt(AForStmt: TForStmt);
       procedure VisitBreakStmt(ABreakStmt: TBreakStmt);
       procedure VisitContinueStmt(AContinueStmt: TContinueStmt);
+      procedure VisitReturnStmt(AReturnStmt: TReturnStmt);
+      procedure VisitCallExprStmt(ACallExprStmt: TCallExprStmt);
       //declarations
       procedure VisitIdentifier(AIdentifier: TIdentifier);
       procedure VisitVarDecl(AVarDecl: TVarDecl);
@@ -248,23 +250,34 @@ var
   Func: ICallable;
   Msg: String;
   CallArg: TCallArg;
-  Token: TToken;
- begin
+begin
   Callee := VisitFunc(ACallExpr.Callee);
   if VarSupports(Callee, ICallable) then
-    Func := ICallable(TVarData(Callee).VPointer)
+    try
+      Func := ICallable(TVarData(Callee).VPointer);
+    except
+    end
   else
   begin
     Msg := Format(ErrNotAFunction, [ACallExpr.Callee.Token.Lexeme]);
     Raise ERuntimeError.Create(ACallExpr.Token, Msg);
   end;
-  Args := TArgList.Create();
-  for i := 0 to ACallExpr.Args.Count-1 do
+
+  if Assigned(Func) then
   begin
-    CallArg := TCallArg.Create(VisitFunc(ACallExpr.Args[i].Expr));
-    Args.Add(CallArg);
+    Args := TArgList.Create();
+    for i := 0 to ACallExpr.Args.Count-1 do
+    begin
+      CallArg := TCallArg.Create(VisitFunc(ACallExpr.Args[i].Expr));
+      Args.Add(CallArg);
+    end;
+    Result := Func.Call(ACallExpr.Token, Self, Args);
   end;
-  Result := Func.Call(ACallExpr.Token, Self, Args);
+end;
+
+procedure TInterpreter.VisitCallExprStmt(ACallExprStmt: TCallExprStmt);
+begin
+  VisitProc(ACallExprStmt.CallExpr);
 end;
 
 function TInterpreter.VisitConstExpr(AConstExpr: TConstExpr): Variant;
@@ -315,7 +328,7 @@ var
   Func: TFunc;
 begin
   CheckDuplicate(AFuncDecl.Identifier, 'Func');
-  Func := TFunc.Create(AFuncDecl);
+  Func := TFunc.Create(AFuncDecl, FCurrentSpace);
   FCurrentSpace.Store(AFuncDecl.Identifier, ICallable(Func));
 end;
 
@@ -338,7 +351,6 @@ procedure TInterpreter.VisitIfStmt(AIfStmt: TIfStmt);
   end;
 
 var
-  Condition: Variant;
   i: Integer;
   ElseIfExecuted: Boolean;
 begin
@@ -408,6 +420,11 @@ begin
       Raise ERuntimeError.Create(ARepeatStmt.Token, ErrConditionNotBoolean);
   except on E: EBreakException do;
   end;
+end;
+
+procedure TInterpreter.VisitReturnStmt(AReturnStmt: TReturnStmt);
+begin
+  raise EReturnFromFunc.Create(VisitFunc(AReturnStmt.Expr));
 end;
 
 function TInterpreter.VisitUnaryExpr(AUnaryExpr: TUnaryExpr): Variant;

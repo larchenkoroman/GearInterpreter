@@ -7,7 +7,7 @@ uses
 
 const
   DeclStartSet: TTokenTypeSet = [ttConst, ttVar, ttFunc];
-  StmtStartSet: TTokenTypeSet = [ttIf, ttWhile, ttRepeat, ttFor, ttPrint, ttIdentifier, ttBreak, ttContinue];
+  StmtStartSet: TTokenTypeSet = [ttIf, ttWhile, ttRepeat, ttFor, ttPrint, ttIdentifier, ttBreak, ttContinue, ttReturn];
   BlockEndSet: TTokenTypeSet  = [ttElse, ttElseIf, ttUntil, ttEnd, ttCase, ttEOF];
   AssignSet: TTokenTypeSet    = [ttPlusIs, ttMinusIs, ttMulIs, ttDivIs, ttRemainderIs, ttAssign];
 
@@ -22,8 +22,8 @@ type
       FLoopDepth: Integer;
 
       function CurrentToken: TToken;
-      function Peek: TToken;
-      function IsLastToken: Boolean;
+//      function Peek: TToken;
+//      function IsLastToken: Boolean;
       procedure Error(AToken: TToken; AMsg: string);
       procedure Expect(const ATokenType:TTokenType);
       procedure Next;
@@ -55,6 +55,7 @@ type
       function ParseForStmt: TStmt;
       function ParseBreakStmt: TStmt;
       function ParseContinueStmt: TStmt;
+      function ParseReturnStmt: TStmt;
       //Declarations
       function ParseDecl: TDecl;
       function ParseVarDecl(AIsConst: Boolean): TDecl;
@@ -128,10 +129,10 @@ begin
   Result := CurrentToken.TokenType in [ttPlus, ttMinus, ttOr, ttXor];
 end;
 
-function TParser.IsLastToken: Boolean;
-begin
-  Result := FCurrent = FTokens.Count - 1;
-end;
+//function TParser.IsLastToken: Boolean;
+//begin
+//  Result := FCurrent = FTokens.Count - 1;
+//end;
 
 function TParser.IsMulOp: Boolean;
 begin
@@ -192,6 +193,8 @@ begin
     else
       Error(Token, ErrInvalidAssignTarget);
   end
+  else if Left is TCallExpr then
+    Result := TCallExprStmt.Create(Left as TCallExpr, Token)
   else
     Error(CurrentToken, ErrExpectedAssignOpFunc);
 end;
@@ -407,7 +410,7 @@ end;
 
 function TParser.ParseIfStmt: TStmt;
 var
-  Token, VarToken: TToken;
+  Token: TToken;
   Condition: TExpr;
   ThenPart: TBlock;
   ElsePart: TBlock;
@@ -540,16 +543,28 @@ begin
   end;
 end;
 
+function TParser.ParseReturnStmt: TStmt;
+var
+  Token: TToken;
+  Expr: TExpr;
+begin
+  Token := CurrentToken;
+  Next; // skip return
+  Expr := ParseExpr;
+  Result := TReturnStmt.Create(Expr, Token);
+end;
+
 function TParser.ParseStmt: TStmt;
 begin
   case CurrentToken.TokenType of
-    ttIf:     Result := ParseIfStmt;
-    ttWhile:  Result := ParseWhileStmt;
-    ttRepeat: Result := ParseRepeatStmt;
-    ttFor:    Result := ParseForStmt;
-    ttPrint:  Result := ParsePrintStmt;
-    ttBreak:  Result := ParseBreakStmt;
-    ttContinue:  Result := ParseContinueStmt;
+    ttIf:       Result := ParseIfStmt;
+    ttWhile:    Result := ParseWhileStmt;
+    ttRepeat:   Result := ParseRepeatStmt;
+    ttFor:      Result := ParseForStmt;
+    ttPrint:    Result := ParsePrintStmt;
+    ttBreak:    Result := ParseBreakStmt;
+    ttContinue: Result := ParseContinueStmt;
+    ttReturn:   Result := ParseReturnStmt;
   else
     Result := ParseAssignStmt;
   end;
@@ -616,13 +631,13 @@ begin
   end;
 end;
 
-function TParser.Peek: TToken;
-begin
-  Result := nil;
-  if not IsLastToken then
-    Result := FTokens[FCurrent + 1]
-end;
-//
+//function TParser.Peek: TToken;
+//begin
+//  Result := nil;
+//  if not IsLastToken then
+//    Result := FTokens[FCurrent + 1]
+//end;
+
 procedure TParser.Synchronize(ATypes: TTokenTypeSet);
 begin
   while not (CurrentToken.TokenType in ATypes) do

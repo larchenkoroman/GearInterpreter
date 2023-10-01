@@ -33,6 +33,8 @@ type
       procedure VisitForStmt(AForStmt: TForStmt);
       procedure VisitBreakStmt(ABreakStmt: TBreakStmt);
       procedure VisitContinueStmt(AContinueStmt: TContinueStmt);
+      procedure VisitReturnStmt(AReturnStmt: TReturnStmt);
+      procedure VisitCallExprStmt(ACallExprStmt: TCallExprStmt);
       //declarattions
       procedure VisitIdentifier(AIdentifier: TIdentifier);
       procedure VisitVarDecl(AVarDecl: TVarDecl);
@@ -122,6 +124,14 @@ begin
   for i := 0 to ACallExpr.Args.Count - 1 do
     VisitProc(ACallExpr.Args[i].Expr);
   DecIndent;
+  DecIndent;
+end;
+
+procedure TPrinter.VisitCallExprStmt(ACallExprStmt: TCallExprStmt);
+begin
+  IncIndent;
+  VisitNode(ACallExprStmt);
+  VisitProc(ACallExprStmt.CallExpr);
   DecIndent;
 end;
 
@@ -244,6 +254,14 @@ begin
   WriteLn(FIndent, 'Loop:');
   VisitProc(RepeatStmt.Block);
   DecIndent;
+  DecIndent;
+end;
+
+procedure TPrinter.VisitReturnStmt(AReturnStmt: TReturnStmt);
+begin
+  IncIndent;
+  VisitNode(AReturnStmt);
+  VisitProc(AReturnStmt.Expr);
   DecIndent;
 end;
 
