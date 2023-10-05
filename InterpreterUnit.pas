@@ -27,6 +27,7 @@ type
       function VisitBinaryExpr(ABinaryExpr: TBinaryExpr): Variant;
       function VisitConstExpr(AConstExpr: TConstExpr): Variant;
       function VisitUnaryExpr(AUnaryExpr: TUnaryExpr): Variant;
+      function VisitIfExpr(AIfExpr: TIfExpr): Variant;
       function VisitCallExpr(ACallExpr: TCallExpr): Variant;
       //statements
       procedure VisitPrintStmt(APrintStmt: TPrintStmt);
@@ -165,6 +166,9 @@ var
   Token: TToken;
 begin
   Token := TToken.Create(ttIdentifier, '', Null, 0, 0);
+
+  AGlobalSpace.Store('sLineBreak', sLineBreak, Token);
+
   AGlobalSpace.Store('pi', ICallable(TPi.Create), Token);
   AGlobalSpace.Store('writeln', ICallable(TWriteln.Create), Token);
 end;
@@ -346,6 +350,22 @@ end;
 procedure TInterpreter.VisitIdentifier(AIdentifier: TIdentifier);
 begin
 
+end;
+
+function TInterpreter.VisitIfExpr(AIfExpr: TIfExpr): Variant;
+var
+  Condition: Variant;
+begin
+  Condition := VisitFunc(AIfExpr.Condition);
+  if VarIsType(Condition, varBoolean) then
+  begin
+    if Condition then
+      Result := VisitFunc(AIfExpr.TrueExpr)
+    else
+      Result := VisitFunc(AIfExpr.FalseExpr);
+  end
+  else
+    Raise ERuntimeError.Create(AIfExpr.Token, ErrConditionNotBoolean);
 end;
 
 procedure TInterpreter.VisitIfStmt(AIfStmt: TIfStmt);

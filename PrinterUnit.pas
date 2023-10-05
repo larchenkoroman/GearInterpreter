@@ -25,6 +25,7 @@ type
       procedure VisitConstExpr(AConstExpr: TConstExpr);
       procedure VisitUnaryExpr(AUnaryExpr: TUnaryExpr);
       procedure VisitCallExpr(ACallExpr: TCallExpr);
+      procedure VisitIfExpr(AIfExpr: TIfExpr);
       //statements
       procedure VisitAssignStmt(AAssignStmt: TAssignStmt);
       procedure VisitIfStmt(AIfStmt: TIfStmt);
@@ -187,6 +188,20 @@ procedure TPrinter.VisitIdentifier(AIdentifier: TIdentifier);
 begin
   IncIndent;
   Writeln(FIndent + 'Identifier: ' + AIdentifier.Text);
+  DecIndent;
+end;
+
+procedure TPrinter.VisitIfExpr(AIfExpr: TIfExpr);
+begin
+  IncIndent;
+  VisitNode(AIfExpr);
+  VisitProc(AIfExpr.Condition);
+  IncIndent;
+  Writeln(FIndent, 'True:');
+  VisitProc(AIfExpr.TrueExpr);
+  Writeln(FIndent, 'False:');
+  VisitProc(AIfExpr.FalseExpr);
+  DecIndent;
   DecIndent;
 end;
 

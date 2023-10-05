@@ -22,7 +22,10 @@ var
 begin
   InputFileName := '';
   ErrorMsg := '';
-
+  IsFileNeeded := False;
+  IsFileInArgs := False;
+  IsAstInArgs := False;
+  IsExecuteInArgs := False;
   if   FindCmdLineSwitch('h')
     or FindCmdLineSwitch('-help') then
   begin
@@ -30,26 +33,42 @@ begin
   end
   else
   begin
-    IsAstInArgs :=    FindCmdLineSwitch('-ast')
-                   or FindCmdLineSwitch('a');
+    if ParamCount = 1 then
+    begin
+      IsFileInArgs := true;
+      IsExecuteInArgs := true;
+      InputFileName := ParamStr(1);
+    end
+    else
+    begin
+      IsAstInArgs :=    FindCmdLineSwitch('-ast')
+                     or FindCmdLineSwitch('a');
 
-    IsExecuteInArgs :=    FindCmdLineSwitch('-execute')
-                       or FindCmdLineSwitch('e');
+      IsExecuteInArgs :=    FindCmdLineSwitch('-execute')
+                         or FindCmdLineSwitch('e');
 
-    IsFileInArgs :=    FindCmdLineSwitch('-file')
-                    or FindCmdLineSwitch('f');
+      IsFileInArgs :=    FindCmdLineSwitch('-file')
+                      or FindCmdLineSwitch('f');
 
-    IsFileNeeded := IsAstInArgs or IsExecuteInArgs;
+      IsFileNeeded := IsAstInArgs or IsExecuteInArgs;
+    end;
+
 
 
     if IsFileNeeded and not IsFileInArgs then
       ErrorMsg := 'Input file name is required.';
 
+
+    if    IsFileInArgs
+      and (InputFileName = '') then
+    begin
+      if not FindCmdLineSwitch('-file', InputFileName) then
+        FindCmdLineSwitch('f', InputFileName);
+    end;
+
     if    (ErrorMsg = '')
       and IsFileInArgs
-      and (   FindCmdLineSwitch('-file', InputFileName)
-           or FindCmdLineSwitch('f', InputFileName)
-          ) then
+      and (InputFileName <> '') then
     begin
       if not FileExists(InputFileName) then
         ErrorMsg := 'Input file does not exist.';
@@ -60,6 +79,8 @@ begin
         ErrorMsg := 'File extension must be ".gear".';
       end;
     end;
+
+
 
 
     if ErrorMsg = '' then

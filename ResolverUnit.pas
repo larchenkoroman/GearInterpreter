@@ -61,6 +61,7 @@ type
       procedure VisitBinaryExpr(ABinaryExpr: TBinaryExpr);
       procedure VisitConstExpr(AConstExpr: TConstExpr);
       procedure VisitUnaryExpr(AUnaryExpr: TUnaryExpr);
+      procedure VisitIfExpr(AIfExpr: TIfExpr);
       procedure VisitVariable(AVariable: TVariable);
       procedure VisitCallExpr(ACallExpr: TCallExpr);
       // Stmt
@@ -221,9 +222,17 @@ end;
 
 procedure TResolver.EnableStandardFunctions;
 begin
+  FGlobalScope.AddSymbol(TSymbol.Create('sLineBreak', sEnabled, True));
+
   FGlobalScope.AddSymbol(TSymbol.Create('pi', sEnabled, True));
   FGlobalScope.AddSymbol(TSymbol.Create('writeln', sEnabled, True));
 end;
+
+procedure TResolver.VisitIfExpr(AIfExpr: TIfExpr);
+begin
+  VisitProc(AIfExpr.Condition);
+  VisitProc(AIfExpr.TrueExpr);
+  VisitProc(AIfExpr.FalseExpr);end;
 
 procedure TResolver.VisitIfStmt(AIfStmt: TIfStmt);
 var

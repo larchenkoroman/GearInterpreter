@@ -38,7 +38,7 @@ type
 
       function ParsePowExpr: TExpr;
       function IsPowOp: Boolean;
-
+      function TParseIfExpr: TExpr;
 
       function ParseUnaryExpr: TExpr;
       function ParseFactor: TExpr;
@@ -317,10 +317,8 @@ begin
       Expect(ttCloseParen);
     end;
 
-    ttIdentifier:
-    begin
-      Result := TVariable.Create(ParseIdentifier);
-    end;
+    ttIf:         Result := TParseIfExpr;
+    ttIdentifier: Result := TVariable.Create(ParseIdentifier);
 
     else
     begin
@@ -642,6 +640,21 @@ procedure TParser.Synchronize(ATypes: TTokenTypeSet);
 begin
   while not (CurrentToken.TokenType in ATypes) do
     Next;
+end;
+
+function TParser.TParseIfExpr: TExpr;
+var
+  Condition, TrueExpr, FalseExpr: TExpr;
+  Token: TToken;
+begin
+  Token := CurrentToken;
+  Next; // skip 'if'
+  Condition := ParseExpr;
+  Expect(ttThen);
+  TrueExpr := ParseExpr;
+  Expect(ttElse);
+  FalseExpr := ParseExpr;
+  Result := TIfExpr.Create(Condition, TrueExpr, FalseExpr, Token);
 end;
 
 end.

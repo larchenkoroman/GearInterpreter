@@ -87,6 +87,19 @@ type
       procedure AddArgument(AExpr: TExpr);
   end;
 
+  TIfExpr = class(TFactorExpr)
+    private
+      FCondition: TExpr;
+      FTrueExpr: TExpr;
+      FFalseExpr: TExpr;
+    public
+      property Condition: TExpr read FCondition;
+      property TrueExpr: TExpr read FTrueExpr;
+      property FalseExpr: TExpr read FFalseExpr;
+      constructor Create(ACondition, ATrueExpr, AFalseExpr: TExpr; AToken: TToken);
+      destructor Destroy; override;
+  end;
+
 
   TIdentifier = class(TNode)
     private
@@ -686,6 +699,31 @@ destructor TCallExprStmt.Destroy;
 begin
   if Assigned(FCallExpr) then
     FreeandNil(FCallExpr);
+
+  inherited Destroy;
+end;
+
+{ TIfExpr }
+
+constructor TIfExpr.Create(ACondition, ATrueExpr, AFalseExpr: TExpr;  AToken: TToken);
+begin
+ inherited Create(AToken);
+  FCondition := ACondition;
+  FTrueExpr := ATrueExpr;
+  FFalseExpr := AFalseExpr;
+end;
+
+destructor TIfExpr.Destroy;
+begin
+  if Assigned(FCondition) then
+    FreeandNil(FCondition);
+
+  if Assigned(FTrueExpr) then
+    FreeAndNil(FTrueExpr);
+
+
+  if Assigned(FFalseExpr) then
+    FreeAndNil(FFalseExpr);
 
   inherited Destroy;
 end;
