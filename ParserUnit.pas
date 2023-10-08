@@ -8,7 +8,7 @@ uses
 const
   DeclStartSet: TTokenTypeSet = [ttConst, ttVar, ttFunc];
   StmtStartSet: TTokenTypeSet = [ttIf, ttWhile, ttRepeat, ttFor, ttPrint, ttIdentifier, ttBreak, ttContinue, ttReturn];
-  BlockEndSet: TTokenTypeSet  = [ttElse, ttElseIf, ttUntil, ttEnd, ttCase, ttEOF];
+  BlockEndSet: TTokenTypeSet  = [ttElse, ttElseIf, ttUntil, ttEnd, ttEOF];
   AssignSet: TTokenTypeSet    = [ttPlusIs, ttMinusIs, ttMulIs, ttDivIs, ttRemainderIs, ttAssign];
 
 type
@@ -22,6 +22,7 @@ type
       FLoopDepth: Integer;
 
       function CurrentToken: TToken;
+      function ParseExprList: TExprList;
 //      function Peek: TToken;
 //      function IsLastToken: Boolean;
       procedure Error(AToken: TToken; AMsg: string);
@@ -38,7 +39,8 @@ type
 
       function ParsePowExpr: TExpr;
       function IsPowOp: Boolean;
-      function TParseIfExpr: TExpr;
+      function ParseIfExpr: TExpr;
+      function ParseCaseExpr: TExpr;
 
       function ParseUnaryExpr: TExpr;
       function ParseFactor: TExpr;
@@ -289,6 +291,17 @@ begin
   end;
 end;
 
+function TParser.ParseExprList: TExprList;
+begin
+  Result := TExprList.Create();
+  Result.Add(ParseExpr);
+  while CurrentToken.TokenType = ttComma do
+  begin
+    Next;  // skip ,
+    Result.Add(ParseExpr);
+  end;
+end;
+
 function TParser.ParseFactor: TExpr;
 begin
   case CurrentToken.TokenType of
@@ -317,7 +330,8 @@ begin
       Expect(ttCloseParen);
     end;
 
-    ttIf:         Result := TParseIfExpr;
+    ttIf:         Result := ParseIfExpr;
+    ttCase:       Result := ParseCaseExpr;
     ttIdentifier: Result := TVariable.Create(ParseIdentifier);
 
     else
@@ -642,7 +656,46 @@ begin
     Next;
 end;
 
-function TParser.TParseIfExpr: TExpr;
+function TParser.ParseCaseExpr: TExpr;
+var
+  Token: TToken;
+  Value, Expr: TExpr;
+  CaseExpr: TCaseExpr;
+  Values: TExprList;
+begin
+  Token := CurrentToken;
+  Next; // skip Case
+  CaseExpr := TCaseExpr.Create(ParseExpr, Token);
+  Expect(ttWhen); // one When is mandatory
+  Values := ParseExprList;
+  Expect(ttThen);
+  Expr := ParseExpr;
+  for Value in Values do
+    CaseExpr.AddLimb(Value, Expr);
+
+  while CurrentToken.TokenType = ttWhen do
+  begin
+    Next;  // skip When
+    Values := ParseExprList;
+    Expect(ttThen);
+    Expr := ParseExpr;
+    for Value in Values do
+      CaseExpr.AddLimb(Value, Expr);
+  end;
+//  Expect(ttElse);  // else is mandatory
+//  MatchExpr.ElseLimb := ParseExpr;
+//  Result := MatchExpr;
+
+  if CurrentToken.TokenType = ttElse then
+  begin
+    Next; //skip else
+    CaseExpr.ElseLimb := ParseExpr;
+  end;
+  Expect(ttEnd);
+  Result := CaseExpr;
+end;
+
+function TParser.ParseIfExpr: TExpr;
 var
   Condition, TrueExpr, FalseExpr: TExpr;
   Token: TToken;

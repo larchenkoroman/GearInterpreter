@@ -26,6 +26,7 @@ type
       procedure VisitUnaryExpr(AUnaryExpr: TUnaryExpr);
       procedure VisitCallExpr(ACallExpr: TCallExpr);
       procedure VisitIfExpr(AIfExpr: TIfExpr);
+      procedure VisitCaseExpr(ACaseExpr: TCaseExpr);
       //statements
       procedure VisitAssignStmt(AAssignStmt: TAssignStmt);
       procedure VisitIfStmt(AIfStmt: TIfStmt);
@@ -133,6 +134,32 @@ begin
   IncIndent;
   VisitNode(ACallExprStmt);
   VisitProc(ACallExprStmt.CallExpr);
+  DecIndent;
+end;
+
+procedure TPrinter.VisitCaseExpr(ACaseExpr: TCaseExpr);
+var
+  Key: TExpr;
+begin
+  IncIndent;
+  VisitNode(ACaseExpr);
+  VisitProc(ACaseExpr.Expr);
+  IncIndent;
+  Writeln(FIndent, 'When Limbs:');
+  for Key in ACaseExpr.WhenLimbs.Keys do
+  begin
+    IncIndent;
+    WriteLn(FIndent, 'When:');
+    VisitProc(Key);
+    VisitProc(ACaseExpr.WhenLimbs[Key]);
+    DecIndent;
+  end;
+  if Assigned(ACaseExpr.ElseLimb) then
+  begin
+    Writeln(FIndent, 'Else:');
+    VisitProc(ACaseExpr.ElseLimb);
+    DecIndent;
+  end;
   DecIndent;
 end;
 

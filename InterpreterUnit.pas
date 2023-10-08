@@ -28,6 +28,7 @@ type
       function VisitConstExpr(AConstExpr: TConstExpr): Variant;
       function VisitUnaryExpr(AUnaryExpr: TUnaryExpr): Variant;
       function VisitIfExpr(AIfExpr: TIfExpr): Variant;
+      function VisitCaseExpr(ACaseExpr: TCaseExpr): Variant;
       function VisitCallExpr(ACallExpr: TCallExpr): Variant;
       //statements
       procedure VisitPrintStmt(APrintStmt: TPrintStmt);
@@ -295,6 +296,26 @@ begin
   VisitProc(ACallExprStmt.CallExpr);
 end;
 
+function TInterpreter.VisitCaseExpr(ACaseExpr: TCaseExpr): Variant;
+var
+  MatchValue, WhenValue: Variant;
+  Key: TExpr;
+begin
+  Result := Null;
+  MatchValue := VisitFunc(ACaseExpr.Expr);
+  for Key in ACaseExpr.WhenLimbs.Keys do
+  begin
+    WhenValue := VisitFunc(Key);
+    if TMath._EQ(MatchValue, WhenValue, Key.Token) then
+      Exit(VisitFunc(ACaseExpr.WhenLimbs[Key]));
+  end;
+  if    VarIsNull(Result)
+    and Assigned(ACaseExpr.ElseLimb) then
+  begin
+    Result := VisitFunc(ACaseExpr.ElseLimb);
+  end;
+end;
+
 function TInterpreter.VisitConstExpr(AConstExpr: TConstExpr): Variant;
 begin
   Result := AConstExpr.Value;
@@ -416,8 +437,6 @@ begin
   for Expr in APrintStmt.ExprList do
   begin
     Value := VarToStrDef(VisitFunc(Expr), 'Null');
-    Value := StringReplace(Value, '\n', sLineBreak, [rfReplaceAll]);
-    Value := StringReplace(Value, '\t', #9, [rfReplaceAll]);
     Write(Value);
   end;
   Writeln;

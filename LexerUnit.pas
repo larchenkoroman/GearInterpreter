@@ -2,7 +2,7 @@ unit LexerUnit;
 
 interface
 uses
-  System.Classes, System.SysUtils, ReaderUnit, TokenUnit, Variants;
+  System.Classes, System.SysUtils, ReaderUnit, TokenUnit, Variants, ErrorUnit;
 
 const
   Space    = #32;
@@ -146,22 +146,40 @@ end;
 
 procedure TLexer.DoString(const QuoteChar: Char; const Line, Col: Integer);
 var
-  Lexeme, Value: string;
+  Lexeme: string ;
+  Value: String;
   Token: TToken;
+  TokenType: TTokenType;
 begin
-  FLook := GetChar;
-  while    (FLook <> QuoteChar)
-       and not CharInSet(FLook, [CHAR_13, CHAR_10, CHAR_EOF]) do
+  Lexeme := '';
+  TokenType := ttString;
+  while True do
   begin
-    Lexeme := Lexeme + FLook;
     FLook := GetChar;
+    if FLook = QuoteChar then
+    begin
+      if FReader.PeekChar = QuoteChar then
+        FLook := GetChar
+      else
+      begin
+        FLook := GetChar;
+        Break;
+      end;
+    end
+    else if FLook = CHAR_EOF then
+    begin
+      Errors.Append(TToken.Create(ttNone, '', Null, Line, Col), 'Lexer error: String exceeds line.');
+      Break;
+    end;
+    Lexeme := Lexeme + FLook;
   end;
 
+  Lexeme := StringReplace(Lexeme, '\n', sLineBreak, [rfReplaceAll]);
+  Lexeme := StringReplace(Lexeme, '\t', Tab, [rfReplaceAll]);
 
-  FLook := getChar;   // consume quote
   Value := Lexeme;
-  Lexeme := QuoteChar + Lexeme + QuoteChar;  // including the quotes
-  Token := TToken.Create(ttString, Lexeme, Value, Line, Col);
+  Lexeme := QuoteChar + Lexeme + QuoteChar;   // including the quotes
+  Token := TToken.Create(TokenType, Lexeme, Value, Line, Col);
   Tokens.Add(Token);
 end;
 

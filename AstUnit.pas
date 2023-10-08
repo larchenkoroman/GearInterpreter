@@ -100,6 +100,23 @@ type
       destructor Destroy; override;
   end;
 
+  TCaseExpr = class(TFactorExpr)
+    private
+      type
+        TWhenLimbs = TObjectDictionary<TExpr, TExpr>;
+    private
+      FExpr: TExpr;
+      FWhenLimbs: TWhenLimbs;
+      FElseLimb: TExpr;
+    public
+      property Expr: TExpr read FExpr;
+      property WhenLimbs: TwhenLimbs read FwhenLimbs;
+      property ElseLimb: TExpr read FElseLimb write FElseLimb;
+      constructor Create(AExpr: TExpr; AToken: TToken);
+      destructor Destroy; override;
+      procedure AddLimb(AValue, AExpr: TExpr);
+  end;
+
 
   TIdentifier = class(TNode)
     private
@@ -724,6 +741,35 @@ begin
 
   if Assigned(FFalseExpr) then
     FreeAndNil(FFalseExpr);
+
+  inherited Destroy;
+end;
+
+{ TCaseExpr }
+
+procedure TCaseExpr.AddLimb(AValue, AExpr: TExpr);
+begin
+  FWhenLimbs.Add(AValue, AExpr);
+end;
+
+constructor TCaseExpr.Create(AExpr: TExpr; AToken: TToken);
+begin
+  Inherited Create(AToken);
+  FExpr := AExpr;
+  FElseLimb := Nil;
+  FWhenLimbs := TWhenLimbs.Create;
+end;
+
+destructor TCaseExpr.Destroy;
+begin
+  if Assigned(FExpr) then
+    FreeAndNil(FExpr);
+
+  if Assigned(FWhenLimbs) then
+    FreeAndNil(FWhenLimbs);
+
+  if Assigned(FElseLimb) then
+    FreeandNil(FElseLimb);
 
   inherited Destroy;
 end;

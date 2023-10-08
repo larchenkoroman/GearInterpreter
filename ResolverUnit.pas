@@ -62,6 +62,7 @@ type
       procedure VisitConstExpr(AConstExpr: TConstExpr);
       procedure VisitUnaryExpr(AUnaryExpr: TUnaryExpr);
       procedure VisitIfExpr(AIfExpr: TIfExpr);
+      procedure VisitCaseExpr(ACaseExpr: TCaseExpr);
       procedure VisitVariable(AVariable: TVariable);
       procedure VisitCallExpr(ACallExpr: TCallExpr);
       // Stmt
@@ -232,7 +233,8 @@ procedure TResolver.VisitIfExpr(AIfExpr: TIfExpr);
 begin
   VisitProc(AIfExpr.Condition);
   VisitProc(AIfExpr.TrueExpr);
-  VisitProc(AIfExpr.FalseExpr);end;
+  VisitProc(AIfExpr.FalseExpr);
+end;
 
 procedure TResolver.VisitIfStmt(AIfStmt: TIfStmt);
 var
@@ -308,6 +310,20 @@ end;
 procedure TResolver.VisitCallExprStmt(ACallExprStmt: TCallExprStmt);
 begin
   VisitProc(ACallExprStmt.CallExpr);
+end;
+
+procedure TResolver.VisitCaseExpr(ACaseExpr: TCaseExpr);
+var
+  Key: TExpr;
+begin
+  VisitProc(ACaseExpr.Expr);
+  for Key in ACaseExpr.WhenLimbs.Keys do
+  begin
+    VisitProc(Key);
+    VisitProc(ACaseExpr.WhenLimbs[Key]);
+  end;
+  if Assigned(ACaseExpr.ElseLimb) then
+    VisitProc(ACaseExpr.ElseLimb);
 end;
 
 procedure TResolver.VisitConstExpr(AConstExpr: TConstExpr);

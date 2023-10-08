@@ -19,8 +19,8 @@ type
 
     //Keywords statements and expressions
     ttIf, ttThen, ttElse, ttElseIf, ttWhile, ttDo, ttRepeat, ttUntil,
-    ttFor, ttIn, ttIs, ttReturn, ttEnd, ttMatch,  ttSwitch, ttCase,
-    ttEnsure, ttPrint, ttInherited, ttSelf, ttUse, ttBreak, ttContinue, ttOn,
+    ttFor, ttIn, ttIs, ttReturn, ttEnd, ttMatch,  ttSwitch, ttCase, ttWhen,
+    ttPrint, ttInherited, ttSelf, ttUse, ttBreak, ttContinue, ttOn,
     ttIdentifier,
 
     //Constant values
@@ -167,13 +167,13 @@ initialization
   Keywords.Add('break', ttBreak);
   Keywords.Add('continue', ttcontinue);
   Keywords.Add('case', ttCase);
+  Keywords.Add('when', ttwhen);
   Keywords.Add('class', ttClass);
   Keywords.Add('dictionary', ttDictionary);
   Keywords.Add('do', ttDo);
   Keywords.Add('each', ttEach);
   Keywords.Add('else', ttElse);
   Keywords.Add('end', ttEnd);
-  Keywords.Add('ensure', ttEnsure);
   Keywords.Add('enum', ttEnum);
   Keywords.Add('extension', ttExtension);
   Keywords.Add('for', ttFor);
