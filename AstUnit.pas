@@ -117,6 +117,14 @@ type
       procedure AddLimb(AValue, AExpr: TExpr);
   end;
 
+  TInterpolatedExpr = class(TFactorExpr)
+    private
+      FExprList: TExprList;
+    public
+      property ExprList: TExprList read FExprList;
+      constructor Create(AExprList: TExprList; AToken: TToken);
+      destructor Destroy; override;
+  end;
 
   TIdentifier = class(TNode)
     private
@@ -770,6 +778,22 @@ begin
 
   if Assigned(FElseLimb) then
     FreeandNil(FElseLimb);
+
+  inherited Destroy;
+end;
+
+{ TInterpolatedExpr }
+
+constructor TInterpolatedExpr.Create(AExprList: TExprList; AToken: TToken);
+begin
+  inherited Create(AToken);
+  FExprList := AExprList;
+end;
+
+destructor TInterpolatedExpr.Destroy;
+begin
+  if Assigned(FExprList) then
+    FreeAndNil(FExprList);
 
   inherited Destroy;
 end;

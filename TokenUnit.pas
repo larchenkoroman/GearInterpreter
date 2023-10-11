@@ -15,7 +15,7 @@ type
 
     //Keywords declarations
     ttArray, ttClass, ttDictionary, ttEach, ttEnum, ttExtension, ttFunc,
-    ttInit, ttConst, ttVal, ttVar,
+    ttInit, ttConst, ttVal, ttVar, ttInterpolated,
 
     //Keywords statements and expressions
     ttIf, ttThen, ttElse, ttElseIf, ttWhile, ttDo, ttRepeat, ttUntil,
@@ -24,7 +24,7 @@ type
     ttIdentifier,
 
     //Constant values
-    ttFalse, ttTrue, ttNull, ttNumber, ttString, ttChar,
+    ttFalse, ttTrue, ttNull, ttNumber, ttString,
 
     //Symbols and punctuation marks
     ttComma, ttSemiColon, ttDot, ttDotDot, ttAssign, ttQuestion, ttArrow,

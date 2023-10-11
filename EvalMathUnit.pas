@@ -82,10 +82,11 @@ end;
 class function TMath._Add(const Left, Right: Variant; Op: TToken): Variant;
 begin
   Result := Null;
-  if OneOfBothNull(Left, Right) then
-    Result := Null
-  else if VarIsStr(Left) then
+
+  if VarIsStr(Left) then
     Result := VarToStr(Left) + VarToStr(Right)
+  else if OneOfBothNull(Left, Right) then
+    Result := Null
   else if AreBothNumber(Left, Right) then
     Result := Left + Right
   else

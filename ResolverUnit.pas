@@ -63,6 +63,7 @@ type
       procedure VisitUnaryExpr(AUnaryExpr: TUnaryExpr);
       procedure VisitIfExpr(AIfExpr: TIfExpr);
       procedure VisitCaseExpr(ACaseExpr: TCaseExpr);
+      procedure VisitInterpolatedExpr(AInterpolatedExpr: TInterpolatedExpr);
       procedure VisitVariable(AVariable: TVariable);
       procedure VisitCallExpr(ACallExpr: TCallExpr);
       // Stmt
@@ -254,6 +255,14 @@ begin
 
   if Assigned(AIfStmt.ElsePart) then
     VisitProc(AIfStmt.ElsePart);
+end;
+
+procedure TResolver.VisitInterpolatedExpr(AInterpolatedExpr: TInterpolatedExpr);
+var
+  Expr: TExpr;
+begin
+  for Expr in AInterpolatedExpr.ExprList do
+    VisitProc(Expr);
 end;
 
 procedure TResolver.VisitAssignStmt(AAssignStmt: TAssignStmt);

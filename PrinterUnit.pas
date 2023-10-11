@@ -27,6 +27,7 @@ type
       procedure VisitCallExpr(ACallExpr: TCallExpr);
       procedure VisitIfExpr(AIfExpr: TIfExpr);
       procedure VisitCaseExpr(ACaseExpr: TCaseExpr);
+      procedure VisitInterpolatedExpr(AInterpolatedExpr: TInterpolatedExpr);
       //statements
       procedure VisitAssignStmt(AAssignStmt: TAssignStmt);
       procedure VisitIfStmt(AIfStmt: TIfStmt);
@@ -257,6 +258,17 @@ begin
     VisitProc(AIfStmt.ElsePart);
   end;
   DecIndent;
+  DecIndent;
+end;
+
+procedure TPrinter.VisitInterpolatedExpr(AInterpolatedExpr: TInterpolatedExpr);
+var
+  Expr: TExpr;
+begin
+  IncIndent;
+  VisitNode(AInterpolatedExpr);
+  for Expr in AInterpolatedExpr.ExprList do
+    VisitProc(Expr);
   DecIndent;
 end;
 

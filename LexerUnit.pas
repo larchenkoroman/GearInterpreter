@@ -30,6 +30,8 @@ type
       FReader: TReader;          // contains the text to scan
       FTokens: TTokens;          // list of mined tokens
       FEndOfFile: Boolean;
+      FIsOpenBrace: Boolean;
+      FCurrentQuoteChar: Char;
       function GetChar: Char;
       procedure DoKeywordOrIdentifier(const Line, Col: Integer);
       procedure DoNumber(const Line, Col: Integer);
@@ -51,6 +53,7 @@ implementation
 
 constructor TLexer.Create(Reader: TReader);
 begin
+  FIsOpenBrace := False;
   FReader := Reader;
   FTokens := TTokens.Create(True); //AOwnsObjects
   FLine := 0;
@@ -151,6 +154,7 @@ var
   Token: TToken;
   TokenType: TTokenType;
 begin
+  FCurrentQuoteChar := QuoteChar;
   Lexeme := '';
   TokenType := ttString;
   while True do
@@ -163,6 +167,17 @@ begin
       else
       begin
         FLook := GetChar;
+        Break;
+      end;
+    end
+    else if FLook = '$' then
+    begin
+      if FReader.PeekChar = '{' then
+      begin
+        FLook := getChar;
+        TokenType := ttInterpolated;
+        FIsOpenBrace := True;
+        FLook := getChar;
         Break;
       end;
     end
@@ -265,7 +280,15 @@ begin
     '(': AddToken(ttOpenParen);
     ')': AddToken(ttCloseParen);
     '{': AddToken(ttOpenBrace);
-    '}': AddToken(ttCloseBrace);
+
+    '}': if FIsOpenBrace then
+         begin
+           FIsOpenBrace := False;
+           DoString(FCurrentQuoteChar, Line, Col);
+         end
+         else
+           AddToken(ttCloseBrace);
+
     '[': AddToken(ttOpenBrack);
     ']': AddToken(ttCloseBrack);
     ',': AddToken(ttComma);

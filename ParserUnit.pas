@@ -41,6 +41,7 @@ type
       function IsPowOp: Boolean;
       function ParseIfExpr: TExpr;
       function ParseCaseExpr: TExpr;
+      function ParseInterpolatedExpr: TExpr;
 
       function ParseUnaryExpr: TExpr;
       function ParseFactor: TExpr;
@@ -330,9 +331,10 @@ begin
       Expect(ttCloseParen);
     end;
 
-    ttIf:         Result := ParseIfExpr;
-    ttCase:       Result := ParseCaseExpr;
-    ttIdentifier: Result := TVariable.Create(ParseIdentifier);
+    ttIf:           Result := ParseIfExpr;
+    ttCase:         Result := ParseCaseExpr;
+    ttInterpolated: Result := ParseInterpolatedExpr;
+    ttIdentifier:   Result := TVariable.Create(ParseIdentifier);
 
     else
     begin
@@ -458,6 +460,26 @@ begin
   end;
   Expect(ttEnd);
   Result := TIfStmt.Create(Condition, ElseIfs, ElseIfParts, ThenPart,  ElsePart, Token);
+end;
+
+function TParser.ParseInterpolatedExpr: TExpr;
+var
+  ExprList: TExprList;
+  Token: TToken;
+begin
+  Token := CurrentToken;
+  ExprList := TExprList.Create();
+  while CurrentToken.TokenType = ttInterpolated do
+  begin
+    ExprList.Add(TConstExpr.Create(CurrentToken.Value, CurrentToken)); // Opening string
+    Next;
+    ExprList.Add(ParseExpr);          // Interpolated expression
+  end;
+  if CurrentToken.TokenType = ttString then
+    ExprList.Add(ParseFactor)
+  else
+    Error(CurrentToken, 'Expected end of string interpolation.');
+  Result := TInterpolatedExpr.Create(ExprList, Token);
 end;
 
 function TParser.ParseMulExpr: TExpr;

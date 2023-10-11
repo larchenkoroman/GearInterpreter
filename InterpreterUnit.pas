@@ -29,6 +29,7 @@ type
       function VisitUnaryExpr(AUnaryExpr: TUnaryExpr): Variant;
       function VisitIfExpr(AIfExpr: TIfExpr): Variant;
       function VisitCaseExpr(ACaseExpr: TCaseExpr): Variant;
+      function VisitInterpolatedExpr(AInterpolatedExpr: TInterpolatedExpr): Variant;
       function VisitCallExpr(ACallExpr: TCallExpr): Variant;
       //statements
       procedure VisitPrintStmt(APrintStmt: TPrintStmt);
@@ -426,6 +427,15 @@ begin
   end
   else if Assigned(AIfStmt.ElsePart) then
     VisitProc(AIfStmt.ElsePart);
+end;
+
+function TInterpreter.VisitInterpolatedExpr(AInterpolatedExpr: TInterpolatedExpr): Variant;
+var
+  Expr: TExpr;
+begin
+  Result := '';
+  for Expr in AInterpolatedExpr.ExprList do
+    Result := TMath._Add(Result, VisitFunc(Expr), Expr.Token);
 end;
 
 procedure TInterpreter.VisitPrintStmt(APrintStmt: TPrintStmt);
