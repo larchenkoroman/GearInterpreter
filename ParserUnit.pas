@@ -378,19 +378,14 @@ var
   Name: TIdentifier;
 
   procedure ParseParameters;
-    procedure ParseParam;
-    begin
-      FuncDecl.AddParam(ParseIdentifier);
-    end;
-
   begin
     if CurrentToken.TokenType <> ttCloseParen then
     begin
-      ParseParam;
+      FuncDecl.AddParam(ParseIdentifier);
       while CurrentToken.TokenType = ttComma do
       begin
         Next; // skip comma
-        ParseParam;
+        FuncDecl.AddParam(ParseIdentifier);
       end;
     end;
   end;
@@ -408,9 +403,16 @@ begin
   Expect(ttOpenParen);
   ParseParameters;
   Expect(ttCloseParen);
-  FuncDecl.Body := ParseBlock;
-  Expect(ttEnd);
-  Result := FuncDecl;
+  if CurrentToken.TokenType = ttArrow then
+  begin
+    FuncDecl.Body := TBlock.Create(TNodeList.Create(), CurrentToken);
+    FuncDecl.Body.Nodes.Add(ParseReturnStmt);
+  end
+  else
+  begin
+    FuncDecl.Body := ParseBlock;
+    Expect(ttEnd);
+  end;  Result := FuncDecl;
 end;
 
 function TParser.ParseIdentifier: TIdentifier;
@@ -704,9 +706,6 @@ begin
     for Value in Values do
       CaseExpr.AddLimb(Value, Expr);
   end;
-//  Expect(ttElse);  // else is mandatory
-//  MatchExpr.ElseLimb := ParseExpr;
-//  Result := MatchExpr;
 
   if CurrentToken.TokenType = ttElse then
   begin
