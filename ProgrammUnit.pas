@@ -20,12 +20,8 @@ var
   IsAstInArgs: Boolean;
   IsExecuteInArgs: Boolean;
 begin
-  InputFileName := '';
-  ErrorMsg := '';
   IsFileNeeded := False;
-  IsFileInArgs := False;
   IsAstInArgs := False;
-  IsExecuteInArgs := False;
   if   FindCmdLineSwitch('h')
     or FindCmdLineSwitch('-help') then
   begin

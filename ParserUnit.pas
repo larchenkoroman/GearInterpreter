@@ -23,8 +23,8 @@ type
 
       function CurrentToken: TToken;
       function ParseExprList: TExprList;
-//      function Peek: TToken;
-//      function IsLastToken: Boolean;
+      function Peek: TToken;
+      function IsLastToken: Boolean;
       procedure Error(AToken: TToken; AMsg: string);
       procedure Expect(const ATokenType:TTokenType);
       procedure Next;
@@ -41,9 +41,11 @@ type
       function IsPowOp: Boolean;
       function ParseIfExpr: TExpr;
       function ParseCaseExpr: TExpr;
+      function ParseIdentifierExpr: TExpr;
       function ParseInterpolatedExpr: TExpr;
 
       function ParseUnaryExpr: TExpr;
+      function ParseParenExpr: TExpr;
       function ParseFactor: TExpr;
       function ParseCallExpr: TExpr;
       function ParseCallArgs(ACallee: TExpr): TExpr;
@@ -132,10 +134,10 @@ begin
   Result := CurrentToken.TokenType in [ttPlus, ttMinus, ttOr, ttXor];
 end;
 
-//function TParser.IsLastToken: Boolean;
-//begin
-//  Result := FCurrent = FTokens.Count - 1;
-//end;
+function TParser.IsLastToken: Boolean;
+begin
+  Result := FCurrent = FTokens.Count - 1;
+end;
 
 function TParser.IsMulOp: Boolean;
 begin
@@ -260,7 +262,7 @@ end;
 function TParser.ParseCallExpr: TExpr;
 begin
   Result := ParseFactor;
-  if CurrentToken.TokenType = ttOpenParen then
+  while CurrentToken.TokenType = ttOpenParen do
     Result := ParseCallArgs(Result);
 end;
 
@@ -324,18 +326,12 @@ begin
       Next;
     end;
 
-    ttOpenParen:
-    begin
-      Next; //Skip '('
-      Result := ParseExpr;
-      Expect(ttCloseParen);
-    end;
-
+    ttOpenParen:    Result := ParseParenExpr;
     ttFunc:         Result := TFuncDeclExpr.Create(ParseFuncDecl(ffAnonym) as TFuncDecl);
     ttIf:           Result := ParseIfExpr;
     ttCase:         Result := ParseCaseExpr;
     ttInterpolated: Result := ParseInterpolatedExpr;
-    ttIdentifier:   Result := TVariable.Create(ParseIdentifier);
+    ttIdentifier:   Result := ParseIdentifierExpr;
 
     else
     begin
@@ -427,6 +423,23 @@ begin
   Result := TIdentifier.Create(Token);
 end;
 
+function TParser.ParseIdentifierExpr: TExpr;
+var
+  Identifier: TIdentifier;
+  FuncDecl: TFuncDecl;
+begin
+  Identifier := ParseIdentifier;
+  if CurrentToken.TokenType = ttArrow then
+  begin
+    FuncDecl := TFuncDecl.Create(nil, CurrentToken);
+    FuncDecl.AddParam(Identifier);
+    FuncDecl.Body := TBlock.Create(TNodeList.Create(), CurrentToken);
+    FuncDecl.Body.Nodes.Add(ParseReturnStmt);
+    Result := TFuncDeclExpr.Create(FuncDecl);
+  end
+  else Result := TVariable.Create(Identifier);
+end;
+
 function TParser.ParseIfStmt: TStmt;
 var
   Token: TToken;
@@ -513,6 +526,40 @@ begin
   except
     Synchronize(DeclStartSet + StmtStartSet + [ttEOF]);
     Result := nil;//TNode.Create(CurrentToken);
+  end;
+end;
+
+function TParser.ParseParenExpr: TExpr;
+var
+  FuncDecl: TFuncDecl;
+begin
+  Expect(ttOpenParen);
+  if     (Peek.TokenType = ttComma)
+      or (    (CurrentToken.TokenType = ttCloseParen)
+          and (Peek.TokenType = ttArrow)
+         ) then
+  begin
+    FuncDecl := TFuncDecl.Create(nil, CurrentToken);
+    if Peek.TokenType = ttComma then
+    begin      // it's a list of parameters
+      FuncDecl.AddParam(ParseIdentifier);
+      while CurrentToken.TokenType = ttComma do
+      begin
+        Next; // skip ,
+        FuncDecl.AddParam(ParseIdentifier);
+      end;
+    end;
+    Expect(ttCloseParen);
+    if CurrentToken.TokenType <> ttArrow then
+      Errors.Append(CurrentToken.Line, CurrentToken.Col, ErrExpectedArrow);
+    FuncDecl.Body := TBlock.Create(TNodeList.Create(), CurrentToken);
+    FuncDecl.Body.Nodes.Add(ParseReturnStmt);
+    Result := TFuncDeclExpr.Create(FuncDecl);
+  end
+  else
+  begin
+    Result := ParseExpr;
+    Expect(ttCloseParen);
   end;
 end;
 
@@ -670,12 +717,12 @@ begin
   end;
 end;
 
-//function TParser.Peek: TToken;
-//begin
-//  Result := nil;
-//  if not IsLastToken then
-//    Result := FTokens[FCurrent + 1]
-//end;
+function TParser.Peek: TToken;
+begin
+  Result := nil;
+  if not IsLastToken then
+    Result := FTokens[FCurrent + 1]
+end;
 
 procedure TParser.Synchronize(ATypes: TTokenTypeSet);
 begin
