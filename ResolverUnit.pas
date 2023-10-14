@@ -66,6 +66,7 @@ type
       procedure VisitInterpolatedExpr(AInterpolatedExpr: TInterpolatedExpr);
       procedure VisitVariable(AVariable: TVariable);
       procedure VisitCallExpr(ACallExpr: TCallExpr);
+      procedure VisitFuncDeclExpr(AFuncDeclExpr: TFuncDeclExpr);
       // Stmt
       procedure VisitPrintStmt(APrintStmt: TPrintStmt);
       procedure VisitAssignStmt(AAssignStmt: TAssignStmt);
@@ -357,9 +358,17 @@ end;
 
 procedure TResolver.VisitFuncDecl(AFuncDecl: TFuncDecl);
 begin
-  Declare(AFuncDecl.Identifier);
-  Enable(AFuncDecl.Identifier);
+  if AFuncDecl.Identifier <> nil then
+  begin
+    Declare(AFuncDecl.Identifier);
+    Enable(AFuncDecl.Identifier);
+  end;
   ResolveFunction(AFuncDecl, fkFunc);
+end;
+
+procedure TResolver.VisitFuncDeclExpr(AFuncDeclExpr: TFuncDeclExpr);
+begin
+  VisitProc(AFuncDeclExpr.FuncDecl);
 end;
 
 procedure TResolver.VisitIdentifier(AIdentifier: TIdentifier);

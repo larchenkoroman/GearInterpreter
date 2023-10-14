@@ -302,6 +302,15 @@ type
       procedure AddParam(AIdentifier: TIdentifier);
   end;
 
+  TFuncDeclExpr = class(TFactorExpr)
+    private
+      FFuncDecl: TFuncDecl;
+    public
+      property FuncDecl: TFuncDecl read FFuncDecl;
+      constructor Create(AFuncDecl: TFuncDecl);
+      destructor Destroy; override;
+  end;
+
   TReturnStmt = class(TStmt)
     private
       FExpr: TExpr;
@@ -794,6 +803,22 @@ destructor TInterpolatedExpr.Destroy;
 begin
   if Assigned(FExprList) then
     FreeAndNil(FExprList);
+
+  inherited Destroy;
+end;
+
+{ TFuncDeclExpr }
+
+constructor TFuncDeclExpr.Create(AFuncDecl: TFuncDecl);
+begin
+  inherited Create(AFuncDecl.Token);
+  FFuncDecl := AFuncDecl;
+end;
+
+destructor TFuncDeclExpr.Destroy;
+begin
+   if Assigned(FFuncDecl) then
+     FreeAndNil(FFuncDecl);
 
   inherited Destroy;
 end;

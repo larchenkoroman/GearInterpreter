@@ -31,6 +31,7 @@ type
       function VisitCaseExpr(ACaseExpr: TCaseExpr): Variant;
       function VisitInterpolatedExpr(AInterpolatedExpr: TInterpolatedExpr): Variant;
       function VisitCallExpr(ACallExpr: TCallExpr): Variant;
+      function VisitFuncDeclExpr(AFuncDeclExpr: TFuncDeclExpr): Variant;
       //statements
       procedure VisitPrintStmt(APrintStmt: TPrintStmt);
       procedure VisitAssignStmt(AAssignStmt: TAssignStmt);
@@ -367,6 +368,11 @@ begin
   CheckDuplicate(AFuncDecl.Identifier, 'Func');
   Func := TFunc.Create(AFuncDecl, FCurrentSpace);
   FCurrentSpace.Store(AFuncDecl.Identifier, ICallable(Func));
+end;
+
+function TInterpreter.VisitFuncDeclExpr(AFuncDeclExpr: TFuncDeclExpr): Variant;
+begin
+  Result := ICallable(TFunc.Create(AFuncDeclExpr.FuncDecl, FCurrentSpace));
 end;
 
 procedure TInterpreter.VisitIdentifier(AIdentifier: TIdentifier);

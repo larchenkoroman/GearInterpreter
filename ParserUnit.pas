@@ -15,7 +15,7 @@ type
   TParser = class
     private
       type
-        TFuncForm = (ffFunction);
+        TFuncForm = (ffFunction, ffAnonym);
     private
       FTokens: TTokens;
       FCurrent: Integer;
@@ -331,6 +331,7 @@ begin
       Expect(ttCloseParen);
     end;
 
+    ttFunc:         Result := TFuncDeclExpr.Create(ParseFuncDecl(ffAnonym) as TFuncDecl);
     ttIf:           Result := ParseIfExpr;
     ttCase:         Result := ParseCaseExpr;
     ttInterpolated: Result := ParseInterpolatedExpr;
@@ -398,6 +399,7 @@ begin
                   Next; //skip func
                   Name := ParseIdentifier;
                 end;
+    ffAnonym:   Next;
   end;
   FuncDecl := TFuncDecl.Create(Name, Token);
   Expect(ttOpenParen);
@@ -412,7 +414,8 @@ begin
   begin
     FuncDecl.Body := ParseBlock;
     Expect(ttEnd);
-  end;  Result := FuncDecl;
+  end;
+  Result := FuncDecl;
 end;
 
 function TParser.ParseIdentifier: TIdentifier;
