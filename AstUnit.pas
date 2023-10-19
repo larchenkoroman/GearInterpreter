@@ -126,6 +126,15 @@ type
       destructor Destroy; override;
   end;
 
+  TTupleExpr = class(TFactorExpr)
+    private
+      FExprList: TExprList;
+    public
+      property ExprList: TExprList read FExprList;
+      constructor Create(AExprList: TExprList; AToken: TToken);
+      destructor Destroy; override;
+  end;
+
   TIdentifier = class(TNode)
     private
       FText: string;
@@ -309,7 +318,8 @@ type
       property FuncDecl: TFuncDecl read FFuncDecl;
       constructor Create(AFuncDecl: TFuncDecl);
       destructor Destroy; override;
-  end;
+  end;
+
 
   TReturnStmt = class(TStmt)
     private
@@ -819,6 +829,22 @@ destructor TFuncDeclExpr.Destroy;
 begin
    if Assigned(FFuncDecl) then
      FreeAndNil(FFuncDecl);
+
+  inherited Destroy;
+end;
+
+{ TTupleExpr }
+
+constructor TTupleExpr.Create(AExprList: TExprList; AToken: TToken);
+begin
+  inherited Create(AToken);
+  FExprList := AExprList;
+end;
+
+destructor TTupleExpr.Destroy;
+begin
+  if Assigned(FExprList) then
+    FreeAndNil(FExprList);
 
   inherited Destroy;
 end;

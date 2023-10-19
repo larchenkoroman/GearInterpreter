@@ -32,6 +32,7 @@ type
       function VisitInterpolatedExpr(AInterpolatedExpr: TInterpolatedExpr): Variant;
       function VisitCallExpr(ACallExpr: TCallExpr): Variant;
       function VisitFuncDeclExpr(AFuncDeclExpr: TFuncDeclExpr): Variant;
+      function VisitTupleExpr(ATupleExpr: TTupleExpr): Variant;
       //statements
       procedure VisitPrintStmt(APrintStmt: TPrintStmt);
       procedure VisitAssignStmt(AAssignStmt: TAssignStmt);
@@ -58,7 +59,7 @@ type
 implementation
 
 uses
-  FuncUnit, CallableUnit, StandardFunctionsUnit;
+  FuncUnit, CallableUnit, StandardFunctionsUnit, TupleUnit, VariantHelperUnit;
 
 { TInterpreter }
 
@@ -270,11 +271,11 @@ var
   CallArg: TCallArg;
 begin
   Callee := VisitFunc(ACallExpr.Callee);
-  if VarSupports(Callee, ICallable) then
-    try
-      Func := ICallable(TVarData(Callee).VPointer);
-    except
-    end
+  if    VarIsType(Callee, varUnknown)
+    and VarSupports(Callee, ICallable) then
+  begin
+    Func := ICallable(TVarData(Callee).VPointer);
+  end
   else
   begin
     Msg := Format(ErrNotAFunction, [ACallExpr.Callee.Token.Lexeme]);
@@ -452,7 +453,7 @@ begin
   Value := '';
   for Expr in APrintStmt.ExprList do
   begin
-    Value := VarToStrDef(VisitFunc(Expr), 'Null');
+    Value := VariantToString(VisitFunc(Expr));
     Write(Value);
   end;
   Writeln;
@@ -491,6 +492,23 @@ end;
 procedure TInterpreter.VisitReturnStmt(AReturnStmt: TReturnStmt);
 begin
   raise EReturnFromFunc.Create(VisitFunc(AReturnStmt.Expr));
+end;
+
+function TInterpreter.VisitTupleExpr(ATupleExpr: TTupleExpr): Variant;
+var
+  Expr: TExpr;
+  Tuple: ITuple;
+  Value: Variant;
+begin
+  Tuple := ITuple(TTuple.Create);
+
+  for Expr in ATupleExpr.ExprList do
+  begin
+    Value := VisitFunc(Expr);
+    Tuple.Elements.Add(Value);
+  end;
+
+  Result := Tuple;
 end;
 
 function TInterpreter.VisitUnaryExpr(AUnaryExpr: TUnaryExpr): Variant;

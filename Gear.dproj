@@ -106,6 +106,8 @@
         <DCCReference Include="CallableUnit.pas"/>
         <DCCReference Include="FuncUnit.pas"/>
         <DCCReference Include="StandardFunctionsUnit.pas"/>
+        <DCCReference Include="TupleUnit.pas"/>
+        <DCCReference Include="VariantHelperUnit.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

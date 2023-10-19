@@ -67,6 +67,7 @@ type
       procedure VisitVariable(AVariable: TVariable);
       procedure VisitCallExpr(ACallExpr: TCallExpr);
       procedure VisitFuncDeclExpr(AFuncDeclExpr: TFuncDeclExpr);
+      procedure VisitTupleExpr(ATupleExpr: TTupleExpr);
       // Stmt
       procedure VisitPrintStmt(APrintStmt: TPrintStmt);
       procedure VisitAssignStmt(AAssignStmt: TAssignStmt);
@@ -409,6 +410,14 @@ begin
     Errors.Append(AReturnStmt.Token.Line, AReturnStmt.Token.Col, ErrReturnFromFunc);
 
   VisitProc(AReturnStmt.Expr);
+end;
+
+procedure TResolver.VisitTupleExpr(ATupleExpr: TTupleExpr);
+var
+  Expr: TExpr;
+begin
+  for Expr in ATupleExpr.ExprList do
+    VisitProc(Expr);
 end;
 
 procedure TResolver.VisitUnaryExpr(AUnaryExpr: TUnaryExpr);

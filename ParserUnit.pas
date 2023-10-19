@@ -531,35 +531,57 @@ end;
 
 function TParser.ParseParenExpr: TExpr;
 var
+  Expr: TExpr;
+  ExprList: TExprList;
   FuncDecl: TFuncDecl;
+  Tuple: TTupleExpr;
 begin
   Expect(ttOpenParen);
-  if     (Peek.TokenType = ttComma)
-      or (    (CurrentToken.TokenType = ttCloseParen)
-          and (Peek.TokenType = ttArrow)
-         ) then
+  if CurrentToken.TokenType <> ttCloseParen then
   begin
-    FuncDecl := TFuncDecl.Create(nil, CurrentToken);
-    if Peek.TokenType = ttComma then
-    begin      // it's a list of parameters
-      FuncDecl.AddParam(ParseIdentifier);
+    Expr := ParseExpr;
+    if CurrentToken.TokenType = ttComma then
+    begin  // check for a list
+      ExprList := TExprList.Create();
+      ExprList.Add(Expr);
       while CurrentToken.TokenType = ttComma do
       begin
         Next; // skip ,
-        FuncDecl.AddParam(ParseIdentifier);
+        ExprList.Add(ParseExpr);
       end;
+      Expect(ttCloseParen);
+      if CurrentToken.TokenType = ttArrow then
+      begin  // func: ExprList contains params
+        FuncDecl := TFuncDecl.Create(nil, CurrentToken);
+        for Expr in ExprList do
+          FuncDecl.AddParam((Expr as TVariable).Identifier);
+        FuncDecl.Body := TBlock.Create(TNodeList.Create(), CurrentToken);
+        FuncDecl.Body.Nodes.Add(ParseReturnStmt);
+        Result := TFuncDeclExpr.Create(FuncDecl);
+      end
+      else  // must be a tuple expr
+      begin
+        Result := TTupleExpr.Create(ExprList, CurrentToken);
+      end;
+    end
+    else
+    begin
+      Result := Expr;  // it’s a regular parenthesised expression
+      Expect(ttCloseParen);
     end;
-    Expect(ttCloseParen);
-    if CurrentToken.TokenType <> ttArrow then
-      Errors.Append(CurrentToken.Line, CurrentToken.Col, ErrExpectedArrow);
-    FuncDecl.Body := TBlock.Create(TNodeList.Create(), CurrentToken);
-    FuncDecl.Body.Nodes.Add(ParseReturnStmt);
-    Result := TFuncDeclExpr.Create(FuncDecl);
   end
   else
   begin
-    Result := ParseExpr;
-    Expect(ttCloseParen);
+    Next; // skip )
+    if CurrentToken.TokenType = ttArrow then
+    begin  // func: zero params
+      FuncDecl := TFuncDecl.Create(nil, CurrentToken);
+      FuncDecl.Body := TBlock.Create(TNodeList.Create(), CurrentToken);
+      FuncDecl.Body.Nodes.Add(ParseReturnStmt);
+      Result := TFuncDeclExpr.Create(FuncDecl);
+    end
+    else // empty tuple
+      Result := TTupleExpr.Create(TExprList.Create(), CurrentToken);
   end;
 end;
 
