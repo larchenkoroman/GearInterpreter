@@ -30,6 +30,7 @@ type
       procedure VisitInterpolatedExpr(AInterpolatedExpr: TInterpolatedExpr);
       procedure VisitFuncDeclExpr(AFuncDeclExpr: TFuncDeclExpr);
       procedure VisitTupleExpr(ATupleExpr: TTupleExpr);
+      procedure VisitGetExpr(AGetExpr: TGetExpr);
       //statements
       procedure VisitAssignStmt(AAssignStmt: TAssignStmt);
       procedure VisitIfStmt(AIfStmt: TIfStmt);
@@ -40,6 +41,7 @@ type
       procedure VisitContinueStmt(AContinueStmt: TContinueStmt);
       procedure VisitReturnStmt(AReturnStmt: TReturnStmt);
       procedure VisitCallExprStmt(ACallExprStmt: TCallExprStmt);
+      procedure VisitSetStmt(ASetStmt: TSetStmt);
       //declarattions
       procedure VisitIdentifier(AIdentifier: TIdentifier);
       procedure VisitVarDecl(AVarDecl: TVarDecl);
@@ -222,6 +224,14 @@ begin
   DecIndent;
 end;
 
+procedure TPrinter.VisitGetExpr(AGetExpr: TGetExpr);
+begin
+  IncIndent;
+  VisitNode(AGetExpr);
+  VisitProc(AGetExpr.Instance);
+  VisitProc(AGetExpr.Member);
+  DecIndent;end;
+
 procedure TPrinter.VisitIdentifier(AIdentifier: TIdentifier);
 begin
   IncIndent;
@@ -326,6 +336,16 @@ begin
   IncIndent;
   VisitNode(AReturnStmt);
   VisitProc(AReturnStmt.Expr);
+  DecIndent;
+end;
+
+procedure TPrinter.VisitSetStmt(ASetStmt: TSetStmt);
+begin
+  IncIndent;
+  VisitNode(ASetStmt);
+  WriteLn(FIndent, '(', ASetStmt.Op.TokenType.toString, ')');
+  VisitProc(ASetStmt.GetExpr);
+  VisitProc(ASetStmt.Expr);
   DecIndent;
 end;
 

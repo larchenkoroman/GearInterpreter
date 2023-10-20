@@ -68,6 +68,7 @@ type
       procedure VisitCallExpr(ACallExpr: TCallExpr);
       procedure VisitFuncDeclExpr(AFuncDeclExpr: TFuncDeclExpr);
       procedure VisitTupleExpr(ATupleExpr: TTupleExpr);
+      procedure VisitGetExpr(AGetExpr: TGetExpr);
       // Stmt
       procedure VisitPrintStmt(APrintStmt: TPrintStmt);
       procedure VisitAssignStmt(AAssignStmt: TAssignStmt);
@@ -79,6 +80,7 @@ type
       procedure VisitContinueStmt(AContinueStmt: TContinueStmt);
       procedure VisitReturnStmt(AReturnStmt: TReturnStmt);
       procedure VisitCallExprStmt(ACallExprStmt: TCallExprStmt);
+      procedure VisitSetStmt(ASetStmt: TSetStmt);
       // Decl
       procedure VisitVarDecl(AVarDecl: TVarDecl);
       procedure VisitVarDecls(AVarDecls: TVarDecls);
@@ -228,8 +230,7 @@ procedure TResolver.EnableStandardFunctions;
 begin
   FGlobalScope.AddSymbol(TSymbol.Create('sLineBreak', sEnabled, True));
 
-  FGlobalScope.AddSymbol(TSymbol.Create('pi', sEnabled, True));
-  FGlobalScope.AddSymbol(TSymbol.Create('writeln', sEnabled, True));
+  FGlobalScope.AddSymbol(TSymbol.Create('TupleInsert', sEnabled, True));
 end;
 
 procedure TResolver.VisitIfExpr(AIfExpr: TIfExpr);
@@ -372,6 +373,11 @@ begin
   VisitProc(AFuncDeclExpr.FuncDecl);
 end;
 
+procedure TResolver.VisitGetExpr(AGetExpr: TGetExpr);
+begin
+  VisitProc(AGetExpr.Instance);
+  VisitProc(AGetExpr.Member);end;
+
 procedure TResolver.VisitIdentifier(AIdentifier: TIdentifier);
 begin
 //do nothing
@@ -410,6 +416,12 @@ begin
     Errors.Append(AReturnStmt.Token.Line, AReturnStmt.Token.Col, ErrReturnFromFunc);
 
   VisitProc(AReturnStmt.Expr);
+end;
+
+procedure TResolver.VisitSetStmt(ASetStmt: TSetStmt);
+begin
+  VisitProc(ASetStmt.GetExpr);
+  VisitProc(ASetStmt.Expr);
 end;
 
 procedure TResolver.VisitTupleExpr(ATupleExpr: TTupleExpr);

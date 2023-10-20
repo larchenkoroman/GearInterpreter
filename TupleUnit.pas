@@ -80,7 +80,7 @@ var
 
   function GetStr(AValue: Variant): string;
   begin
-    Result := VariantToString(AValue);
+    Result := VariantToStr(AValue);
     if VarType(AValue) = varString then
       Result := QuotedStr(Result);
   end;

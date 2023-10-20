@@ -3,7 +3,7 @@ unit EvalMathUnit;
 interface
 
 uses
-  System.Classes, System.SysUtils, TokenUnit, ErrorUnit, Math, System.Variants;
+  System.Classes, System.SysUtils, TokenUnit, ErrorUnit, Math, System.Variants, VariantHelperUnit;
 
 type
   TMath = Record
@@ -84,7 +84,7 @@ begin
   Result := Null;
 
   if VarIsStr(Left) then
-    Result := VarToStr(Left) + VarToStr(Right)
+    Result := VarToStr(Left) + VariantToStr(Right)
   else if OneOfBothNull(Left, Right) then
     Result := Null
   else if AreBothNumber(Left, Right) then

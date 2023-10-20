@@ -154,6 +154,17 @@ type
       destructor Destroy; override;
   end;
 
+  TGetExpr = class(TFactorExpr)
+    private
+      FInstance: TExpr;
+      FMember: TExpr;
+    public
+      property Instance: TExpr read FInstance;
+      property Member: TExpr read FMember;
+      constructor Create(AInstance, AMember: TExpr; AToken: TToken);
+      destructor Destroy; override;
+  end;
+
   //Statements
   TStmt = class(TNode)
     // Base class for statements
@@ -225,6 +236,18 @@ type
       destructor Destroy; override;
   end;
 
+  TSetStmt = class(TStmt)
+    private
+      FGetExpr: TGetExpr;
+      FOp: TToken;
+      FExpr: TExpr;
+    public
+      property GetExpr: TGetExpr read FGetExpr;
+      property Op: TToken read FOp;
+      property Expr: TExpr read FExpr;
+      constructor Create(AGetExpr: TGetExpr; AOp: TToken; AExpr: TExpr);
+      destructor Destroy; override;
+  end;
 
   //Base class for declarations
   TDecl = class(TNode)
@@ -845,6 +868,47 @@ destructor TTupleExpr.Destroy;
 begin
   if Assigned(FExprList) then
     FreeAndNil(FExprList);
+
+  inherited Destroy;
+end;
+
+{ TGetExpr }
+
+constructor TGetExpr.Create(AInstance, AMember: TExpr; AToken: TToken);
+begin
+  inherited Create(AToken);
+  FInstance := AInstance;
+  FMember := AMember;
+end;
+
+destructor TGetExpr.Destroy;
+begin
+  if Assigned(FInstance) then
+    FreeAndNil(FInstance);
+
+  if Assigned(FMember) then
+    FreeAndNil(FMember);
+
+  inherited Destroy;
+end;
+
+{ TSetStmt }
+
+constructor TSetStmt.Create(AGetExpr: TGetExpr; AOp: TToken; AExpr: TExpr);
+begin
+  inherited Create(AOp);
+  FGetExpr := AGetExpr;
+  FOp := AOp;
+  FExpr := AExpr;
+end;
+
+destructor TSetStmt.Destroy;
+begin
+  if Assigned(FGetExpr) then
+    FreeAndNil(FGetExpr);
+
+  if Assigned(FExpr) then
+    FreeAndnil(FExpr);
 
   inherited Destroy;
 end;

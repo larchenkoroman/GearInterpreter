@@ -33,6 +33,7 @@ type
       function VisitCallExpr(ACallExpr: TCallExpr): Variant;
       function VisitFuncDeclExpr(AFuncDeclExpr: TFuncDeclExpr): Variant;
       function VisitTupleExpr(ATupleExpr: TTupleExpr): Variant;
+      function VisitGetExpr(AGetExpr: TGetExpr): Variant;
       //statements
       procedure VisitPrintStmt(APrintStmt: TPrintStmt);
       procedure VisitAssignStmt(AAssignStmt: TAssignStmt);
@@ -44,6 +45,7 @@ type
       procedure VisitContinueStmt(AContinueStmt: TContinueStmt);
       procedure VisitReturnStmt(AReturnStmt: TReturnStmt);
       procedure VisitCallExprStmt(ACallExprStmt: TCallExprStmt);
+      procedure VisitSetStmt(ASetStmt: TSetStmt);
       //declarations
       procedure VisitIdentifier(AIdentifier: TIdentifier);
       procedure VisitVarDecl(AVarDecl: TVarDecl);
@@ -173,8 +175,8 @@ begin
 
   AGlobalSpace.Store('sLineBreak', sLineBreak, Token);
 
-  AGlobalSpace.Store('pi', ICallable(TPi.Create), Token);
   AGlobalSpace.Store('writeln', ICallable(TWriteln.Create), Token);
+  AGlobalSpace.Store('TupleInsert', ICallable(TTupleInsert.Create), Token);
 end;
 
 function TInterpreter.TypeOf(AValue: Variant): String;
@@ -376,6 +378,24 @@ begin
   Result := ICallable(TFunc.Create(AFuncDeclExpr.FuncDecl, FCurrentSpace));
 end;
 
+function TInterpreter.VisitGetExpr(AGetExpr: TGetExpr): Variant;
+var
+  Instance, Index: Variant;
+begin
+  Instance := VisitFunc(AGetExpr.Instance);
+
+  if    VarIsType(Instance, varUnknown)
+    and VarSupports(Instance, ITuple) then
+  begin
+    Index := VisitFunc(AGetExpr.Member);
+    if not VarIsNumeric(Index) then
+      Raise ERuntimeError.Create(AGetExpr.Member.Token, 'Integer number expected.');
+    Result := ITuple(TVarData(Instance).VPointer).Get(Index, AGetExpr.Member.Token);
+  end
+  else
+    Raise ERuntimeError.Create(AGetExpr.Token, 'Expected instance of Tuple.');
+end;
+
 procedure TInterpreter.VisitIdentifier(AIdentifier: TIdentifier);
 begin
 
@@ -453,7 +473,7 @@ begin
   Value := '';
   for Expr in APrintStmt.ExprList do
   begin
-    Value := VariantToString(VisitFunc(Expr));
+    Value := VariantToStr(VisitFunc(Expr));
     Write(Value);
   end;
   Writeln;
@@ -492,6 +512,28 @@ end;
 procedure TInterpreter.VisitReturnStmt(AReturnStmt: TReturnStmt);
 begin
   raise EReturnFromFunc.Create(VisitFunc(AReturnStmt.Expr));
+end;
+
+procedure TInterpreter.VisitSetStmt(ASetStmt: TSetStmt);
+var
+  Instance, OldValue, NewValue, Value, Index: Variant;
+begin
+  Instance := VisitFunc(ASetStmt.GetExpr.Instance);
+
+  if    VarIsType(Instance, varUnknown)
+    and VarSupports(Instance, ITuple) then
+  begin
+    Index := VisitFunc(ASetStmt.GetExpr.Member);
+    if not VarIsNumeric(Index) then
+      Raise ERuntimeError.Create(ASetStmt.GetExpr.Member.Token, 'Integer number expected.');
+
+    OldValue := ITuple(TVarData(Instance).VPointer).Get(Index, ASetStmt.GetExpr.Member.Token);
+    NewValue := VisitFunc(ASetStmt.Expr);
+    Value := GetAssignValue(OldValue, NewValue, ASetStmt.GetExpr.Member.Token, ASetStmt.Op);
+    ITuple(TVarData(Instance).VPointer).Put(Index, Value, ASetStmt.GetExpr.Member.Token);
+  end
+  else
+    Raise ERuntimeError.Create(ASetStmt.GetExpr.Token, 'Instance of Tuple expected.');
 end;
 
 function TInterpreter.VisitTupleExpr(ATupleExpr: TTupleExpr): Variant;

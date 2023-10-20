@@ -7,18 +7,18 @@ uses
 
 
 function VarSupportsIntf(AValue: Variant; AIntf: array of TGUID): Boolean;
-function VariantToString(AValue: Variant): string;
+function VariantToStr(AValue: Variant): string;
 
 implementation
 
 { TVariantHelper }
 
-function VariantToString(AValue: Variant): string;
+function VariantToStr(AValue: Variant): string;
 begin
   if    VarIsType(AValue, varUnknown)
     and VarSupports(AValue, IUnknown) then
   begin
-    Result := (IUnknown(TVarData(AValue).VPointer) as TInterfacedObject).ToString;
+    Result := (IUnknown(AValue) as TInterfacedObject).ToString;
   end
   else
     Result := VarToStrDef(AValue, 'Null');

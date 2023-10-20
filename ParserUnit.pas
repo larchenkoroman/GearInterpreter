@@ -195,6 +195,10 @@ begin
     begin
       Result := TAssignStmt.Create(Left as TVariable, Op, Right);
     end
+    else if Left is TGetExpr then
+    begin
+       Result := TSetStmt.Create(Left as TGetExpr, Op, Right);
+    end
     else
       Error(Token, ErrInvalidAssignTarget);
   end
@@ -260,10 +264,22 @@ begin
 end;
 
 function TParser.ParseCallExpr: TExpr;
+var
+  Token: TToken;
 begin
+  Token := CurrentToken;
   Result := ParseFactor;
-  while CurrentToken.TokenType = ttOpenParen do
-    Result := ParseCallArgs(Result);
+  while CurrentToken.TokenType in [ttOpenBrack, ttOpenParen] do
+    case CurrentToken.TokenType of
+      ttOpenBrack:
+        begin
+          Next; // skip [
+          Result := TGetExpr.Create(Result, ParseFactor, Token);
+          Expect(ttCloseBrack);
+        end;
+
+      ttOpenParen: Result := ParseCallArgs(Result);
+    end;
 end;
 
 function TParser.ParseContinueStmt: TStmt;

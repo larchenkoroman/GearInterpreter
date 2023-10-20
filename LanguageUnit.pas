@@ -66,7 +66,6 @@ end;
 
 class procedure Language.ExecuteFromFile(const ASource: string);
 begin
-  WriteLn('Gear Interpreter ', GearVersion, ' - (c) Roman Ltd 2023');
   Language.Execute(ASource, itFile);
 end;
 
@@ -96,7 +95,6 @@ var
   Tree: TProduct;
 begin
   Tree := nil;
-  WriteLn('Gear AST ', GearVersion, ' - (c) Roman Ltd 2023');
   try
     Parser := TParser.Create(TLexer.Create(TReader.Create(ASource, itFile)));
     Tree := Parser.Parse;
