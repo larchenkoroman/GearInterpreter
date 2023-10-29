@@ -11,12 +11,15 @@ function VariantToStr(AValue: Variant): string;
 
 implementation
 
+uses
+  TupleUnit, DictionaryUnit;
+
 { TVariantHelper }
 
 function VariantToStr(AValue: Variant): string;
 begin
   if    VarIsType(AValue, varUnknown)
-    and VarSupports(AValue, IUnknown) then
+    and VarSupportsIntf(AValue, [ITuple, IDictionary]) then
   begin
     Result := (IUnknown(AValue) as TInterfacedObject).ToString;
   end

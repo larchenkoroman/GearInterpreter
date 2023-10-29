@@ -68,6 +68,7 @@ type
       procedure VisitCallExpr(ACallExpr: TCallExpr);
       procedure VisitFuncDeclExpr(AFuncDeclExpr: TFuncDeclExpr);
       procedure VisitTupleExpr(ATupleExpr: TTupleExpr);
+      procedure VisitDictionaryExpr(ADictionaryExpr: TDictionaryExpr);
       procedure VisitGetExpr(AGetExpr: TGetExpr);
       // Stmt
       procedure VisitPrintStmt(APrintStmt: TPrintStmt);
@@ -231,6 +232,7 @@ begin
   FGlobalScope.AddSymbol(TSymbol.Create('sLineBreak', sEnabled, True));
 
   FGlobalScope.AddSymbol(TSymbol.Create('TupleInsert', sEnabled, True));
+  FGlobalScope.AddSymbol(TSymbol.Create('TupleLength', sEnabled, True));
 end;
 
 procedure TResolver.VisitIfExpr(AIfExpr: TIfExpr);
@@ -348,6 +350,16 @@ begin
   //nothing
 end;
 
+procedure TResolver.VisitDictionaryExpr(ADictionaryExpr: TDictionaryExpr);
+var
+  Key: TExpr;
+begin
+  for Key in ADictionaryExpr.KeyValueList.Keys do
+  begin
+    VisitProc(Key);
+    VisitProc(ADictionaryExpr.KeyValueList[Key]);
+  end;end;
+
 procedure TResolver.VisitForStmt(AForStmt: TForStmt);
 begin
   BeginScope;
@@ -376,7 +388,8 @@ end;
 procedure TResolver.VisitGetExpr(AGetExpr: TGetExpr);
 begin
   VisitProc(AGetExpr.Instance);
-  VisitProc(AGetExpr.Member);end;
+  VisitProc(AGetExpr.Member);
+end;
 
 procedure TResolver.VisitIdentifier(AIdentifier: TIdentifier);
 begin

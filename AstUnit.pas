@@ -31,6 +31,7 @@ type
   end;
 
   TExprList = TObjectList<TExpr>;
+  TKeyValueList = TObjectDictionary<TExpr, TExpr>;
 
   TFactorExpr = class(TExpr)
     //Base node fo parsing a factor
@@ -132,6 +133,15 @@ type
     public
       property ExprList: TExprList read FExprList;
       constructor Create(AExprList: TExprList; AToken: TToken);
+      destructor Destroy; override;
+  end;
+
+  TDictionaryExpr = class(TFactorExpr)
+    private
+      FKeyValueList: TKeyValueList;
+    public
+      property KeyValueList: TKeyValueList read FKeyValueList;
+      constructor Create(AKeyValueList: TKeyValueList; AToken: TToken);
       destructor Destroy; override;
   end;
 
@@ -911,6 +921,22 @@ begin
     FreeAndnil(FExpr);
 
   inherited Destroy;
+end;
+
+{ TDictionaryExpr }
+
+constructor TDictionaryExpr.Create(AKeyValueList: TKeyValueList;  AToken: TToken);
+begin
+  inherited Create(AToken);
+  FKeyValueList := AKeyValueList;
+end;
+
+destructor TDictionaryExpr.Destroy;
+begin
+  if Assigned(FKeyValueList) then
+    FreeAndNil(FKeyValueList);
+
+  inherited;
 end;
 
 end.

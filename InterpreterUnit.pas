@@ -33,6 +33,7 @@ type
       function VisitCallExpr(ACallExpr: TCallExpr): Variant;
       function VisitFuncDeclExpr(AFuncDeclExpr: TFuncDeclExpr): Variant;
       function VisitTupleExpr(ATupleExpr: TTupleExpr): Variant;
+      function VisitDictionaryExpr(ADictionaryExpr: TDictionaryExpr): Variant;
       function VisitGetExpr(AGetExpr: TGetExpr): Variant;
       //statements
       procedure VisitPrintStmt(APrintStmt: TPrintStmt);
@@ -61,7 +62,7 @@ type
 implementation
 
 uses
-  FuncUnit, CallableUnit, StandardFunctionsUnit, TupleUnit, VariantHelperUnit;
+  FuncUnit, CallableUnit, StandardFunctionsUnit, TupleUnit, VariantHelperUnit, DictionaryUnit;
 
 { TInterpreter }
 
@@ -177,6 +178,7 @@ begin
 
   AGlobalSpace.Store('writeln', ICallable(TWriteln.Create), Token);
   AGlobalSpace.Store('TupleInsert', ICallable(TTupleInsert.Create), Token);
+  AGlobalSpace.Store('TupleLength', ICallable(TTupleLength.Create), Token);
 end;
 
 function TInterpreter.TypeOf(AValue: Variant): String;
@@ -329,6 +331,25 @@ end;
 procedure TInterpreter.VisitContinueStmt(AContinueStmt: TContinueStmt);
 begin
   raise EContinueException.Create('');
+end;
+
+function TInterpreter.VisitDictionaryExpr(ADictionaryExpr: TDictionaryExpr): Variant;
+var
+  Key, Value: TExpr;
+  Dictionary: IDictionary;
+  KeyVar: string;
+  ValueVar: Variant;
+begin
+  Dictionary := IDictionary(TDictionary.Create);
+
+  for Key in ADictionaryExpr.KeyValueList.Keys do
+  begin
+    KeyVar := VisitFunc(Key);
+    ValueVar := VisitFunc(ADictionaryExpr.KeyValueList[Key]);
+    Dictionary.Elements.Add(Keyvar, ValueVar);
+  end;
+
+  Result := Dictionary;
 end;
 
 procedure TInterpreter.VisitForStmt(AForStmt: TForStmt);

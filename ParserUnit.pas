@@ -46,6 +46,7 @@ type
 
       function ParseUnaryExpr: TExpr;
       function ParseParenExpr: TExpr;
+      function ParseDictionaryExpr: TExpr;
       function ParseFactor: TExpr;
       function ParseCallExpr: TExpr;
       function ParseCallArgs(ACallee: TExpr): TExpr;
@@ -297,6 +298,37 @@ begin
   end;
 end;
 
+function TParser.ParseDictionaryExpr: TExpr;
+var
+  Key, Value: TExpr;
+  KeyValueList: TKeyValueList;
+begin
+  Expect(ttOpenBrace);
+  if CurrentToken.TokenType <> ttCloseBrace then
+  begin
+    KeyValueList := TKeyValueList.Create;
+    Key := ParseExpr;
+    Expect(ttColon);
+    Value := ParseExpr;
+    KeyValueList.Add(Key, Value);
+    while CurrentToken.TokenType = ttComma do
+    begin
+      Next; //skip ttComma
+      Key := ParseExpr;
+      Expect(ttColon);
+      Value := ParseExpr;
+      KeyValueList.Add(Key, Value);
+    end;
+    Expect(ttCloseBrace);
+    Result := TDictionaryExpr.Create(KeyValueList, CurrentToken);
+  end
+  else
+  begin //empty Dictionary
+    Next; //skip ttCloseBrace
+    Result := TDictionaryExpr.Create(TKeyValueList.Create, CurrentToken);
+  end;
+end;
+
 function TParser.ParseExpr: TExpr;
 var
   RelOp: TToken;
@@ -343,6 +375,7 @@ begin
     end;
 
     ttOpenParen:    Result := ParseParenExpr;
+    ttOpenBrace:    Result := ParseDictionaryExpr;
     ttFunc:         Result := TFuncDeclExpr.Create(ParseFuncDecl(ffAnonym) as TFuncDecl);
     ttIf:           Result := ParseIfExpr;
     ttCase:         Result := ParseCaseExpr;

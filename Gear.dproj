@@ -108,6 +108,7 @@
         <DCCReference Include="StandardFunctionsUnit.pas"/>
         <DCCReference Include="TupleUnit.pas"/>
         <DCCReference Include="VariantHelperUnit.pas"/>
+        <DCCReference Include="DictionaryUnit.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

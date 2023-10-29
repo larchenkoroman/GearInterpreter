@@ -30,6 +30,7 @@ type
       procedure VisitInterpolatedExpr(AInterpolatedExpr: TInterpolatedExpr);
       procedure VisitFuncDeclExpr(AFuncDeclExpr: TFuncDeclExpr);
       procedure VisitTupleExpr(ATupleExpr: TTupleExpr);
+      procedure VisitDictionaryExpr(ADictionaryExpr: TDictionaryExpr);
       procedure VisitGetExpr(AGetExpr: TGetExpr);
       //statements
       procedure VisitAssignStmt(AAssignStmt: TAssignStmt);
@@ -182,6 +183,20 @@ begin
   DecIndent;
 end;
 
+procedure TPrinter.VisitDictionaryExpr(ADictionaryExpr: TDictionaryExpr);
+var
+  Key, Value: TExpr;
+begin
+  IncIndent;
+  VisitNode(ADictionaryExpr);
+  for Key in ADictionaryExpr.KeyValueList.Keys do
+  begin
+    Write(FIndent + 'Key: '); VisitProc(Key);
+    Write(FIndent + 'Val: '); VisitProc(ADictionaryExpr.KeyValueList[Key]);
+  end;
+  DecIndent;
+end;
+
 procedure TPrinter.VisitForStmt(AForStmt: TForStmt);
 begin
   IncIndent;
@@ -230,7 +245,8 @@ begin
   VisitNode(AGetExpr);
   VisitProc(AGetExpr.Instance);
   VisitProc(AGetExpr.Member);
-  DecIndent;end;
+  DecIndent;
+end;
 
 procedure TPrinter.VisitIdentifier(AIdentifier: TIdentifier);
 begin

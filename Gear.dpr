@@ -24,7 +24,8 @@ uses
   FuncUnit in 'FuncUnit.pas',
   StandardFunctionsUnit in 'StandardFunctionsUnit.pas',
   TupleUnit in 'TupleUnit.pas',
-  VariantHelperUnit in 'VariantHelperUnit.pas';
+  VariantHelperUnit in 'VariantHelperUnit.pas',
+  DictionaryUnit in 'DictionaryUnit.pas';
 
 begin
   ProgrammUnit.DoRun;
