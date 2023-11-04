@@ -8,6 +8,7 @@ uses
 
 function VarSupportsIntf(AValue: Variant; AIntf: array of TGUID): Boolean;
 function VariantToStr(AValue: Variant): string;
+function VarIsNo(AValue: Variant): Boolean;
 
 implementation
 
@@ -18,8 +19,7 @@ uses
 
 function VariantToStr(AValue: Variant): string;
 begin
-  if    VarIsType(AValue, varUnknown)
-    and VarSupportsIntf(AValue, [ITuple, IDictionary]) then
+  if VarIsType(AValue, varUnknown) then
   begin
     Result := (IUnknown(AValue) as TInterfacedObject).ToString;
   end
@@ -41,6 +41,11 @@ begin
         break;
       end;
   end;
+end;
+
+function VarIsNo(AValue: Variant): Boolean;
+begin
+  Result := VarIsNull(AValue) or VarIsEmpty(AValue);
 end;
 
 end.

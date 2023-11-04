@@ -185,7 +185,7 @@ end;
 
 procedure TPrinter.VisitDictionaryExpr(ADictionaryExpr: TDictionaryExpr);
 var
-  Key, Value: TExpr;
+  Key: TExpr;
 begin
   IncIndent;
   VisitNode(ADictionaryExpr);

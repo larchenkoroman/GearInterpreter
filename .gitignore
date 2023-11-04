@@ -1,5 +1,4 @@
 # Specify filepatterns you want git to ignore.
-/Test/Win32
 /Win32
 
 # Delphi compiler-generated binaries (safe to delete)

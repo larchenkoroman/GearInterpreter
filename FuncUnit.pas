@@ -56,7 +56,10 @@ end;
 
 function TFunc.ToString: String;
 begin
-  Result := '<func ' + FFuncDecl.Identifier.Text+ '>';
+  if Assigned(FFuncDecl.Identifier) then
+    Result := '<func ' + FFuncDecl.Identifier.Text + '>'
+  else
+    Result := '<lambda>';
 end;
 
 end.

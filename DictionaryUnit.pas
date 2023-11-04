@@ -11,16 +11,19 @@ type
   IDictionary = interface
     ['{9215916F-38C6-4CC1-BA8A-2CD651BB8A6C}']
     function GetElements: TDictionaryElements;
+    function GetLength: Integer;
     function Get(AKey: string; AToken: TToken): Variant;
     procedure Put(AKey: string; AValue: Variant; AToken: TToken);
     function ToString: String;
     property Elements: TDictionaryElements read GetElements;
+    property Length: Integer read GetLength;
   end;
 
   TDictionary = class(TInterfacedObject, IDictionary)
     private
       FElements: TDictionaryElements;
       function GetElements: TDictionaryElements;
+      function GetLength: Integer;
     public
       constructor Create;
       destructor Destroy; override;
@@ -28,6 +31,7 @@ type
       function Get(AKey: string; AToken: TToken): Variant;
       procedure Put(AKey: string; AValue: Variant; AToken: TToken);
       property Elements: TDictionaryElements read GetElements;
+      property Length: Integer read GetLength;
   end;
 
 implementation
@@ -47,12 +51,23 @@ end;
 
 function TDictionary.Get(AKey: string; AToken: TToken): Variant;
 begin
-
+  if FElements.ContainsKey(AKey) then
+    Result := FElements[AKey]
+  else
+  begin
+    Result := Unassigned;
+    Raise ERuntimeError.Create(AToken, 'Key "'+ AKey + '" not found.');
+  end;
 end;
 
 function TDictionary.GetElements: TDictionaryElements;
 begin
   Result := FElements;
+end;
+
+function TDictionary.GetLength: Integer;
+begin
+  Result := FElements.Count;
 end;
 
 procedure TDictionary.Put(AKey: string; AValue: Variant; AToken: TToken);

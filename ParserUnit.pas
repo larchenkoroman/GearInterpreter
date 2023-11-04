@@ -23,8 +23,8 @@ type
 
       function CurrentToken: TToken;
       function ParseExprList: TExprList;
-      function Peek: TToken;
-      function IsLastToken: Boolean;
+//      function Peek: TToken;
+//      function IsLastToken: Boolean;
       procedure Error(AToken: TToken; AMsg: string);
       procedure Expect(const ATokenType:TTokenType);
       procedure Next;
@@ -135,10 +135,10 @@ begin
   Result := CurrentToken.TokenType in [ttPlus, ttMinus, ttOr, ttXor];
 end;
 
-function TParser.IsLastToken: Boolean;
-begin
-  Result := FCurrent = FTokens.Count - 1;
-end;
+//function TParser.IsLastToken: Boolean;
+//begin
+//  Result := FCurrent = FTokens.Count - 1;
+//end;
 
 function TParser.IsMulOp: Boolean;
 begin
@@ -583,7 +583,6 @@ var
   Expr: TExpr;
   ExprList: TExprList;
   FuncDecl: TFuncDecl;
-  Tuple: TTupleExpr;
 begin
   Expect(ttOpenParen);
   if CurrentToken.TokenType <> ttCloseParen then
@@ -788,12 +787,12 @@ begin
   end;
 end;
 
-function TParser.Peek: TToken;
-begin
-  Result := nil;
-  if not IsLastToken then
-    Result := FTokens[FCurrent + 1]
-end;
+//function TParser.Peek: TToken;
+//begin
+//  Result := nil;
+//  if not IsLastToken then
+//    Result := FTokens[FCurrent + 1]
+//end;
 
 procedure TParser.Synchronize(ATypes: TTokenTypeSet);
 begin

@@ -6,9 +6,6 @@
         <Projects Include="Gear.dproj">
             <Dependencies/>
         </Projects>
-        <Projects Include="Test\GearTests.dproj">
-            <Dependencies/>
-        </Projects>
     </ItemGroup>
     <ProjectExtensions>
         <Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -26,23 +23,14 @@
     <Target Name="Gear:Make">
         <MSBuild Projects="Gear.dproj" Targets="Make"/>
     </Target>
-    <Target Name="GearTests">
-        <MSBuild Projects="Test\GearTests.dproj"/>
-    </Target>
-    <Target Name="GearTests:Clean">
-        <MSBuild Projects="Test\GearTests.dproj" Targets="Clean"/>
-    </Target>
-    <Target Name="GearTests:Make">
-        <MSBuild Projects="Test\GearTests.dproj" Targets="Make"/>
-    </Target>
     <Target Name="Build">
-        <CallTarget Targets="Gear;GearTests"/>
+        <CallTarget Targets="Gear"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="Gear:Clean;GearTests:Clean"/>
+        <CallTarget Targets="Gear:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="Gear:Make;GearTests:Make"/>
+        <CallTarget Targets="Gear:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>

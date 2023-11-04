@@ -232,7 +232,7 @@ begin
   FGlobalScope.AddSymbol(TSymbol.Create('sLineBreak', sEnabled, True));
 
   FGlobalScope.AddSymbol(TSymbol.Create('TupleInsert', sEnabled, True));
-  FGlobalScope.AddSymbol(TSymbol.Create('TupleLength', sEnabled, True));
+  FGlobalScope.AddSymbol(TSymbol.Create('Length', sEnabled, True));
 end;
 
 procedure TResolver.VisitIfExpr(AIfExpr: TIfExpr);
@@ -358,7 +358,8 @@ begin
   begin
     VisitProc(Key);
     VisitProc(ADictionaryExpr.KeyValueList[Key]);
-  end;end;
+  end;
+end;
 
 procedure TResolver.VisitForStmt(AForStmt: TForStmt);
 begin

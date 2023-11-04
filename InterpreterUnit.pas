@@ -68,6 +68,7 @@ uses
 
 const
   ErrDuplicateID = 'Duplicate identifier: %s "%s" is already declared.';
+  ErrDuplicateDictionaryKey = 'Duplicate Key: "%s"';
   ErrIncompatibleTypes = 'Incompatible types in assignment: %s vs. %s.';
   ErrConditionNotBoolean = 'Condition is not Boolean.';
   ErrNotAFunction = '"%s" is not defined as function.';
@@ -178,7 +179,7 @@ begin
 
   AGlobalSpace.Store('writeln', ICallable(TWriteln.Create), Token);
   AGlobalSpace.Store('TupleInsert', ICallable(TTupleInsert.Create), Token);
-  AGlobalSpace.Store('TupleLength', ICallable(TTupleLength.Create), Token);
+  AGlobalSpace.Store('Length', ICallable(TLength.Create), Token);
 end;
 
 function TInterpreter.TypeOf(AValue: Variant): String;
@@ -335,7 +336,7 @@ end;
 
 function TInterpreter.VisitDictionaryExpr(ADictionaryExpr: TDictionaryExpr): Variant;
 var
-  Key, Value: TExpr;
+  Key: TExpr;
   Dictionary: IDictionary;
   KeyVar: string;
   ValueVar: Variant;
@@ -346,7 +347,10 @@ begin
   begin
     KeyVar := VisitFunc(Key);
     ValueVar := VisitFunc(ADictionaryExpr.KeyValueList[Key]);
-    Dictionary.Elements.Add(Keyvar, ValueVar);
+    if not Dictionary.Elements.ContainsKey(KeyVar) then
+      Dictionary.Elements.Add(Keyvar, ValueVar)
+    else
+      raise ERunTimeError.Create(ADictionaryExpr.Token, Format(ErrDuplicateDictionaryKey, [KeyVar]));
   end;
 
   Result := Dictionary;
@@ -401,20 +405,25 @@ end;
 
 function TInterpreter.VisitGetExpr(AGetExpr: TGetExpr): Variant;
 var
-  Instance, Index: Variant;
+  Instance, Index, Key: Variant;
 begin
   Instance := VisitFunc(AGetExpr.Instance);
-
-  if    VarIsType(Instance, varUnknown)
-    and VarSupports(Instance, ITuple) then
+  if    not VarIsNo(Instance)
+    and VarIsType(Instance, varUnknown) then
   begin
     Index := VisitFunc(AGetExpr.Member);
-    if not VarIsNumeric(Index) then
-      Raise ERuntimeError.Create(AGetExpr.Member.Token, 'Integer number expected.');
-    Result := ITuple(TVarData(Instance).VPointer).Get(Index, AGetExpr.Member.Token);
-  end
-  else
-    Raise ERuntimeError.Create(AGetExpr.Token, 'Expected instance of Tuple.');
+    if VarSupports(Instance, ITuple) then
+    begin
+      if not VarIsNumeric(Index) then
+        Raise ERuntimeError.Create(AGetExpr.Member.Token, 'Integer number expected.');
+      Result := ITuple(TVarData(Instance).VPointer).Get(Index, AGetExpr.Member.Token);
+    end
+    else if VarSupports(Instance, IDictionary) then
+    begin
+      Key := VariantToStr(Index);
+      Result := IDictionary(TVarData(Instance).VPointer).Get(Key, AGetExpr.Member.Token);
+    end
+  end;
 end;
 
 procedure TInterpreter.VisitIdentifier(AIdentifier: TIdentifier);

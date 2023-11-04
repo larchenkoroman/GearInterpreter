@@ -11,16 +11,19 @@ type
   ITuple = interface
     ['{D0C1D564-3EF9-4A95-8B46-F95C2FA3F56C}']
     function GetElements: TTupleElements;
+    function GetLength: Integer;
     function Get(i: Integer; AToken: TToken): Variant;
     procedure Put(i: Integer; AValue: Variant; AToken: TToken);
     function ToString: String;
     property Elements: TTupleElements read getElements;
+    property Length: Integer read GetLength;
   end;
 
   TTuple = class(TInterfacedObject, ITuple)
     private
       FElements: TTupleElements;
       function GetElements: TTupleElements;
+      function GetLength: Integer;
     public
       constructor Create;
       destructor Destroy; override;
@@ -28,6 +31,7 @@ type
       function Get(i: Integer; AToken: TToken): Variant;
       procedure Put(i: Integer; AValue: Variant; AToken: TToken);
       property Elements: TTupleElements read GetElements;
+      property Length: Integer read GetLength;
   end;
 
 implementation
@@ -61,6 +65,11 @@ end;
 function TTuple.GetElements: TTupleElements;
 begin
   Result := FElements;
+end;
+
+function TTuple.GetLength: Integer;
+begin
+  Result := FElements.Count;
 end;
 
 procedure TTuple.Put(i: Integer; AValue: Variant; AToken: TToken);

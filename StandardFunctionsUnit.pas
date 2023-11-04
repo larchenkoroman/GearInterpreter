@@ -3,7 +3,7 @@ unit StandardFunctionsUnit;
 interface
 
 uses
-  System.Variants, CallableUnit, InterpreterUnit, TokenUnit, FuncUnit, VariantHelperUnit, TupleUnit, ErrorUnit;
+  System.Variants, CallableUnit, InterpreterUnit, TokenUnit, FuncUnit, VariantHelperUnit, TupleUnit, ErrorUnit, DictionaryUnit;
 
 type
 
@@ -11,7 +11,7 @@ type
     function Call(AToken: TToken; AInterpreter: TInterpreter; AArgList: TArgList): Variant;
   end;
 
-  TTupleLength = class(TInterfacedObject, ICallable)
+  TLength = class(TInterfacedObject, ICallable)
     function Call(AToken: TToken; AInterpreter: TInterpreter; AArgList: TArgList): Variant;
   end;
 
@@ -21,7 +21,6 @@ type
 
 implementation
 
-{ TWriteln }
 
 function TWriteln.Call(AToken: TToken; AInterpreter: TInterpreter;  AArgList: TArgList): Variant;
 begin
@@ -30,7 +29,6 @@ begin
   Writeln;
 end;
 
-{ TTupleInsert }
 
 function TTupleInsert.Call(AToken: TToken; AInterpreter: TInterpreter;  AArgList: TArgList): Variant;
 var
@@ -51,27 +49,26 @@ begin
     Raise ERuntimeError.Create(AToken, 'First argument must be a tuple.');
 end;
 
-{ T ортежƒлина }
 
-function TTupleLength.Call(AToken: TToken; AInterpreter: TInterpreter; AArgList: TArgList): Variant;
+function TLength.Call(AToken: TToken; AInterpreter: TInterpreter; AArgList: TArgList): Variant;
 var
-  Tuple: ITuple;
+  Value: Variant;
 begin
   Result := 0;
-  if   (AArgList.Count > 1)
-    or (AArgList.Count = 0) then
+  TFunc.CheckArity(AToken, AArgList.Count, 1);
+  Value := AArgList[0].Value;
+
+  if VarIsType(Value, varUnknown) then
   begin
-    Raise ERuntimeError.Create(AToken, 'TupleLength ожидает один аргумент - кортеж');
+    if VarSupports(Value, ITuple) then
+      Result := ITuple(TVarData(Value).VPointer).Length
+    else if VarSupports(Value, IDictionary) then
+      Result := IDictionary(TVarData(Value).VPointer).Length;
   end
   else
-  if    VarIsType(AArgList[0].Value, varUnknown)
-    and VarSupports(AArgList[0].Value, ITuple) then
-  begin
-    Tuple := ITuple(TVarData(AArgList[0].Value).VPointer);
-    Result := Tuple.Elements.Count;
-  end
-  else
-    Raise ERuntimeError.Create(AToken, 'Argument must be a tuple.');
+  if    not VarIsNull(Value)
+    and not VarIsEmpty(Value) then
+    Result := Length(VarToStr(Value));
 end;
 
 end.
