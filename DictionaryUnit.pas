@@ -72,7 +72,10 @@ end;
 
 procedure TDictionary.Put(AKey: string; AValue: Variant; AToken: TToken);
 begin
-
+  if FElements.ContainsKey(AKey) then
+    FElements[AKey] := AValue
+  else
+    FElements.Add(AKey, AValue);
 end;
 
 function TDictionary.ToString: string;

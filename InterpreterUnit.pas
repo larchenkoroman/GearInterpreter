@@ -546,24 +546,33 @@ end;
 
 procedure TInterpreter.VisitSetStmt(ASetStmt: TSetStmt);
 var
-  Instance, OldValue, NewValue, Value, Index: Variant;
+  Instance, OldValue, NewValue, Value, Index, Key: Variant;
 begin
   Instance := VisitFunc(ASetStmt.GetExpr.Instance);
-
-  if    VarIsType(Instance, varUnknown)
-    and VarSupports(Instance, ITuple) then
+  if VarIsType(Instance, varUnknown) then
   begin
     Index := VisitFunc(ASetStmt.GetExpr.Member);
-    if not VarIsNumeric(Index) then
-      Raise ERuntimeError.Create(ASetStmt.GetExpr.Member.Token, 'Integer number expected.');
+    if VarSupports(Instance, ITuple) then
+    begin
+      if not VarIsNumeric(Index) then
+        Raise ERuntimeError.Create(ASetStmt.GetExpr.Member.Token, 'Integer number expected.');
 
-    OldValue := ITuple(TVarData(Instance).VPointer).Get(Index, ASetStmt.GetExpr.Member.Token);
-    NewValue := VisitFunc(ASetStmt.Expr);
-    Value := GetAssignValue(OldValue, NewValue, ASetStmt.GetExpr.Member.Token, ASetStmt.Op);
-    ITuple(TVarData(Instance).VPointer).Put(Index, Value, ASetStmt.GetExpr.Member.Token);
+      OldValue := ITuple(TVarData(Instance).VPointer).Get(Index, ASetStmt.GetExpr.Member.Token);
+      NewValue := VisitFunc(ASetStmt.Expr);
+      Value := GetAssignValue(OldValue, NewValue, ASetStmt.GetExpr.Member.Token, ASetStmt.Op);
+      ITuple(TVarData(Instance).VPointer).Put(Index, Value, ASetStmt.GetExpr.Member.Token);
+    end
+    else if VarSupports(Instance, IDictionary) then
+    begin
+      Key := VariantToStr(Index);
+      OldValue := IDictionary(TVarData(Instance).VPointer).Get(Key, ASetStmt.GetExpr.Member.Token);
+      NewValue := VisitFunc(ASetStmt.Expr);
+      Value := GetAssignValue(OldValue, NewValue, ASetStmt.GetExpr.Member.Token, ASetStmt.Op);
+      IDictionary(TVarData(Instance).VPointer).Put(Key, Value, ASetStmt.GetExpr.Member.Token);
+    end;
   end
   else
-    Raise ERuntimeError.Create(ASetStmt.GetExpr.Token, 'Instance of Tuple expected.');
+    Raise ERuntimeError.Create(ASetStmt.GetExpr.Token, 'Instance of Tuple or Dictionary expected.');
 end;
 
 function TInterpreter.VisitTupleExpr(ATupleExpr: TTupleExpr): Variant;
