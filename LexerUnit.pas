@@ -11,15 +11,15 @@ const
   CHAR_10  = #10;
   Quote1   = #39; // '
   Quote2   = #34; // "
+  SpecialChar     = '#';
 
   WhiteSpace      = [Tab, CHAR_13, CHAR_10, Space];
   Underscore      = ['_'];
   LoCaseLetter    = ['a'..'z'];
   UpCaseLetter    = ['A'..'Z'];
-  Letters         = UpCaseLetter + LoCaseLetter;
-  AlphaChars      = UpCaseLetter + LoCaseLetter + Underscore;
   NumberChars     = ['0'..'9'];
-  SpecialChar     = '#';
+  Letters         = UpCaseLetter + LoCaseLetter;
+  AlphaChars      = Letters + Underscore;
   IdentifierChars = NumberChars + AlphaChars;
 
 type
