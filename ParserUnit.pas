@@ -574,7 +574,7 @@ begin
       Error(CurrentToken, ErrUnrecognizedDeclOrStmt);
   except
     Synchronize(DeclStartSet + StmtStartSet + [ttEOF]);
-    Result := nil;//TNode.Create(CurrentToken);
+    Result := nil;
   end;
 end;
 

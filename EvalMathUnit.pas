@@ -3,7 +3,7 @@ unit EvalMathUnit;
 interface
 
 uses
-  System.Classes, System.SysUtils, TokenUnit, ErrorUnit, Math, System.Variants, VariantHelperUnit;
+  System.Classes, System.SysUtils, TokenUnit, ErrorUnit, Math, System.Variants, VariantHelperUnit, TupleUnit;
 
 type
   TMath = Record
@@ -41,6 +41,7 @@ type
 
       // boolean checks
       class function AreBothNumber(const Value1, Value2: Variant): Boolean; static;
+      class function AreBothTuple(const Value1, Value2: Variant): Boolean; static;
       class function AreBothBoolean(const Value1, Value2: Variant): Boolean; static;
       class function AreBothString(const Value1, Value2: Variant): Boolean; static;
       class function OneOfBothBoolean(const Value1, Value2: Variant): Boolean; static;
@@ -68,6 +69,11 @@ begin
   Result := VarIsStr(Value1) and VarIsStr(Value2);
 end;
 
+class function TMath.AreBothTuple(const Value1, Value2: Variant): Boolean;
+begin
+  Result :=  VarIsTuple(Value1) and VarIsTuple(Value2);
+end;
+
 class function TMath.OneOfBothBoolean(const Value1, Value2: Variant): Boolean;
 begin
   Result :=    (VarType(Value1) = varBoolean)
@@ -80,6 +86,8 @@ begin
 end;
 
 class function TMath._Add(const Left, Right: Variant; Op: TToken): Variant;
+var
+  Tuple: ITuple;
 begin
   Result := Null;
 
@@ -89,6 +97,19 @@ begin
     Result := Null
   else if AreBothNumber(Left, Right) then
     Result := Left + Right
+  else if AreBothTuple(Left, Right) then
+  begin
+    Tuple := ITuple(TTuple.Create);
+    Tuple.AddFromTuple(ITuple(TVarData(Left).VPointer));
+    Tuple.AddFromTuple(ITuple(TVarData(Right).VPointer));
+    Result := Tuple;
+  end
+  else if VarIsTuple(Left) then
+  begin
+    Tuple := ITuple(TVarData(Left).VPointer);
+    Tuple.Elements.Add(Right);
+    Result := Left;
+  end
   else
     Raise ERuntimeError.Create(Op, Format(ErrIncompatibleOperands, ['+']));
 end;

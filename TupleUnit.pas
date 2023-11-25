@@ -15,6 +15,7 @@ type
     function Get(i: Integer; AToken: TToken): Variant;
     procedure Put(i: Integer; AValue: Variant; AToken: TToken);
     function ToString: String;
+    procedure AddFromTuple(ATuple: ITuple);
     property Elements: TTupleElements read getElements;
     property Length: Integer read GetLength;
   end;
@@ -30,6 +31,7 @@ type
       function ToString: string; override;
       function Get(i: Integer; AToken: TToken): Variant;
       procedure Put(i: Integer; AValue: Variant; AToken: TToken);
+      procedure AddFromTuple(ATuple: ITuple);
       property Elements: TTupleElements read GetElements;
       property Length: Integer read GetLength;
   end;
@@ -37,6 +39,14 @@ type
 implementation
 
 { TTuple }
+
+procedure TTuple.AddFromTuple(ATuple: ITuple);
+begin
+  for var MyElem in ATuple.Elements do
+  begin
+    Elements.Add(MyElem);
+  end;
+end;
 
 constructor TTuple.Create;
 begin
@@ -90,7 +100,7 @@ var
   function GetStr(AValue: Variant): string;
   begin
     Result := VariantToStr(AValue);
-    if VarType(AValue) = varString then
+    if VarIsStr(AValue) then
       Result := QuotedStr(Result);
   end;
 
@@ -98,7 +108,7 @@ begin
   Result := '(';
   if FElements.Count > 0 then
   begin
-    for i := 0 to FElements.Count-2 do
+    for i := 0 to FElements.Count - 2 do
       Result := Result + GetStr(FElements[i]) + ', ';
     Result := Result + GetStr(FElements[FElements.Count-1]);
   end;

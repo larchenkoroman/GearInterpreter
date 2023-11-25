@@ -141,7 +141,8 @@ begin
     and not (    (OldType = 'String')
              and (NewType = 'Number')
              and (Op.TokenType = ttMulIs) // для строк допустимо *=
-            ) then
+            )
+    and not VarIsTuple(OldValue) then
   begin
     raise ERuntimeError.Create(ID, Format(ErrIncompatibleTypes, [OldType, NewType]));
   end;
@@ -428,7 +429,7 @@ end;
 
 procedure TInterpreter.VisitIdentifier(AIdentifier: TIdentifier);
 begin
-
+   // do nothing
 end;
 
 function TInterpreter.VisitIfExpr(AIfExpr: TIfExpr): Variant;
