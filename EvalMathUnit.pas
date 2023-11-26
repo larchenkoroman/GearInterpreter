@@ -71,7 +71,7 @@ end;
 
 class function TMath.AreBothTuple(const Value1, Value2: Variant): Boolean;
 begin
-  Result :=  VarIsTuple(Value1) and VarIsTuple(Value2);
+  Result :=  VarIsList(Value1) and VarIsList(Value2);
 end;
 
 class function TMath.OneOfBothBoolean(const Value1, Value2: Variant): Boolean;
@@ -104,7 +104,7 @@ begin
     Tuple.AddFromTuple(ITuple(TVarData(Right).VPointer));
     Result := Tuple;
   end
-  else if VarIsTuple(Left) then
+  else if VarIsList(Left) then
   begin
     Tuple := ITuple(TVarData(Left).VPointer);
     Tuple.Elements.Add(Right);

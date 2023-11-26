@@ -289,8 +289,8 @@ begin
          else
            AddToken(ttCloseBrace);
 
-    '[': AddToken(ttOpenBrack);
-    ']': AddToken(ttCloseBrack);
+    '[': AddToken(ttOpenBracket);
+    ']': AddToken(ttCloseBracket);
     ',': AddToken(ttComma);
     ':': AddToken(ttColon);
     ';': AddToken(ttSemiColon);

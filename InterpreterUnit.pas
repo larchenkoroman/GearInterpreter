@@ -142,7 +142,7 @@ begin
              and (NewType = 'Number')
              and (Op.TokenType = ttMulIs) // для строк допустимо *=
             )
-    and not VarIsTuple(OldValue) then
+    and not VarIsList(OldValue) then
   begin
     raise ERuntimeError.Create(ID, Format(ErrIncompatibleTypes, [OldType, NewType]));
   end;
@@ -179,7 +179,7 @@ begin
   AGlobalSpace.Store('sLineBreak', sLineBreak, Token);
 
   AGlobalSpace.Store('writeln', ICallable(TWriteln.Create), Token);
-  AGlobalSpace.Store('TupleInsert', ICallable(TTupleInsert.Create), Token);
+  AGlobalSpace.Store('ListInsert', ICallable(TListInsert.Create), Token);
   AGlobalSpace.Store('Length', ICallable(TLength.Create), Token);
 end;
 

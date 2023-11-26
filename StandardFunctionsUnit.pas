@@ -7,7 +7,7 @@ uses
 
 type
 
-  TTupleInsert = class(TInterfacedObject, ICallable)
+  TListInsert = class(TInterfacedObject, ICallable)
     function Call(AToken: TToken; AInterpreter: TInterpreter; AArgList: TArgList): Variant;
   end;
 
@@ -30,16 +30,15 @@ begin
 end;
 
 
-function TTupleInsert.Call(AToken: TToken; AInterpreter: TInterpreter;  AArgList: TArgList): Variant;
+function TListInsert.Call(AToken: TToken; AInterpreter: TInterpreter;  AArgList: TArgList): Variant;
 var
   Tuple: ITuple;
   i: Integer;
 begin
-  if AArgList.Count <= 2 then
-    Raise ERuntimeError.Create(AToken, 'Too few arguments were supported for TupleInsert.')
+  if AArgList.Count < 2 then
+    Raise ERuntimeError.Create(AToken, 'Too few arguments were supported for ListInsert.')
   else
-  if    VarIsType(AArgList[0].Value, varUnknown)
-    and VarSupports(AArgList[0].Value, ITuple) then
+  if VarIsList(AArgList[0].Value) then
   begin
     Tuple := ITuple(TVarData(AArgList[0].Value).VPointer);
     for i := 1 to AArgList.Count - 1 do
@@ -66,8 +65,7 @@ begin
       Result := IDictionary(TVarData(Value).VPointer).Length;
   end
   else
-  if    not VarIsNull(Value)
-    and not VarIsEmpty(Value) then
+  if not VarIsNo(Value) then
     Result := Length(VarToStr(Value));
 end;
 

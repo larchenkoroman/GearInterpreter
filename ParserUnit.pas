@@ -47,6 +47,7 @@ type
       function ParseUnaryExpr: TExpr;
       function ParseParenExpr: TExpr;
       function ParseDictionaryExpr: TExpr;
+      function ParseListExpr: TExpr;
       function ParseFactor: TExpr;
       function ParseCallExpr: TExpr;
       function ParseCallArgs(ACallee: TExpr): TExpr;
@@ -270,13 +271,13 @@ var
 begin
   Token := CurrentToken;
   Result := ParseFactor;
-  while CurrentToken.TokenType in [ttOpenBrack, ttOpenParen] do
+  while CurrentToken.TokenType in [ttOpenBracket, ttOpenParen] do
     case CurrentToken.TokenType of
-      ttOpenBrack:
+      ttOpenBracket:
         begin
           Next; // skip [
           Result := TGetExpr.Create(Result, ParseFactor, Token);
-          Expect(ttCloseBrack);
+          Expect(ttCloseBracket);
         end;
 
       ttOpenParen: Result := ParseCallArgs(Result);
@@ -376,6 +377,7 @@ begin
 
     ttOpenParen:    Result := ParseParenExpr;
     ttOpenBrace:    Result := ParseDictionaryExpr;
+    ttOpenBracket:  Result := ParseListExpr;
     ttFunc:         Result := TFuncDeclExpr.Create(ParseFuncDecl(ffAnonym) as TFuncDecl);
     ttIf:           Result := ParseIfExpr;
     ttCase:         Result := ParseCaseExpr;
@@ -549,6 +551,33 @@ begin
   Result := TInterpolatedExpr.Create(ExprList, Token);
 end;
 
+function TParser.ParseListExpr: TExpr;
+var
+  Expr: TExpr;
+  ExprList: TExprList;
+begin
+  Expect(ttOpenBracket);
+  if CurrentToken.TokenType <> ttCloseBracket then
+  begin
+    ExprList := TExprList.Create;
+    Expr := ParseExpr;
+    ExprList.Add(Expr);
+    while CurrentToken.TokenType = ttComma do
+    begin
+      Next; //skip ttComma
+      Expr := ParseExpr;
+      ExprList.Add(Expr);
+    end;
+    Expect(ttCloseBracket);
+    Result := TTupleExpr.Create(ExprList, CurrentToken);
+  end
+  else
+  begin //empty List
+    Next; //skip ttCloseBracket
+    Result := TTupleExpr.Create(TExprList.Create(), CurrentToken);
+  end;
+end;
+
 function TParser.ParseMulExpr: TExpr;
 var
   MulOp: TToken;
@@ -598,19 +627,13 @@ begin
         ExprList.Add(ParseExpr);
       end;
       Expect(ttCloseParen);
-      if CurrentToken.TokenType = ttArrow then
-      begin  // func: ExprList contains params
-        FuncDecl := TFuncDecl.Create(nil, CurrentToken);
-        for Expr in ExprList do
-          FuncDecl.AddParam((Expr as TVariable).Identifier);
-        FuncDecl.Body := TBlock.Create(TNodeList.Create(), CurrentToken);
-        FuncDecl.Body.Nodes.Add(ParseReturnStmt);
-        Result := TFuncDeclExpr.Create(FuncDecl);
-      end
-      else  // must be a tuple expr
-      begin
-        Result := TTupleExpr.Create(ExprList, CurrentToken);
-      end;
+      Expect(ttArrow);
+      FuncDecl := TFuncDecl.Create(nil, CurrentToken);
+      for Expr in ExprList do
+        FuncDecl.AddParam((Expr as TVariable).Identifier);
+      FuncDecl.Body := TBlock.Create(TNodeList.Create(), CurrentToken);
+      FuncDecl.Body.Nodes.Add(ParseReturnStmt);
+      Result := TFuncDeclExpr.Create(FuncDecl);
     end
     else
     begin
@@ -621,15 +644,11 @@ begin
   else
   begin
     Next; // skip )
-    if CurrentToken.TokenType = ttArrow then
-    begin  // func: zero params
-      FuncDecl := TFuncDecl.Create(nil, CurrentToken);
-      FuncDecl.Body := TBlock.Create(TNodeList.Create(), CurrentToken);
-      FuncDecl.Body.Nodes.Add(ParseReturnStmt);
-      Result := TFuncDeclExpr.Create(FuncDecl);
-    end
-    else // empty tuple
-      Result := TTupleExpr.Create(TExprList.Create(), CurrentToken);
+    Expect(ttArrow);// func: zero params
+    FuncDecl := TFuncDecl.Create(nil, CurrentToken);
+    FuncDecl.Body := TBlock.Create(TNodeList.Create(), CurrentToken);
+    FuncDecl.Body.Nodes.Add(ParseReturnStmt);
+    Result := TFuncDeclExpr.Create(FuncDecl);
   end;
 end;
 

@@ -9,7 +9,7 @@ uses
 function VarSupportsIntf(AValue: Variant; AIntf: array of TGUID): Boolean;
 function VariantToStr(AValue: Variant): string;
 function VarIsNo(AValue: Variant): Boolean;
-function VarIsTuple(AValue: Variant): Boolean;
+function VarIsList(AValue: Variant): Boolean;
 
 implementation
 
@@ -44,7 +44,7 @@ begin
   end;
 end;
 
-function VarIsTuple(AValue: Variant): Boolean;
+function VarIsList(AValue: Variant): Boolean;
 begin
   Result := VarIsType(AValue, varUnknown) and VarSupports(AValue, ITuple);
 end;

@@ -105,14 +105,14 @@ var
   end;
 
 begin
-  Result := '(';
+  Result := '[';
   if FElements.Count > 0 then
   begin
     for i := 0 to FElements.Count - 2 do
       Result := Result + GetStr(FElements[i]) + ', ';
     Result := Result + GetStr(FElements[FElements.Count-1]);
   end;
-  Result := Result + ')';
+  Result := Result + ']';
 end;
 
 end.

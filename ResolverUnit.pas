@@ -231,7 +231,7 @@ procedure TResolver.EnableStandardFunctions;
 begin
   FGlobalScope.AddSymbol(TSymbol.Create('sLineBreak', sEnabled, True));
 
-  FGlobalScope.AddSymbol(TSymbol.Create('TupleInsert', sEnabled, True));
+  FGlobalScope.AddSymbol(TSymbol.Create('ListInsert', sEnabled, True));
   FGlobalScope.AddSymbol(TSymbol.Create('Length', sEnabled, True));
 end;
 

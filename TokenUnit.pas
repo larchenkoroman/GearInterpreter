@@ -29,7 +29,7 @@ type
     //Symbols and punctuation marks
     ttComma, ttColon, ttSemiColon, ttDot, ttDotDot, ttAssign, ttQuestion, ttArrow,
     ttOpenParen, ttCloseParen, ttOpenBrace, ttCloseBrace,
-    ttOpenBrack, ttCloseBrack, ttComment, ttEOF, ttNone
+    ttOpenBracket, ttCloseBracket, ttComment, ttEOF, ttNone
   );
 
   TTokenTypeHelper = record helper for TTokenType
@@ -134,8 +134,8 @@ begin
     ttCloseParen:  Result := ')';
     ttOpenBrace:   Result := '{';
     ttCloseBrace:  Result := '}';
-    ttOpenBrack:   Result := '[';
-    ttCloseBrack:  Result := ']';
+    ttOpenBracket:   Result := '[';
+    ttCloseBracket:  Result := ']';
     ttEOF:         Result := 'End of file';
   else
     Result := TRttiEnumerationType.GetName(Self).Substring(2);
