@@ -1,4 +1,4 @@
-unit TupleUnit;
+unit ListUnit;
 
 interface
 
@@ -6,24 +6,24 @@ uses
   System.Classes, System.SysUtils, System.Generics.Collections, System.Variants, TokenUnit, ErrorUnit, VariantHelperUnit;
 
 type
-  TTupleElements = TList<Variant>;
+  TListElements = TList<Variant>;
 
-  ITuple = interface
+  IList = interface
     ['{D0C1D564-3EF9-4A95-8B46-F95C2FA3F56C}']
-    function GetElements: TTupleElements;
+    function GetElements: TListElements;
     function GetLength: Integer;
     function Get(i: Integer; AToken: TToken): Variant;
     procedure Put(i: Integer; AValue: Variant; AToken: TToken);
     function ToString: String;
-    procedure AddFromTuple(ATuple: ITuple);
-    property Elements: TTupleElements read getElements;
+    procedure AddFromList(AList: IList);
+    property Elements: TListElements read getElements;
     property Length: Integer read GetLength;
   end;
 
-  TTuple = class(TInterfacedObject, ITuple)
+  TGearList = class(TInterfacedObject, IList)
     private
-      FElements: TTupleElements;
-      function GetElements: TTupleElements;
+      FElements: TListElements;
+      function GetElements: TListElements;
       function GetLength: Integer;
     public
       constructor Create;
@@ -31,35 +31,35 @@ type
       function ToString: string; override;
       function Get(i: Integer; AToken: TToken): Variant;
       procedure Put(i: Integer; AValue: Variant; AToken: TToken);
-      procedure AddFromTuple(ATuple: ITuple);
-      property Elements: TTupleElements read GetElements;
+      procedure AddFromList(AList: IList);
+      property Elements: TListElements read GetElements;
       property Length: Integer read GetLength;
   end;
 
 implementation
 
-{ TTuple }
+{ TGearList }
 
-procedure TTuple.AddFromTuple(ATuple: ITuple);
+procedure TGearList.AddFromList(AList: IList);
 begin
-  for var MyElem in ATuple.Elements do
+  for var MyElem in AList.Elements do
   begin
     Elements.Add(MyElem);
   end;
 end;
 
-constructor TTuple.Create;
+constructor TGearList.Create;
 begin
-   FElements := TTupleElements.Create;
+   FElements := TListElements.Create;
 end;
 
-destructor TTuple.Destroy;
+destructor TGearList.Destroy;
 begin
   FreeAndNil(FElements);
   inherited Destroy;
 end;
 
-function TTuple.Get(i: Integer; AToken: TToken): Variant;
+function TGearList.Get(i: Integer; AToken: TToken): Variant;
 var
   Count: Integer;
 begin
@@ -72,17 +72,17 @@ begin
     Raise ERuntimeError.Create(AToken, 'Index ('+ IntToStr(i) + ') out of range ('+ '0..' + IntToStr(Count - 1) + ').');
 end;
 
-function TTuple.GetElements: TTupleElements;
+function TGearList.GetElements: TListElements;
 begin
   Result := FElements;
 end;
 
-function TTuple.GetLength: Integer;
+function TGearList.GetLength: Integer;
 begin
   Result := FElements.Count;
 end;
 
-procedure TTuple.Put(i: Integer; AValue: Variant; AToken: TToken);
+procedure TGearList.Put(i: Integer; AValue: Variant; AToken: TToken);
 var
   Count: Integer;
 begin
@@ -93,7 +93,7 @@ begin
     Raise ERuntimeError.Create(AToken, 'Index ('+ IntToStr(i) + ') out of range ('+ '0..' + IntToStr(Count - 1) + ').');
 end;
 
-function TTuple.ToString: String;
+function TGearList.ToString: String;
 var
   i: Integer;
 

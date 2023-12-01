@@ -78,6 +78,7 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
+        <Debugger_RunParams>C:\Projects\Delphi\GearInterpreter\Win32\Debug\ttt.gear</Debugger_RunParams>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
         <DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
@@ -106,7 +107,7 @@
         <DCCReference Include="CallableUnit.pas"/>
         <DCCReference Include="FuncUnit.pas"/>
         <DCCReference Include="StandardFunctionsUnit.pas"/>
-        <DCCReference Include="TupleUnit.pas"/>
+        <DCCReference Include="ListUnit.pas"/>
         <DCCReference Include="VariantHelperUnit.pas"/>
         <DCCReference Include="DictionaryUnit.pas"/>
         <BuildConfiguration Include="Base">

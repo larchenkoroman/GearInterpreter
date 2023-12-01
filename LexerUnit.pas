@@ -279,7 +279,7 @@ begin
     '^': AddToken(ttPow);
     '(': AddToken(ttOpenParen);
     ')': AddToken(ttCloseParen);
-    '{': AddToken(ttOpenBrace);
+    '{': AddToken(ttOpenCurlyBr);
 
     '}': if FIsOpenBrace then
          begin
@@ -287,10 +287,10 @@ begin
            DoString(FCurrentQuoteChar, Line, Col);
          end
          else
-           AddToken(ttCloseBrace);
+           AddToken(ttCloseCurlyBr);
 
-    '[': AddToken(ttOpenBracket);
-    ']': AddToken(ttCloseBracket);
+    '[': AddToken(ttOpenSquareBr);
+    ']': AddToken(ttCloseSquareBr);
     ',': AddToken(ttComma);
     ':': AddToken(ttColon);
     ';': AddToken(ttSemiColon);

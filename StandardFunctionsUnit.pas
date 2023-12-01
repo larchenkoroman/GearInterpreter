@@ -3,7 +3,7 @@ unit StandardFunctionsUnit;
 interface
 
 uses
-  System.Variants, CallableUnit, InterpreterUnit, TokenUnit, FuncUnit, VariantHelperUnit, TupleUnit, ErrorUnit, DictionaryUnit;
+  System.Variants, CallableUnit, InterpreterUnit, TokenUnit, FuncUnit, VariantHelperUnit, ListUnit, ErrorUnit, DictionaryUnit;
 
 type
 
@@ -32,7 +32,7 @@ end;
 
 function TListInsert.Call(AToken: TToken; AInterpreter: TInterpreter;  AArgList: TArgList): Variant;
 var
-  Tuple: ITuple;
+  List: IList;
   i: Integer;
 begin
   if AArgList.Count < 2 then
@@ -40,9 +40,9 @@ begin
   else
   if VarIsList(AArgList[0].Value) then
   begin
-    Tuple := ITuple(TVarData(AArgList[0].Value).VPointer);
+    List := IList(TVarData(AArgList[0].Value).VPointer);
     for i := 1 to AArgList.Count - 1 do
-      Tuple.Elements.Add(AArgList[i].Value);
+      List.Elements.Add(AArgList[i].Value);
   end
   else
     Raise ERuntimeError.Create(AToken, 'First argument must be a tuple.');
@@ -57,15 +57,11 @@ begin
   TFunc.CheckArity(AToken, AArgList.Count, 1);
   Value := AArgList[0].Value;
 
-  if VarIsType(Value, varUnknown) then
-  begin
-    if VarSupports(Value, ITuple) then
-      Result := ITuple(TVarData(Value).VPointer).Length
-    else if VarSupports(Value, IDictionary) then
-      Result := IDictionary(TVarData(Value).VPointer).Length;
-  end
-  else
-  if not VarIsNo(Value) then
+  if VarIsList(value) then
+    Result := IList(TVarData(Value).VPointer).Length
+  else if VarIsDict(Value) then
+    Result := IDictionary(TVarData(Value).VPointer).Length
+  else if not VarIsNo(Value) then
     Result := Length(VarToStr(Value));
 end;
 

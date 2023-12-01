@@ -32,7 +32,7 @@ type
       function VisitInterpolatedExpr(AInterpolatedExpr: TInterpolatedExpr): Variant;
       function VisitCallExpr(ACallExpr: TCallExpr): Variant;
       function VisitFuncDeclExpr(AFuncDeclExpr: TFuncDeclExpr): Variant;
-      function VisitTupleExpr(ATupleExpr: TTupleExpr): Variant;
+      function VisitListExpr(AListExpr: TListExpr): Variant;
       function VisitDictionaryExpr(ADictionaryExpr: TDictionaryExpr): Variant;
       function VisitGetExpr(AGetExpr: TGetExpr): Variant;
       //statements
@@ -62,7 +62,7 @@ type
 implementation
 
 uses
-  FuncUnit, CallableUnit, StandardFunctionsUnit, TupleUnit, VariantHelperUnit, DictionaryUnit;
+  FuncUnit, CallableUnit, StandardFunctionsUnit, ListUnit, VariantHelperUnit, DictionaryUnit;
 
 { TInterpreter }
 
@@ -413,11 +413,11 @@ begin
     and VarIsType(Instance, varUnknown) then
   begin
     Index := VisitFunc(AGetExpr.Member);
-    if VarSupports(Instance, ITuple) then
+    if VarSupports(Instance, IList) then
     begin
       if not VarIsNumeric(Index) then
         Raise ERuntimeError.Create(AGetExpr.Member.Token, 'Integer number expected.');
-      Result := ITuple(TVarData(Instance).VPointer).Get(Index, AGetExpr.Member.Token);
+      Result := IList(TVarData(Instance).VPointer).Get(Index, AGetExpr.Member.Token);
     end
     else if VarSupports(Instance, IDictionary) then
     begin
@@ -553,15 +553,15 @@ begin
   if VarIsType(Instance, varUnknown) then
   begin
     Index := VisitFunc(ASetStmt.GetExpr.Member);
-    if VarSupports(Instance, ITuple) then
+    if VarSupports(Instance, IList) then
     begin
       if not VarIsNumeric(Index) then
         Raise ERuntimeError.Create(ASetStmt.GetExpr.Member.Token, 'Integer number expected.');
 
-      OldValue := ITuple(TVarData(Instance).VPointer).Get(Index, ASetStmt.GetExpr.Member.Token);
+      OldValue := IList(TVarData(Instance).VPointer).Get(Index, ASetStmt.GetExpr.Member.Token);
       NewValue := VisitFunc(ASetStmt.Expr);
       Value := GetAssignValue(OldValue, NewValue, ASetStmt.GetExpr.Member.Token, ASetStmt.Op);
-      ITuple(TVarData(Instance).VPointer).Put(Index, Value, ASetStmt.GetExpr.Member.Token);
+      IList(TVarData(Instance).VPointer).Put(Index, Value, ASetStmt.GetExpr.Member.Token);
     end
     else if VarSupports(Instance, IDictionary) then
     begin
@@ -576,21 +576,21 @@ begin
     Raise ERuntimeError.Create(ASetStmt.GetExpr.Token, 'Instance of Tuple or Dictionary expected.');
 end;
 
-function TInterpreter.VisitTupleExpr(ATupleExpr: TTupleExpr): Variant;
+function TInterpreter.VisitListExpr(AListExpr: TListExpr): Variant;
 var
   Expr: TExpr;
-  Tuple: ITuple;
+  List: IList;
   Value: Variant;
 begin
-  Tuple := ITuple(TTuple.Create);
+  List := IList(TGearList.Create);
 
-  for Expr in ATupleExpr.ExprList do
+  for Expr in AListExpr.ExprList do
   begin
     Value := VisitFunc(Expr);
-    Tuple.Elements.Add(Value);
+    List.Elements.Add(Value);
   end;
 
-  Result := Tuple;
+  Result := List;
 end;
 
 function TInterpreter.VisitUnaryExpr(AUnaryExpr: TUnaryExpr): Variant;

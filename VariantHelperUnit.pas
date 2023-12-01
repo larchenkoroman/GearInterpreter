@@ -10,11 +10,12 @@ function VarSupportsIntf(AValue: Variant; AIntf: array of TGUID): Boolean;
 function VariantToStr(AValue: Variant): string;
 function VarIsNo(AValue: Variant): Boolean;
 function VarIsList(AValue: Variant): Boolean;
+function VarIsDict(AValue: Variant): Boolean;
 
 implementation
 
 uses
-  TupleUnit, DictionaryUnit;
+  ListUnit, DictionaryUnit;
 
 { TVariantHelper }
 
@@ -46,7 +47,12 @@ end;
 
 function VarIsList(AValue: Variant): Boolean;
 begin
-  Result := VarIsType(AValue, varUnknown) and VarSupports(AValue, ITuple);
+  Result := VarIsType(AValue, varUnknown) and VarSupports(AValue, IList);
+end;
+
+function VarIsDict(AValue: Variant): Boolean;
+begin
+  Result := VarIsType(AValue, varUnknown) and VarSupports(AValue, IDictionary);
 end;
 
 function VarIsNo(AValue: Variant): Boolean;

@@ -28,8 +28,8 @@ type
 
     //Symbols and punctuation marks
     ttComma, ttColon, ttSemiColon, ttDot, ttDotDot, ttAssign, ttQuestion, ttArrow,
-    ttOpenParen, ttCloseParen, ttOpenBrace, ttCloseBrace,
-    ttOpenBracket, ttCloseBracket, ttComment, ttEOF, ttNone
+    ttOpenParen, ttCloseParen, ttOpenCurlyBr, ttCloseCurlyBr,
+    ttOpenSquareBr, ttCloseSquareBr, ttComment, ttEOF, ttNone
   );
 
   TTokenTypeHelper = record helper for TTokenType
@@ -105,38 +105,38 @@ end;
 function TTokenTypeHelper.ToString: string;
 begin
   case Self of
-    ttPlus:        Result := '+';
-    ttMinus:       Result := '-';
-    ttMul:         Result := '*';
-    ttDiv:         Result := '/';
-    ttRemainder:   Result := '%';
-    ttPlusIs:      Result := '+=';
-    ttMinusIs:     Result := '-=';
-    ttMulIs:       Result := '*=';
-    ttDivIs:       Result := '/=';
-    ttRemainderIs: Result := '%=';
-    ttPow:         Result := '^';
-    ttEQ:          Result := '==';
-    ttNEQ:         Result := '<>';
-    ttGT:          Result := '>';
-    ttGE:          Result := '>=';
-    ttLT:          Result := '<';
-    ttLE:          Result := '<=';
-    ttComma:       Result := ',';
-    ttColon:       Result := ':';
-    ttSemiColon:   Result := ';';
-    ttDot:         Result := '.';
-    ttDotDot:      Result := '..';
-    ttAssign:      Result := '=';
-    ttQuestion:    Result := '?';
-    ttArrow:       Result := '=>';
-    ttOpenParen:   Result := '(';
-    ttCloseParen:  Result := ')';
-    ttOpenBrace:   Result := '{';
-    ttCloseBrace:  Result := '}';
-    ttOpenBracket:   Result := '[';
-    ttCloseBracket:  Result := ']';
-    ttEOF:         Result := 'End of file';
+    ttPlus:          Result := '+';
+    ttMinus:         Result := '-';
+    ttMul:           Result := '*';
+    ttDiv:           Result := '/';
+    ttRemainder:     Result := '%';
+    ttPlusIs:        Result := '+=';
+    ttMinusIs:       Result := '-=';
+    ttMulIs:         Result := '*=';
+    ttDivIs:         Result := '/=';
+    ttRemainderIs:   Result := '%=';
+    ttPow:           Result := '^';
+    ttEQ:            Result := '==';
+    ttNEQ:           Result := '<>';
+    ttGT:            Result := '>';
+    ttGE:            Result := '>=';
+    ttLT:            Result := '<';
+    ttLE:            Result := '<=';
+    ttComma:         Result := ',';
+    ttColon:         Result := ':';
+    ttSemiColon:     Result := ';';
+    ttDot:           Result := '.';
+    ttDotDot:        Result := '..';
+    ttAssign:        Result := '=';
+    ttQuestion:      Result := '?';
+    ttArrow:         Result := '=>';
+    ttOpenParen:     Result := '(';
+    ttCloseParen:    Result := ')';
+    ttOpenCurlyBr:   Result := '{';
+    ttCloseCurlyBr:  Result := '}';
+    ttOpenSquareBr:  Result := '[';
+    ttCloseSquareBr: Result := ']';
+    ttEOF:           Result := 'End of file';
   else
     Result := TRttiEnumerationType.GetName(Self).Substring(2);
   end;

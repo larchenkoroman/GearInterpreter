@@ -54,10 +54,7 @@ begin
   if FElements.ContainsKey(AKey) then
     Result := FElements[AKey]
   else
-  begin
-    Result := Unassigned;
-    Raise ERuntimeError.Create(AToken, 'Key "'+ AKey + '" not found.');
-  end;
+    Result := Null;
 end;
 
 function TDictionary.GetElements: TDictionaryElements;

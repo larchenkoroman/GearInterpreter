@@ -127,7 +127,7 @@ type
       destructor Destroy; override;
   end;
 
-  TTupleExpr = class(TFactorExpr)
+  TListExpr = class(TFactorExpr)
     private
       FExprList: TExprList;
     public
@@ -384,7 +384,6 @@ begin
   FLeft := ALeft;
   FOp := AOp;
   FRight := ARight;
-//  Writeln('TBinaryExpr.Create ', AOp.ToString);
 end;
 
 destructor TBinaryExpr.Destroy;
@@ -866,15 +865,15 @@ begin
   inherited Destroy;
 end;
 
-{ TTupleExpr }
+{ TListExpr }
 
-constructor TTupleExpr.Create(AExprList: TExprList; AToken: TToken);
+constructor TListExpr.Create(AExprList: TExprList; AToken: TToken);
 begin
   inherited Create(AToken);
   FExprList := AExprList;
 end;
 
-destructor TTupleExpr.Destroy;
+destructor TListExpr.Destroy;
 begin
   if Assigned(FExprList) then
     FreeAndNil(FExprList);
@@ -938,6 +937,7 @@ begin
 
   inherited;
 end;
+
 
 end.
 

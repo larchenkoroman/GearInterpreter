@@ -3,7 +3,7 @@ unit EvalMathUnit;
 interface
 
 uses
-  System.Classes, System.SysUtils, TokenUnit, ErrorUnit, Math, System.Variants, VariantHelperUnit, TupleUnit;
+  System.Classes, System.SysUtils, TokenUnit, ErrorUnit, Math, System.Variants, VariantHelperUnit, ListUnit;
 
 type
   TMath = Record
@@ -87,7 +87,7 @@ end;
 
 class function TMath._Add(const Left, Right: Variant; Op: TToken): Variant;
 var
-  Tuple: ITuple;
+  List: IList;
 begin
   Result := Null;
 
@@ -99,15 +99,15 @@ begin
     Result := Left + Right
   else if AreBothTuple(Left, Right) then
   begin
-    Tuple := ITuple(TTuple.Create);
-    Tuple.AddFromTuple(ITuple(TVarData(Left).VPointer));
-    Tuple.AddFromTuple(ITuple(TVarData(Right).VPointer));
-    Result := Tuple;
+    List := IList(TGearList.Create);
+    List.AddFromList(IList(TVarData(Left).VPointer));
+    List.AddFromList(IList(TVarData(Right).VPointer));
+    Result := List;
   end
   else if VarIsList(Left) then
   begin
-    Tuple := ITuple(TVarData(Left).VPointer);
-    Tuple.Elements.Add(Right);
+    List := IList(TVarData(Left).VPointer);
+    List.Elements.Add(Right);
     Result := Left;
   end
   else

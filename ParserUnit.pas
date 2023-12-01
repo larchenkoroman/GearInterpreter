@@ -30,21 +30,21 @@ type
       procedure Next;
       procedure Synchronize(ATypes: TTokenTypeSet);
       //Expressions
-      function ParseExpr: TExpr;
       function IsRelOp: Boolean;
-      function ParseAddExpr: TExpr;
       function IsAddOp: Boolean;
-      function ParseMulExpr: TExpr;
       function IsMulOp: Boolean;
-
-      function ParsePowExpr: TExpr;
       function IsPowOp: Boolean;
+
+      function ParseExpr: TExpr;
+      function ParseAddExpr: TExpr;
+      function ParseMulExpr: TExpr;
+      function ParsePowExpr: TExpr;
       function ParseIfExpr: TExpr;
       function ParseCaseExpr: TExpr;
       function ParseIdentifierExpr: TExpr;
       function ParseInterpolatedExpr: TExpr;
-
       function ParseUnaryExpr: TExpr;
+
       function ParseParenExpr: TExpr;
       function ParseDictionaryExpr: TExpr;
       function ParseListExpr: TExpr;
@@ -271,13 +271,13 @@ var
 begin
   Token := CurrentToken;
   Result := ParseFactor;
-  while CurrentToken.TokenType in [ttOpenBracket, ttOpenParen] do
+  while CurrentToken.TokenType in [ttOpenSquareBr, ttOpenParen] do
     case CurrentToken.TokenType of
-      ttOpenBracket:
+      ttOpenSquareBr:
         begin
           Next; // skip [
           Result := TGetExpr.Create(Result, ParseFactor, Token);
-          Expect(ttCloseBracket);
+          Expect(ttCloseSquareBr);
         end;
 
       ttOpenParen: Result := ParseCallArgs(Result);
@@ -304,8 +304,8 @@ var
   Key, Value: TExpr;
   KeyValueList: TKeyValueList;
 begin
-  Expect(ttOpenBrace);
-  if CurrentToken.TokenType <> ttCloseBrace then
+  Expect(ttOpenCurlyBr);
+  if CurrentToken.TokenType <> ttCloseCurlyBr then
   begin
     KeyValueList := TKeyValueList.Create;
     Key := ParseExpr;
@@ -320,7 +320,7 @@ begin
       Value := ParseExpr;
       KeyValueList.Add(Key, Value);
     end;
-    Expect(ttCloseBrace);
+    Expect(ttCloseCurlyBr);
     Result := TDictionaryExpr.Create(KeyValueList, CurrentToken);
   end
   else
@@ -376,8 +376,8 @@ begin
     end;
 
     ttOpenParen:    Result := ParseParenExpr;
-    ttOpenBrace:    Result := ParseDictionaryExpr;
-    ttOpenBracket:  Result := ParseListExpr;
+    ttOpenCurlyBr:  Result := ParseDictionaryExpr;
+    ttOpenSquareBr: Result := ParseListExpr;
     ttFunc:         Result := TFuncDeclExpr.Create(ParseFuncDecl(ffAnonym) as TFuncDecl);
     ttIf:           Result := ParseIfExpr;
     ttCase:         Result := ParseCaseExpr;
@@ -556,8 +556,8 @@ var
   Expr: TExpr;
   ExprList: TExprList;
 begin
-  Expect(ttOpenBracket);
-  if CurrentToken.TokenType <> ttCloseBracket then
+  Expect(ttOpenSquareBr);
+  if CurrentToken.TokenType <> ttCloseSquareBr then
   begin
     ExprList := TExprList.Create;
     Expr := ParseExpr;
@@ -568,13 +568,13 @@ begin
       Expr := ParseExpr;
       ExprList.Add(Expr);
     end;
-    Expect(ttCloseBracket);
-    Result := TTupleExpr.Create(ExprList, CurrentToken);
+    Expect(ttCloseSquareBr);
+    Result := TListExpr.Create(ExprList, CurrentToken);
   end
   else
   begin //empty List
     Next; //skip ttCloseBracket
-    Result := TTupleExpr.Create(TExprList.Create(), CurrentToken);
+    Result := TListExpr.Create(TExprList.Create(), CurrentToken);
   end;
 end;
 
@@ -632,7 +632,7 @@ begin
       for Expr in ExprList do
         FuncDecl.AddParam((Expr as TVariable).Identifier);
       FuncDecl.Body := TBlock.Create(TNodeList.Create(), CurrentToken);
-      FuncDecl.Body.Nodes.Add(ParseReturnStmt);
+      FuncDecl.Body.Nodes.Add(TReturnStmt.Create(ParseExpr, CurrentToken));
       Result := TFuncDeclExpr.Create(FuncDecl);
     end
     else
@@ -655,9 +655,11 @@ end;
 function TParser.ParsePowExpr: TExpr;
 var
   PowOp: TToken;
+  Cond, Left, Right: TExpr;
 begin
   Result := ParseUnaryExpr;
-  while isPowOp do begin
+  while isPowOp do
+  begin
     PowOp := CurrentToken;
     Next;
     Result := TBinaryExpr.Create(Result, PowOp, ParseUnaryExpr);

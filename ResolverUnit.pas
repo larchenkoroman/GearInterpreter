@@ -67,7 +67,7 @@ type
       procedure VisitVariable(AVariable: TVariable);
       procedure VisitCallExpr(ACallExpr: TCallExpr);
       procedure VisitFuncDeclExpr(AFuncDeclExpr: TFuncDeclExpr);
-      procedure VisitTupleExpr(ATupleExpr: TTupleExpr);
+      procedure VisitListExpr(AListExpr: TListExpr);
       procedure VisitDictionaryExpr(ADictionaryExpr: TDictionaryExpr);
       procedure VisitGetExpr(AGetExpr: TGetExpr);
       // Stmt
@@ -438,11 +438,11 @@ begin
   VisitProc(ASetStmt.Expr);
 end;
 
-procedure TResolver.VisitTupleExpr(ATupleExpr: TTupleExpr);
+procedure TResolver.VisitListExpr(AListExpr: TListExpr);
 var
   Expr: TExpr;
 begin
-  for Expr in ATupleExpr.ExprList do
+  for Expr in AListExpr.ExprList do
     VisitProc(Expr);
 end;
 
